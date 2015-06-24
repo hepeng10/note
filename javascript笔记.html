@@ -1,0 +1,1121 @@
+<!-- 文档模式 -->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">  //目前最好使用此文档模式，可让IE8兼容position:fixed
+
+<!-- 创建JS代码 -->
+<script>...</script>  //插入JS代码，通常写在</body>标签前，写在<head>中可能导致IE6无法打开页面
+<script src="../xx.js"></script>  //引入外部JS文件，不写type="text/javascript"默认就是javascript
+<script src="../xx.js" defer="defer"></script>  //添加defer属性作为延迟脚本，引入的js文件遇到</html>标签才执行，只适用于外部脚本文件
+<script src="../xx.js" async></script>  //添加async属性后，页面可异步下载js文件，而不是等到js下载完再往后加载，所以要注意使用时机
+
+<!-- 语法 -->
+<script>
+//变量
+"use strict"  //使用严格语法，之后会出现在声明变量时不使用var就会报错等情况，通常不建议使用，自己注意规范就好
+var a;
+var a,b,c;
+var a=0,b='abc',c;  //各种声明变量的方法
+typeof a;  //查看一个变量的类型，返回一个字符串，如：undefined,boolean,string,number,object,function
+var obj=null;  //null值的类型是object，在声明一个变量用来保存对象的时候，最好先赋值为null，将一个对象设置为null可以通知GC回收此对象；undefined派生自null值，所以undefined==null会返回true
+
+//数字
+var i=072;  //将一个八进制的数字赋值给变量，如果数字里有大于7的数字则会成为十进制；0xa3这是16进制
+0.1+0.2!=0.3;  //浮点数的精度问题，会导致0.1+0.2!=0.3，需要注意
+8.3%4 //当求模的时候，PHP会自动转化为整数，而JS不会，所以不要用浮点数求模
+Infinity,-Infinity;  //正无穷和负无穷；可使用isFinite()函数来判断一个数字是否处于之间，是则返回true
+NaN;  //not a number；可使用isNaN()来判断一个变量是否为数字，会尝试将其它类型转为数字类型；使用typeof(NaN)结果为number
+Number(x);  //试图将任意类型转换为数字类型，转换失败则为NaN
+parseInt("AF",16) parseFloat()  //将字符串转换为数字类型；parseInt()可设置进制
+
+//字符串
+var str="javascript";  //声明字符串；字符串是不可变的，只会产生新的字符串
+a.length;  //通过length属性获取字符串长度
+num.toString(8);  //调用toString()方法可以将一个其它类型的值转换为字符串类型，可传入参数指定进制
+str.charAt(0);  //获取字符串第一个字符
+str.charCodeAt(0);  //获取字符串第一个字符的编码值
+String.fromCharCode(22937);  //通过编码得到相应的字
+str.substring(0,2);  //截取字符串；若参数中为负值的则会转换为0；若前面的数字大于后面，则会自动交换位置
+str.substr(0,2);  //和substring()类似，不同的是参数为负数时，第一个参数会加上字符串的长度，第二个参数转换为0
+str.slice(-5,-2);  //和substring()类似，不同的是参数为负值，两个参数都会转换为和字符串长度相加的值
+str.toLowerCase()||toUpperCase()  //将一个字符串转换为小写字母或大写字母
+str.split(',');  //字符串分割，返回一个数组；参数可以使用正则。str.split('')会把字符串每个字符作为数组的一个元素；str.split(',',3)限制长度
+str.split('').reverse().join('');  //这样调用后可以将字符串反转
+str.indexOf('a',0);  //结果为1，查询子字符串在字符串中的位置，没找到则返回-1；第二个参数为从第几位开始查找
+str.lastIndexOf('a');  //同上，结果为9
+str.localeCompare(str2);  //比较两个字符串；参数在前返回1，相等返回0，参数在后返回-1
+str.trim();  //删除字符串前后的空白，ECMA5新方法
+str.search(pattern);  //正则匹配字符串，成功返回索引，失败返回-1
+str.replace(pattern|str1,str2|fun);  //字符串替换。第一个参数可以是字符串或正则；若是字符串则会用str2替换匹配到的字符串，只匹配一个；要替换所有只能用正则，并指定全局g，即/pattern/g
+text.replace(/[<>"&]/g,function(match,pos,originalText){  //第二个参数为函数时，接收3个参数：模式的匹配项、模式匹配项在字符串中的位置和原始字符串
+    switch(match){
+        case "<":
+        return "&lt;";
+        case ">":
+        return "&gt;";
+        case "&":
+        return "&amp;";
+        case "\"":
+        return "&quot;";
+    }
+})
+
+
+
+// 语句
+var i=0;
+if (i<10) {
+    ...
+}else if(i<50){  //这里的else和if必须分开
+    ...
+}else{
+    ...
+}
+
+switch(i){
+    case 1:
+        ...
+        break;
+    case 5:
+        ...
+        break;
+    case 10:
+        ...
+        break;
+    default:
+        ...
+}
+
+do{
+    ...
+    i++;
+}while(i<100)
+
+while(i<100){
+    ...
+    i++;
+}
+
+for(var i=0; i<100; i++){  //这里声明的变量在for循环外也能访问到
+    ...
+}
+
+for(var propName in window){  //使用for in语句枚举对象的属性
+    ...
+}
+
+var num=0;
+outermost：  //创建一个标识，用于跳出多层循环等操作
+for (var i = 0; i < 100; i++) {
+    for (var j = 0; i < 100; j++) {
+        if (i==50 && j==50) {
+            break outermost;  //当执行到这里的时候会跳出两层循环，并终止循环
+            continue outermost;  //如果是continue则跳出这一次的两层循环，继续下一次循环
+        }
+        num++
+    }
+}
+
+with(obj){  //使用with语句，将多个属性或方法添加到对象中；简化操作，性能较差
+    var name="abc";
+    var age=20;
+    var sex="male";
+    var say=say();
+}
+
+
+
+// 数组
+var colors=["red","blue","green"];  //使用字面量创建数组；数组也可以像对象那样，里面每个值可以存放对象、函数等复杂数据结构，但是不建议这样使用
+alert(colors[0]);  //访问数组元素
+alert(colors.length);  //获取数组的长度
+colors.length=1;  //修改数组的长度后，超出的部分会删除；可以通过此方法快速清空数组，或者colors=[]
+colors[colors.length]='black';  //往数组末尾添加新元素
+colors instanceof Array;  //检测一个变量是否为数组
+Array.isArray(value);  //检测一个变量是否为数组，IE9以上有效
+alert(colors.toString());  //数组的toString()方法可将一个数组转换为由数组的每个值组合成的字符串，逗号隔开；valueOf()和直接alert(colors)得到的结果一样，它们会隐式调用toString()
+alert(colors.join('|'));  //调用数组的join()方法，数组将转化为字符串，让数组按照传入的参数分割字符串
+colors.push("pink","yellow");  //push()将数据依次添加到数组末尾，返回数组长度
+colors.pop();  //pop()取得数组最后一项
+colors.shift();  //shift()取得数组第一项
+colors.unshift("white","orange");  //unshift()往数组前端添加项，返回新数组的长度；white在orange之前
+colors.reverse();  //reverse()反转数组排序，返回一个新数组
+num.sort();  //升序排列数组，返回一个新数组；结果可能是这样：1 10 5 8
+num.sort(compare);  //接收一个比较函数，这个函数需要接收两个参数，通过比较这两个参数返回正数、0、负数进行排序
+function compare(v1,v2){  //通过这个函数排序就会是：1 5 8 10
+    if (v1<v2) {
+        return -1; 
+    }else if(v1>v2){
+        return 1;
+    }else{
+        return 0;
+    }
+    //return v1-v2;  //如果v1,v2为数字，这里可以直接返回v1-v2就能进行排序了
+}
+colors.concat(arr);  //合并数组，接收字符串或数组，可以有多个参数，将会添加到数组的末尾
+colors.slice(1,4);  //取出数组部分项，返回一个新数组；如果参数中有负数，则用数组长度加上该数来确定相应的位置。如果结束位置小于起始位置，则返回空数组
+colors.splice(0,2);  //删除数组前两项
+colors.splice(2,0,"red","green");  //参数：起始位置，要删除的项数，插入的项（可以多个）；这里就会从位置2插入项
+colors.indexOf("red");  //取得red在数组中的位置索引
+colors.lastIndexOf("red")  //数组中可能包含两个相同的内容在不同的索引，这个就是从后面查找
+// ES5新增方法：
+colors.every(func);  //对数组中的每一项运行给定函数，如果该函数对每一项都返回true，则返回ture
+colors.forEach(func);  //对数组中的每一项运行给定函数，这个方法没有返回值。
+colors.filter(func);  //对数组中的每一项运行给定函数，返回该函数会返回true的项组成的数组
+colors.map(func);  //对数组中的每一项运行给定函数，返回每次函数调用的结果组成的数组
+colors.some(func);  //对数组中的每一项运行给定函数，如果该函数对任一项返回true，则返回true
+
+
+
+// 对象
+var o=new Object();  //使用new关键字创建对象
+// 每个实例都有下列属性和方法
+Constructor  //构造函数：保存着用于创建当前对象的函数。上面就是Object()
+hasOwnProperty(propertyName)  //用于检查给定的属性在当前对象实例中是否存在，如：o.hasOwnProperty('name')
+isPrototypeOf(propertyName)  //用于检查传入的对象是否是另一个对象的原型
+propertyIsEnumerable(propertyName)  //用于检查给定的属性是否能够使用for-in语句来枚举
+toLocaleString()  //返回对象的字符串表示，该字符串与执行环境的地区对应
+toString()  //返回对象的字符串表示
+valueOf()  //返回对象的字符串、数值或布尔值表示，通常与toString()方法返回值相同
+// 关于引用传递
+var o2=o;  //将一个对象赋值给另一个变量，赋值的是引用，修改o2则o会变
+function setName(obj){  //在函数中，将一个对象传递给形参，也是引用传递
+    obj.name="Tirion";  //在函数中修改这个对象的内容，则函数外的对象也会被修改
+}
+alert(person instanceof Object);  //使用instanceof判断一个实例是否属于某个对象
+// 创建对象
+var person={  //字面量定义对象：最简单的创建对象的写法，创建的对象是最基本的Object对象
+    "name":"Tirion",
+    "aget":20,
+    "say":function(){...}
+}
+alert(person.name);
+alert(person['name']);  //两种访问对象属性的方法，第二种的优点是可接收变量作为参数：person[v]
+//for in遍历对象
+for (var propName in window) {
+    document.write(propName);
+}
+
+// Date对象
+var now=new Date();  //获得当前的日期和时间；传入Unix时间戳，则会生成相应的日期时间
+Date.parse("6/13/2014");  //获取指定日期的时间戳
+var time=new Date("6/13/2014");  //效果和parse()相同，会隐式调用parse()方法
+Date.now();  //ES5新增方法：获取当前的时间戳
+// 常用日期方法，get都有对应的set
+now.valueOf();  //返回日期的毫秒数；所以可以直接比较两个Date对象的大小，它们会自动调用valueOf()方法
+now.getTime();  //返回表示日期的毫秒数，和valueOf()相同
+now.getFullYear();  //取得四位数的年份
+now.getMonth();  //获取月份。0-11
+now.getDate();  //返回日期月份中的天数。1-31
+now.getHours();  //返回小时数。0-23
+now.getMinutes();  //返回分钟数。0-59
+now.getSeconds();  //返回秒数。0-59
+now.getMilliseconds();  //返回毫秒数
+
+// Math对象
+Math.random();  //返回0-1之间的小数
+Math.round(num);  //四舍五入
+Math.floor(num);  //向下取整
+Math.ceil(num);  //向上取整
+Math.round(Math.random()*(y-x)+x);  //取得x到y（包括x和y）的数的公式
+Math.min(2,12,54,132);  //取得一组数中的最小值
+Math.max(2,12,54,132);  //取得一组数中的最大值
+var arr = [1, 2, 3];
+Math.max.apply(Math, arr);  //取得数组中的最大值；使用apply将数组变为参数传入max()（参照call方法，apply传入数组，call传入多个参数，apply也会转换为多个参数的形式）；首先将Math作为this（本来也就是Math，但是使用apply必须要求传递一个参数，所以也就只能再传个Math进去了），然后将数组作为参数，也就会转化为Math.max(1,2,3)这样的形式了
+Math.abs(num);  //返回绝对值
+Math.pow(num,n);  //返回num的n次幂
+
+// JSON：对象的一种，对象能用的操作都能用在JSON上，JSON也能用来保存JS中的所有数据类型
+var json={"name":"Tirion","age":28}  //创建JSON
+json.name||json['name']  //读取数据
+json.name='abc';  //修改数据
+var json2=[{"name":"Tirion","age":28},{"name":"abc","age":12}]  //数组里面的元素可以为JSON（当然，其实任何类型都可以）
+json2[0]['name'];  //访问数据
+var json3{'user':['a','b','c'],'age':[12,15,23]}  //JSON也就是快速创建JS对象的方式，每个元素的值可以为任意类型
+var json4={'people':[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}],'dog':{'name':'wangcai','age':'5'}} //混合的json格式；通过obj.people[0].name访问tirion，通过obj.dog.name访问wangcai
+for(var attr in json){  //使用for in遍历JSON
+    alert(json[attr]);
+}
+
+// JSON的命名空间，通过特殊的数据结构模拟
+var miaov={};
+miaov.common={
+    getByClass:function(){...},
+    myAddEvent:function(){...}
+};
+miaov.fx{
+    startMove:function(){...},
+    drag:function(){...}
+};
+miaov.common.getByClass();
+
+//AJAX：主要用于页面的局部刷新和按需取数据，是一种JS技术
+//ajax分为同步和异步两种，通常使用异步，但有时也会用到同步。同步ajax需要ajax执行完后，才继续执行网页上的代码（详见兄弟连PHP项目视频21）
+//创建AJAX对象：比较复杂，但代码固定
+function createAJAX(){
+    var request=false;
+    //window对象中有XMLHttpRequest存在就是符合W3C标准的浏览器
+    if(window.XMLHttpRequest){
+        request=new XMLHttpRequest();
+        if(request.overrideMimeType){
+            request.overrideMimeType("text/xml");
+        }
+    //window对象中有ActiveXObject属性就是IE6
+    }else if(window.ActiveXObject){
+        request=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    return request;
+}
+var ajax=createAJAX();
+//AJAX的6个方法：用于向服务器发送请求
+setRequestHeader("label","value"); //设置header并和请求一起发送
+getResponseHeader("headerLabel"); //作为字符串返回单个header标签
+getAllResponseHeaders(); //作为字符串返回所有的header标签
+abort() //停止当前请求；以上4个方法通常不用
+open("method","URL"[,asyncFlas,"username","password"]); //设置请求的目标，第一个参数传入get|post，第二个参数是请求的地址，第三个参数传入true|false(通常为true)，后面两个一般不用
+send(content); //发送请求的内容
+ajax.open("get","server.php?key1=value1&key2=value2&random="+Math.random(),true); //使用get方法发送请求，可以直接通过URL请求数据(value1&key2=value2...)，服务器断使用$_GET接收；random=Math.random()的作用是避免每次发送的是同一个请求而导致返回的数据是缓存里的
+ajax.send(null); //发送数据；数据写在了URL里，这里就传空即可
+ajax.open("post","server.php"); //使用post发送请求，第三个参数也不用传
+ajax.send("key1=value1&key2=value2&random"+Math.random()); //就必须把请求内容写在这里了
+ajax.setRequestHeader("Content-Type","application/x-www-form-urlencoded");  //post方式还必须使用这条语句发送头信息；<form action="server.php" method="post" enctype="">form里还需要添加个enctype属性
+//AJAX的6个属性：用于接收服务器发送的数据
+ajax.onreadystatechange=function(){ //状态改变的事件触发器readystatechange 
+    if(ajax.readyState==4){ //数据传输过程中会有0-4种状态，4是完成，只需要获取完成后的状态即可
+        if(ajax.status==200){ //服务器返回的状态码，200是成功，还有404等其它状态码
+            var data=ajax.responseText; //通过responseText获取服务器发送来的数据
+        }
+    }
+}
+responseXML //返回兼容DOM的XML文档对象
+//json：将数组转换为json编码
+$arr=array('a'=>1,'b'=>2,'c'=>3,'d'=>4,'e'=>5);
+json_encode($arr); //将数组转为json格式；json转码后的代码为：{"a":1,"b":2,"c":3,"d":4,"e":5}，这也就是JS快速创建对象的写法
+eval("var obj="+data); //通过ajax获取服务器通过json转码后传送的数据并将数据转为ojb对象，这样就能访问数组的各个数据里，如果没用json转码，获取的数组也只是一个字符串
+alert(obj.a); //就能通过对象中的属性访问值了
+json_decod($json); //反编译json编码，将json编码转为PHP数组
+//服务器端返回json需要使用header()
+header("Content-Type: text/html;charset=utf-8");
+header("Cache-Control: no-cache");
+var obj={'name':'tirion','age':'26'} //最基本的json格式，通过obj.name访问
+var obj=[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}] //并列的多组json数据，通过obj[0].name或obj[1].name访问
+var obj={'people':[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}],'dog':{'name':'wangcai','age':'5'}} //混合的json格式；通过obj.people[0].name访问tirion，通过obj.dog.name访问wangcai
+//创建ajax对象，简化ajax的使用
+function Ajax(recvType){
+    var aj=new Object();
+    aj.recvType=recvType?recvType.toUpperCase():'HTML'
+    aj.targeUrl='';
+    aj.sendString='';
+    aj.createXMLHttpRequest=function(){
+    }
+    aj.get=function(){
+    }
+    aj.post=function(){
+    }
+    return aj;
+}
+//自定义ajax对象简化ajax操作
+function Ajax(recvType){
+    var aj=new Object();
+    aj.recvType=recvType ? recvType.toUpperCase() : 'HTML' //HTML XML
+    aj.targetUrl='';
+    aj.sendString='';
+    aj.resultHandle=null;
+    aj.createXMLHttpRequest=function(){
+        var request=false;
+        //window对象中有XMLHttpRequest存在就是非IE，包括（IE7，IE8）
+        if(window.XMLHttpRequest){
+            request=new XMLHttpRequest();
+            if(request.overrideMimeType){
+                request.overrideMimeType("text/xml");
+            }
+        //window对象中有ActiveXObject属性存在就是IE
+        }else if(window.ActiveXObject){
+            var versions=['Microsoft.XMLHTTP', 'MSXML.XMLHTTP', 'Msxml2.XMLHTTP.7.0','Msxml2.XMLHTTP.6.0','Msxml2.XMLHTTP.5.0', 'Msxml2.XMLHTTP.4.0', 'MSXML2.XMLHTTP.3.0', 'MSXML2.XMLHTTP'];
+            for(var i=0; i<versions.length; i++){
+                    try{
+                        request=new ActiveXObject(versions[i]);
+
+                        if(request){
+                            return request;
+                        }
+                    }catch(e){
+                        request=false;
+                    }
+            }
+        }
+        return request;
+    }
+    aj.XMLHttpRequest=aj.createXMLHttpRequest();
+    aj.processHandle=function(){
+        if(aj.XMLHttpRequest.readyState == 4){
+            if(aj.XMLHttpRequest.status == 200){
+                if(aj.recvType=="HTML")
+                    aj.resultHandle(aj.XMLHttpRequest.responseText);
+                else if(aj.recvType=="XML")
+                    aj.resultHandle(aj.XMLHttpRequest.responseXML);
+            }
+        }
+    }
+    aj.get=function(targetUrl, resultHandle){
+        aj.targetUrl=targetUrl; 
+        if(resultHandle!=null){
+            aj.XMLHttpRequest.onreadystatechange=aj.processHandle;  
+            aj.resultHandle=resultHandle;   
+        }
+        if(window.XMLHttpRequest){
+            aj.XMLHttpRequest.open("get", aj.targetUrl);
+            aj.XMLHttpRequest.send(null);
+        }else{
+            aj.XMLHttpRequest.open("get", aj.targetUrl, true);
+            aj.XMLHttpRequest.send();
+        }
+    }
+    aj.post=function(targetUrl, sendString, resultHandle){
+        aj.targetUrl=targetUrl;
+
+        if(typeof(sendString)=="object"){
+            var str="";
+            for(var pro in sendString){
+                str+=pro+"="+sendString[pro]+"&";   
+            }
+            aj.sendString=str.substr(0, str.length-1);
+        }else{
+            aj.sendString=sendString;
+        }
+        if(resultHandle!=null){
+            aj.XMLHttpRequest.onreadystatechange=aj.processHandle;  
+            aj.resultHandle=resultHandle;   
+        }
+        aj.XMLHttpRequest.open("post", targetUrl);
+        aj.XMLHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        aj.XMLHttpRequest.send(aj.sendString);
+        
+    }
+    return aj;
+}
+var ajax=Ajax();
+ajax.post("index.php",{name:zhangsan,age:20},function(data){}); //第一个参数指定传入的PHP文件，第二个参数设置传入的数据，第三个参数接收返回的数据
+ajax.get("index.php?name=zhangsan&age=20",function(data){}); //第一个参数指定传入的PHP文件和数据，第二个参数接收返回的数据
+
+// 对象详解
+// 数据属性
+对象的属性包含四种行为（用两个中括号[[..]]表示这些特性是内部值，不能直接访问）：
+[[Configurable]] ：表示能否通过 delete 删除属性从而重新定义属性，能否修改属性的特性，或者能否把属性修改为访问器属性。默认为true
+[[Enumerable]] ：表示能否通过 for-in 循环返回属性。默认为true
+[[Writable]] ：表示能否修改属性的值。默认为true
+[[Value]] ：包含这个属性的数据值。默认为undefined，在创建属性的时候为其赋值，则为所赋的值
+要修改属性默认的特性，必须使用ES5的 Object.defineProperty() 方法。这个方法接收三个参数：属性所在的对象、属性的名字和一个描述符对象。其中，描述符（descriptor）对象的属性必须是： configurable、enumerable、writable 和 value。
+Object.defineProperty(person, "name", {  //修改数据属性的特性
+    writable: false,
+    value: "Nicholas"
+});
+// getter和setter
+var book = {
+    _year: 2004,  //前面加_的属性表示只能通过对象方法来访问（只是一个常用记号，而不起到禁止访问的作用）
+    edition: 1
+};
+Object.defineProperty(book, "year", {  //也是通过Object.defineProperty来设置，为对象添加一个year属性并设置
+    get: function(){  //设置getter函数
+        return this._year;
+    },
+    set: function(newValue){  //设置setter函数，需要接收一个值，也就是在设置这个属性时的值
+        if (newValue > 2004) {
+            this._year = newValue;
+            this.edition += newValue - 2004;
+        }
+    }
+});
+注：只设置了get或set，则在执行另一个操作的时候会报错
+Object.defineProperties(book, {  //使用Object.defineProperties()一次定义多个属性
+    _year: {
+        value: 2004
+    },
+    edition: {
+        value: 1
+    },
+    year: {
+        get: function(){
+            return this._year;
+        },
+        set: function(newValue){
+            if (newValue > 2004) {
+                this._year = newValue;
+                this.edition += newValue - 2004;
+            }
+        }
+    }
+});
+
+// 设计模式
+// 工厂模式
+function createPerson(name, age, job){
+    var o = new Object();
+    o.name = name;
+    o.age = age;
+    o.job = job;
+    o.sayName = function(){
+        alert(this.name);
+    };
+    return o;
+}
+var person1 = createPerson("Nicholas", 29, "Software Engineer");
+var person2 = createPerson("Greg", 27, "Doctor");
+
+// 构造函数模式
+function Person(name, age, job){
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = function(){  //在构造函数内部声明函数，会导致实例化的每个对象都生成一个函数，增大开销，所以应写在外面
+        alert(this.name);
+    };
+}
+var person1 = new Person("Nicholas", 29, "Software Engineer");
+var person2 = new Person("Greg", 27, "Doctor");
+
+// 构造函数增强
+function Person(name, age, job){
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.sayName = sayName;
+}
+function sayName(){  //将构造函数中声明的函数写在外面，这样更好
+    alert(this.name);  //通过对象来调用函数，this也就是对象了，所以能访问到对象的其它成员
+}
+
+// 原型模式：实例对象访问的是相同的成员属性和方法（共享）
+function Person(){
+}
+Person.prototype.name = "Nicholas";  //将成员声明在原型对象上
+Person.prototype.age = 29;
+Person.prototype.job = "Software Engineer";
+Person.prototype.sayName = function(){
+    alert(this.name);
+};
+var person1 = new Person();  //实例中的指针指向原型prototype而非构造函数
+Person.prototype = {  //简写方法（重写），免除多次.prototype；这种写法是重写prototype而不是在原型上添加属性
+    constructor : Person,  //自动生成的constructor属性会在重写后被屏蔽，所以需要重新指定，否则指向Object；这样指定后枚举特性会成为true，默认为false；若非必要可以不指定constructor为自身
+    name : "Soul",
+    age : 27,
+    job: "？",
+    sayName : function () {
+        alert(this.name);
+    }
+};
+var person2 = new Person();  //在重写prototype后创建的对象，访问的成员属性和方法也是重写后的，之前的被屏蔽
+alert(person1.name);  //弹出Nicholas；因为person1是在重写之前创建的对象，它的指针也是指向重写前的prototype
+alert(person2.name);  //弹出Soul；因为实在重写后创建的对象
+
+String.prototype.startsWith = function (text) {  //为原生对象添加成员属性或方法
+    return this.indexOf(text) == 0;
+};
+
+// 原型对象
+Person.prototype;  //类的prototype指向原型对象
+Person.prototype.constructor;  //创建一个函数（类）会自动创建constructor属性；默认情况下原型对象的constructor属性是指向自身的，这里就是Person
+Person.prototype.name;  //类的所有成员属性和方法都保存在原型对象上
+person1的[[prototype]]指向Person.prototype;  //[[prototype]]是对象的内部隐藏属性
+Person.isPrototypeOf(person1);  //通过isPrototypeOf()来判断对象的原型和类的原型是否是同一个
+Object.getPrototypeOf(person1);  //获取对象的[[prototype]]（ES5新增）
+person1.name="Tirion";  //通过给对象属性赋值不会修改原型中的值，而是在此实例中创建属性，而该属性屏蔽了原型中的同名属性
+person1.hasOwnProperty('name');  //当属性存在于实例中时返回ture；存在于原型中或不存在返回false
+"name" in person1;  //只要对象能访问到此属性则返回true，无论是属于对象实例还是原型
+Object.keys(person1);  //获取对象可枚举的实例属性，返回包含所有属性的数组
+Object.getOwnPropertyNames(person1);  //获取对象的实例属性，无论是否可枚举
+
+// 组合使用构造函数模式和原型模式：最常用的创建自定义类方式
+function Person(name, age, job){  //将成员属性用构造函数声明
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    this.friends = ["Shelby", "Court"];
+}
+Person.prototype = {  //将成员方法用原型模式声明
+    constructor : Person,
+    sayName : function(){  //所有对象共享一个成员方法；就不会出现构造函数模式每个对象一个自己的成员方法而增大开销了
+        alert(this.name);
+    }
+}
+
+// 动态原型模式
+function Person(name, age, job){
+    this.name = name;
+    this.age = age;
+    this.job = job;
+    if (typeof this.sayName != "function"){  //会在sayName()不存在的情况下添加到原型中；这段代码只会在初次调用构造函数实例化对象时才会调用；if语句检查的是初始化之后应该存在的任何属性或方法，不必检查每个属性或方法
+        Person.prototype.sayName = function(){
+            alert(this.name);
+        };
+    }
+}
+
+// 继承：利用原型让一个引用类型继承另一个引用类型的属性和方法（无法接收参数）
+function Super(){...}
+function Sub(){...}
+Sub.prototype=new Super();  //将父类Super的实例赋值给子类Sub的原型prototype完成继承（创建对象实例可以是对象字面量方式，即JSON格式，重写原型的时候也可以用JSON格式来重写，所以将父类的对象实例赋值给子类的原型就能实现继承。因为Super实例的constructor是指向Super的，所以Sub的constructor也是指向Super的）
+Sub.prototype.selfFun=function(){...}  //子类中扩展自己的成员方法；也可以重写父类的方法，必须写在替换了原型的语句之后
+instance instanceof Sub|Super|Object  //由于原型链的关系，三个都会返回true
+Sub|Super|Object.prototype.isPrototypeOf(instance);  //这样也都返回true
+
+// 借用构造函数
+function Super(like){
+    this.name=['a','b','c'];  //当父类构造函数中定义的属性包含引用类型的时候，子类继承后，其中一个子类的实例修改了这个引用属性，所有子类实例的这个引用属性都会跟着变化，这就造成了问题（继承是将父类的所有东西都定义在了prototype上，而prototype上的都是共享的）
+    this.like=like;
+}
+function Sub(like){
+    Super.call(this,like);  //所以需要在子类中将this指向父类；这样在子类实例化的时候，每个实例的this就直接指向父类，从而避免了上述问题；而且通过这个方法还解决了父类需要传参的问题
+    this.age=20;  //子类中扩展自己的成员属性；只有通过子类实例化才生效，所以不会影响到父类
+}
+var s1=new Sub();
+s1.name.push('d');  //通过上面的流程后，在子类的一个实例中修改引用属性也不会导致别的子类实例跟着修改了
+var s2=new Sub();
+alert(s2.name);
+
+// 组合继承：最常用的继承（可以接收参数）
+Sub.prototype=new Super();  //在借用构造函数的基础上，将原型也继承父类（重写原型链）；扩展原型，避免将方法写在构造函数中
+Sub.prototype.constructor=Sub;  //将constructor修改为自己（非必须）
+Sub.prototype.self=function(){...}  //扩展子类的方法
+// 例：
+function Super(name){
+    this.name=name;
+}
+function Sub(name,age){
+    Super.call(this,name);
+    this.age=age;
+}
+Sub.prototype=new Super();
+Sub.prototype.constructor=Sub;
+Sub.prototype.self=function(){
+    alert(o.name+o.age);
+}
+var o=new Sub('Tirion',28);
+o.self();
+
+
+// 面向对象改写注意事项：this
+function TabSwitch(){
+    this.aBtn=document.getElementsByTagName('input');
+    this.a=10;
+    for (var i = 0; i < this.aBtn.length; i++) {
+        this.aBtn[i].index=i;
+        var _this=this;  //将this赋值给一个自定义的_this，这个_this就代表实例化的对象
+        this.aBtn[i].onclick=function(){
+            _this.tab(this);  //给按钮添加点击事件的时候，this是表示对应的按钮，而这里却是要调用对象的方法，所以需要使用_this；传入this的作用是，tab()方法需要用到这个按钮对象，而在原型链创建的函数中无法直接获取，那里面的this表示对象实例
+        }
+    };
+    setInterval(function(){
+        _this.show();  //被定时器调用的函数，this必然是window对象，所以这里也需要使用_this而不能用this
+    },1000);
+}
+TabSwitch.prototype.tab=function(oBtn){
+    oBtn.className='active';  //非面向对象使用的是this.className，现在this变成了对象实例，所以接收了一个oBtn来表示对应的按钮对象
+}
+TabSwitch.prototype.show=function(){
+    alert(this.a);
+}
+一般JS的面向对象是高手使用的，主要用在游戏公司，或公司的高级程序员来写给下面的程序员使用
+
+
+
+// 正则RegExp
+var expression=new RegExp(pattern,flags);  //JS风格正则，不常使用
+var expression=/pattern/flags;  //Perl风格，一般使用这个；正则表达式的基本语法；整体和PHP的差不多
+var p=/at/g;  //g表示全局模式；i表示不区分大小写模式；m表示多行模式
+var p=/\.at/gi;  //因为.在正则中有特殊意义的，所以要匹配.at就需要使用转义符\
+str.search(pattern);  //查找字符串，查找到则返回所在位置，否则返回-1
+str.match(pattern);  //正则匹配，返回匹配上的内容，加上g则会返回匹配上的数组
+str.replace(pattern,text);  //替换字符串，用text替换匹配上的内容，返回替换后的字符串
+str.exec(pattern);  //使用正则匹配一个字符串，返回一个匹配数组
+pattern.test(str);  //在匹配的情况下返回true
+pattern.toString();  //得到正则字符串
+\d  [0-9] 数字  \D取反
+\w  [0-9a-z_]  \W取反
+\s  空白  \S取反
+|  或者  oText.replace(/艹|fuck|日/g, '和谐');  这样就能替换不和谐内容了
++  一到多个等同于{1,}
+*  0到多个等同于{0,}不建议使用
+?  0或1个{0,1}
+.  任意字符
+^  以什么开头
+$  以什么结尾
+字符类：
+[abc]  a或b或c，只是单个字符  /1[abc]2/ == /1a2|1b2|1c2|/
+[0-9] [a-z]  0到9和a到z的简写
+[^a]  除了a以外的所有东西  [^0-9a-z]除了数字和字母以外的东西
+{n,m}  最少n次，最多m次，可以省略其中一个
+[\u4e00-\u9fa5]  中文字符集
+
+
+
+// 函数
+// 函数声明：函数名本身就是变量，所以可以按照变量的方式来使用
+function say(string){  //创建一个普通函数，在JS中，这样创建的函数都会先解析，调用函数的代码写在函数之前也能执行
+    var name='';  //定义私有变量；因为外部无法访问
+}
+
+// 函数表达式语法声明（不会预解析）
+var say=function(string){  //创建一个匿名函数，并将函数赋值给一个变量，这样的创建方式调用代码就必须写在创建之后了
+    ...
+}  //除了调用时机不同外，两种函数声明是等价的
+
+// arguments
+function sayHi(){
+    alert("Hello"+arguments[0]+","+argunments[1]);  //可以不指定形参，也能传入任意数量的参数。在函数内使用arguments数组接收
+    alert(arguments.length);  //因为arguments是个类数组（不是数组），可以通过length属性来查看传入参数的个数。可以通过判断长度来模拟函数的重载
+}
+function say(str){
+    arguments[0]='hello';  //函数接收了一个参数，通过修改arguments对象也会影响对应位置的参数
+    alert(str);  //将输出hello
+}
+
+// 函数立即执行
+function(){  //创建一个匿名函数并立即执行，可用此方法来模拟块级作用域
+    ...
+}();
+(function a(b){  //创建函数立即执行，并接收参数
+    ...
+})(c);
+
+// 闭包：有权访问另一个函数作用域中的变量的函数。创建闭包的常见方式是在一个函数内部创建另一个函数，并且需要使用到外部函数的变量，类似JAVA的内部类
+function createComparisonFunction(propertyName) {  //这个函数在执行完毕后，其活动对象不会被销毁，因为内部匿名函数的作用域链仍然在引用这个活动对象；直到匿名函数被销毁后，它的活动对象才会被销毁
+    return function(object1, object2){  //这里就是个闭包
+        var value1 = object1[propertyName];  //内部函数通过作用域链访问了外部函数的参数
+        var value2 = object2[propertyName];
+        if (value1 < value2){
+            return -1;
+        } else if (value1 > value2){
+            return 1;
+        } else {
+            return 0;
+        }
+    };
+}
+var compareNames = createComparisonFunction("name");  //因为内部函数的存在，此函数执行完后不会销毁
+var result = compareNames({ name: "Nicholas" }, { name: "Greg" });
+compareNames = null;  //解除对匿名函数的引用（以便释放内存）
+function createFunctions(){
+    var result = new Array();
+    for (var i=0; i < 10; i++){
+        result[i] = function(num){  //通常情况下闭包只能取得包含函数中任何变量的最后一个值（数组中每个元素的值都为10）
+            return function(){  //通过立即执行的匿名函数取得i的值然后返回，这样可以避免上述情况
+                return num;
+            };
+        }(i);  //闭包传参，每次都是一个独立的变量了，而不是共用外部的最后一个i
+    }
+    return result;
+}
+
+// 接收函数的函数
+function callSomeFunction(someFunction, someArgument){  //someFunction函数可以作为一个参数传递给另一个函数；要访问函数的指针而不执行函数的话，必须去掉函数名后面的那对圆括号。
+    return someFunction(someArgument);  //可以调用someFunction()函数
+}
+
+// callee：arguments.callee()指向函数自身
+function factorial(num){ 
+    if (num <=1) { 
+        return 1; 
+    } else { 
+        return num * arguments.callee(num-1);  //arguments除了保存传入的参数外还有一个名叫callee的属性，该属性是一个指针，指向拥有这个arguments对象的函数。这里就不用写factorial(num-1)了，从而提高耦合性（函数名变了依然能正常递归）
+    } 
+}
+
+// this：引用的是函数据以执行的环境对象
+window.color = "red";
+var o = { color: "blue" };
+function sayColor(){
+    alert(this.color);
+}
+sayColor();  //"red"，当在全局作用域中调用sayColor()时，解析器也就是在全局作用域中运行的this.color这段代码，所以this引用的是也就是全局对象window；也可以看作调用的时候是window.sayColor()
+o.sayColor = sayColor;  //将sayColor函数赋给对象
+o.sayColor();  //"blue"，通过o对象调用，this就是对象o了
+// 对象中的this
+function SayColor(){
+    this.color='red';
+}
+var oSayColor=new SayColor2();  //当创建了一个SayColor对象后，里面的this就是oSayColor对象了（据以执行的环境对象），从而里面this.color也就是给oSayColor添加一个color属性
+alert(oSayColor.color);
+
+// caller
+function outer(){ 
+    inner(); 
+} 
+function inner(){ 
+    alert(inner.caller);  //caller中保存着调用当前函数的函数(这里是outer调用了inner，所以inner.caller即为outer)的引用，如果是在全局作用域中调用当前函数，它的值为null
+    alert(arguments.callee.caller);  //使用arguments.callee提高耦合性，效果同上
+} 
+outer();  //输出outer函数的源代码
+inner();  //输出null
+
+// length
+fun.length;  //返回这个函数的形参个数
+
+// apply()和call()；这两个方法的用途都是在特定的作用域中调用函数，实际上等于设置函数体内this对象的值
+function sum(num1, num2){ 
+    return num1 + num2; 
+} 
+function callSum(num1, num2){ 
+    return sum.apply(this, arguments); // 传入运行函数的作用域和数组
+    return sum.call(this, num1, num2); // 作用和apply相同，只是接收参数的形式不同，接收多个参数而不是数组
+}
+alert(callSum(10,10));  //因为是在全局作用域中调用的callSum()，所以callSum()中的this代表window对象
+
+// 例：
+function A(){
+    this.color="blue";
+}
+function B(){ 
+    this.color="yellow"; 
+} 
+var a=new A();
+B.call(a);  //用a对象来替换B()函数中的this；函数在调用call()或apply()的时候会执行函数
+alert(a.color);  //这里将输出yellow
+// 因此，上面的代码就可以改写成：
+function A(){
+    this.color="blue";
+}
+function B(){ 
+    a.color="yellow";  //上面的B.call(a)的结果就变成了这样
+} 
+var a=new A();
+B();  //调用了一次B()，从而修改了a.color的值
+alert(a.color);  //所以输出yellow
+
+
+// 事实上，传递参数并非apply()和call()真正的用武之地；它们真正强大的地方是能够扩充函数赖以运行的作用域
+window.color = "red"; 
+var o = { color: "blue" }; 
+function sayColor(){ 
+    alert(this.color); 
+} 
+sayColor(); //red 
+sayColor.call(this); //red 
+sayColor.call(window); //red；这三个函数体内的this都指向全局window对象
+sayColor.call(o); //blue；此时函数体内的this对象指向了o，于是结果显示的是"blue"
+// 函数调用
+function show(){alert(this);}
+show()==show.call()  //后面这个才是函数调用的完整体
+show.call('abc');  //会弹出abc，因为在call()中传入的参数就是改变this的指向
+show.call('abc',1,2);  //如果show(a,b)函数需要接收参数，则可以将参数传入call()的后面的参数
+
+// bind
+window.color = "red"; 
+var o = { color: "blue" }; 
+function sayColor(){ 
+    alert(this.color); 
+} 
+var objectSayColor = sayColor.bind(o);  //bind方法会创建一个函数的实例，其this值会被绑定到传给bind()函数的值
+objectSayColor(); //blue 
+
+// 静态变量
+(function(){
+    var privateVariable = 10;  //私有变量；通过下面的构造函数生成的所有对象都能访问这个变量，并且没法修改它的值，所以可以看作是静态变量
+    function privateFunction(){  //私有函数
+        ...
+    }
+    MyObject = function(){  //构造函数；没有使用var声明，创建的是全局的；并且因为处于这个匿名函数内，也就能访问上面的变量和函数
+    };
+    MyObject.prototype.publicMethod = function(){  //公有/特权方法（有权访问私有变量的公有方法叫做特权方法）
+        privateVariable++;
+        return privateFunction();
+    };
+})();
+
+
+
+// DOM操作：有不少兼容问题，所以需要DOM结构合理
+dom.childNodes;  //获取元素的子节点（不包含孙节点），包括元素节点和文本节点（非标准下只有元素节点IE678）；兼容性问题太多，不推荐使用，推荐children
+dom.children;  //获取元素的子节点，但是只获取元素节点，推荐使用
+dom.firstElementChild;  //获取第一个子元素节点（firstChild非标准；标准也有这个属性，但是会获取到第一个文本节点，下面几个相同）；可通过var e=dom.firstElementChild||dom.firstChild来获取；但也有BUG，比如当元素没子节点的时候，推荐使用dom.children[0]来获取第一个子元素节点
+dom.lastElementChild;  //与上面一个相反（lastChild非标准）；
+dom.nextElementSibling;  //获取下一个兄弟节点（nextSibling非标准）；
+dom.previousElementSibling;  //获取下一个兄弟节点（previousSibling非标准）；
+dom.parentNode;  //获取父节点
+dom.offsetParent;  //获取最近的有定位属性的父节点；没有定位父级，则为body（IE7以下如果当前元素有定位属性，则为HTML，如果父级某个元素触发了layout，则会定位到这个触发了layout(position,zoom等)的元素的父节点上）
+dom.offsetTop|offsetLeft;  //获取元素到有定位属性的父级的距离（IE7如果当前元素没有定位则是到body的距离，有定位才是到定位父级的距离）；如果没有定位父级，则是到HTML的距离
+dom.nodeType;  //获取元素的节点类型：1表示元素节点；2表示属性节点；3表示文本类型；
+dom.attributes;  //获取元素的属性集合。dom.attributes.length; dom.attributes[0].name; dom.attributes[0].value;
+dom.style.width='350px';  //设置行内样式
+dom.style.cssText='width:350px;height:25px';  //设置DOM元素的样式，可以一次设置多个。使用cssText是重写元素的行内style样式而不是添加
+dom.style.width;  //可以通过一个DOM的style属性来获取它的行内样式，也就是style='width:500px'这样的，不能获取CSS里写的
+dom.clientWidth;  //获取可视区宽，包括padding
+dom.offsetWidth;  //获取占位宽：可视区宽+border
+getComputedStyle(dom.width)  //获取计算后的样式，也就是当前DOM实际的样式（这里就是当前DOM的宽度），不论是CSS，style，JS设置的
+dom.currentStyle.width  //同上，IE678专用
+// 浏览器兼容-属性判断法
+if (dom.currentStyle) {
+    dom.currentStyle.width;
+}else{
+    getComputedStyle(dom).width;
+}
+// 封装成一个函数，就可以通过getStyle(dom,'width')这样来获取属性值了。注意，最好不要直接获取background，因为这是一个复合属性，需要backgroundColor等单独获取，而且以-分割的属性都要去-改大写；别获取未设置的样式
+function getStyle(dom,attr){
+    return dom.currentStyle?dom.currentStyle[attr]:getComputedStyle(dom)[attr];
+}
+document.documentElement.clientWidth/clientHeight;  //获得可视区宽度/高度
+document.documentElement.scrollTop/scrollLeft;  //获取滚动条滚动距离；chrome是通过body获取；可以通过||运算符来处理兼容性
+document.body.offsetHeight/offsetWidth;  //获取文档的高度/宽度
+oDiv.scrollHeight/scrollWidth;  //获取元素的内容高/宽；有溢出内容的也会算在里面，用了overflow:hidden则不会计算了
+var oLi=document.createElement('li');  //创建元素
+oLi.innerHTML="这是动态创建的li";  //使用innerHTML为动态创建的元素添加内容，当然这里面还可以添加HTML代码
+oUl.appendChild(oLi);  //使用appendChild()将DOM追加到一个元素中末尾作为子元素。（操作的是DOM上的已有节点则是剪切操作）
+oUl.insertBefore(oLi,oUl.children[0]);  //将DOM插入到一个元素中的某个子元素前面。参数：要插入的元素；插入到哪个子元素之前。如果第二个参数节点不存在，IE中会报错，标准浏览器会用appendChild()替代；所以需要判断节点是否存在再选择使用insertBefore()还是appendChild()。（操作的是DOM上的已有节点则是剪切操作）
+oUl.replaceChild(oLi1,oLi2);  //替换子节点；这里就是用oLi1节点替换oUl的子节点oLi2。（操作的是DOM上的已有节点则是剪切操作）
+oUl.removeChild(oUl.children[0]);  //删除一个子元素
+
+// 表格操作
+var oTab=document.getElementById('table1');  //先通过ID获取到table
+oTab.getElementsByName('tbody')[0].getElementsByName('tr')[2].getElementsByName('td')[1]  //获取表格元素完整版，可以简写为下面的格式，表格专用
+oTab.tBodies(0).rows(2).cells(1).innerHTML();  //获取第一个tbody的第一行tr的第二列td的内容（没写tbody浏览器会自动将里面的内容嵌套到tbody里）
+oTab.tHead.rows(0).cells(1).innerHTML();  //获取thead的内容；一个表格只能有一个thead和tfoot，可以有多个tbody
+oTab.tFoot.rows(0).cells(1).innerHTML();  //获取tfoot的内容
+
+// 表单操作
+var oForm=document.getElementById('form1');
+oForm.text1.value;  //这里的text1是表单中的一个input标签的name值，可以这样轻易的获取到相应的表单元素（各种表单元素都能通过name获取）
+oForm.text1.onChange=function(){...}  //表单元素改变事件；text在内容改变后失去焦点时触发
+oForm.select1.onChange=function(){...}  //select元素，当选择发生改变时触发
+oForm.radio1[0].onChange=function(){...}  //radio元素获取到的是一个对象集合，需要给每个元素添加点击事件；标准：获取焦点触发，非标准：失去焦点触发
+oForm.checkbox1[0].onChange=function(){...}  //checkbox元素和radio类似
+oForm.radio1[0].checked  //通过checked属性判断元素是否被选中（通常使用for循环来为所有选择类型的元素添加事件）
+oForm.onSubmit=function(){return false;}  //当表单提交的时候触发（必须通过input的submit元素提交才有效，button元素按钮无效）
+oForm.submit();  //调用form表单的submit()方法会提交这个表单
+oForm.onreset=function(){return false;}  //当reset重置按钮点击的时候触发
+var b=confirm("确定提交？");  //弹出确认对话框，用户点击确定返回ture，取消返回false；会暂时阻止代码的继续执行
+
+// 系统内置数组对象
+document.body //获取body元素
+document.all //获取所有标签
+document.embeds //获取embed标签
+document.scripts //获取script标签
+document.images //获取image标签
+document.forms //获取form标签
+document.anchors //获取锚点
+document.styleSheets //获取style标签
+document.links //获取链接标签
+alert(document.images.length) //将弹出页面中所有image标签的个数
+document.forms[1].username.value //获取页面第二个form表单中name值为username的那个标签(<input type="text" name="username" value="zhangsan">)的value值
+document["f2"].username.value //获取页面中name为f2的那个标签(比如这里是一个form标签)；所以可以通过添加参数name，使用document快速定位标签进行操作
+
+
+
+// BOM
+var newWindow=window.open('http://www.baidu.com','_self');  //打开一个新页面；参数：url，如果为空则为空白页面；打开方式，如果为空则为新窗口方式；返回值为新窗口的window对象，可以通过这个新window对象来操作新窗口（新窗口和老窗口同一域名）
+open();  //因为前面是window对象，JS的所有内容都是在window对象下的，所以可以省略前面的window
+newWindow.close();  //关闭页面；只能操作通过open()打开的页面，操作自己有兼容问题，如FF不会关闭
+window.navigator.userAgent;  //浏览器信息
+if (window.navigator.userAgent.indexOf('MSIE')!=-1) {  //浏览器信息中没找到MSIE则返回-1，确定不是IE；通过正则则能判断更精细
+    alert('我是IE');
+}else{
+    alert('我不是IE');
+}
+var urlInfo=window.location;  //浏览器地址信息即url，是个对象
+urlInfo.href;  //url字符串
+urlInfo.search;  //url?后面的内容，包括?
+urlInfo.hash;  //url#后面的内容，包括#（浏览历史记录就和这个有关，3body-AJAX保留浏览历史的解决方案）
+window.onscroll=function(){...}  //滚动条滚动的时候触发的事件。不是滚动一个像素就触发一次，是浏览器的一个很短时间间隔的监听
+window.onresize=function(){...}  //窗口大小发生变化的时候触发
+
+
+
+// 事件
+// 焦点：使浏览器能够区分用户输入的对象；当一个元素有焦点的时候，它就可以接收用户的输入操作。获得焦点：点击、tab键、JS。不是所有元素都能接收焦点，能够响应用户操作的才有焦点，如输入框的输入，按钮的点击，下拉列表的点击等
+oText.onfocus=function(){...}  //元素获得焦点时触发
+oText.onblur=function(){...}  //元素失去焦点时触发
+oText.focus();  //让元素获得焦点
+oText.blur();  //让元素失去焦点
+oText.select();  //全选文本框里的文本内容，方便用户复制，类似ctrl+a
+
+// event：事件对象；当一个事件发生时，和当前这个对象发生的这个事件的相关信息都会被临时保存到一个event对象中，供我们在需要时调用
+// event对象是一个内置全局对象，必须在事件调用函数中使用才有内容，否则为一个空对象
+document.onclick=function(e){
+    var e=e||event;  //在事件函数中使用event对象；注：事件函数的第一个参数始终是事件对象；IE低版本只能通过全局event对象获取，这里就是兼容写法
+    for(var attr in e){
+        console.log(attr+'='+e[attr]);  //输出事件对象的详细细节
+    }
+    e.clientX/Y;  //当前鼠标到浏览器页面左边/顶部的距离（按可视区算，滚动条无效，要获取到文档顶部的高度需要加上滚动条的距离）
+}
+
+// 事件冒泡：当一个元素接收到事件之后，这个事件会从这个元素往祖先级元素逐一扩散，如果祖先级元素也绑定了自定义的这类事件（事件总是存在的，只是有没有要执行的函数而已），则会依次触发
+document.onclick=function(e){
+    var e=e||event;
+    ...  //做各种事
+    e.cancelBubble=true;  //阻止当前对象的当前事件冒泡；默认为false不阻止
+}
+事件冒泡的应用：点击“菜单”按钮显示菜单，点击其它任何地方隐藏菜单；这个时候就需要在document上绑定个隐藏菜单的事件，当点击其它地方的时候，都会冒泡到document上，而“菜单”按钮也会冒泡到document上导致隐藏，所以菜单按钮要阻止冒泡
+
+// 事件绑定
+// 普通绑定：后面的会覆盖前面的，不能绑定多个相同事件
+oDiv.onclick=function(){...}  //通常使用的事件绑定方法
+oDiv.onclick=function(){...}  //当绑定多个，后面的会覆盖前面的
+// 增强绑定：可以绑定多个事件
+oDiv.addEventListener('click',fn,false);  //标准下使用addEventListener；没有on，第三个参数是是否捕获（与冒泡顺序相反；事件是先从外到内捕获，再从内到外冒泡的顺序执行），不传则默认为false不捕获（冒泡）
+oDiv.attachEvent('onclick',fn);  //IE下使用attachEvent；IE8以下执行的顺序和绑定顺序是相反的，所以绑定的多个事件不要有因果关系
+// 兼容处理
+function bind(obj,eName,fn){
+    if (obj.addEventListener) {
+        obj.addEventListener(eName,fn);
+    }else{
+        obj.attachEvent('on'+eName,function(){
+            fn.call(obj);  //因为attachEvent绑定的事件，执行的函数里面的this不能正确指向绑定它的对象，都会指向window，所以需要调用call()传入绑定事件的对象，将this替换为绑定事件的对象
+        });
+    }
+}
+// 全局捕获：IE有效
+oBtn.setCapture();  //设置全局捕获：当一个事件发生的时候，无论发生事件的元素是哪个（比如点击另一个button、任意的div等），这个事件都会被设置了全局捕获的元素oBtn劫持，而发生oBtn上绑定的相应事件
+
+// 事件取消
+// 普通取消
+oDiv.onclick=null;  //将事件赋值为null即取消
+// 增强取消：对应上面的增强绑定
+function cancel(obj,eName,fn){
+    if (obj.addEventListener) {
+        obj.removeEventListener(eName,fn,false);  //取消的时候只取消false的，注意第三个参数也要对应上
+    }else{
+        obj.detachEvent('on'+eName,fn);  //取消的时候就不用关注this了
+    }
+}
+
+// 键盘事件
+document.onkeydown=function(e){  //按下时执行；如果按住不放会连续触发，中间会有一定时间的间隔，第一次的间隔时间较长，可用定时器解决这个问题
+    var e=e||event;
+    e.keyCode;  //获取按下按键的值，是一个数字
+    ev.ctrlKey||ev.altKey||ev.shitKey  //当事件发生的时候，ctrl|alt|shit是否按下状态，是返回true，否则返回false
+}
+oText.onkeyup=function(){...}  //抬起时执行；能够接收焦点的元素就能接收键盘事件
+
+// 阻止事件默认行为
+很多元素有默认事件行为，比如点击按钮、右键菜单、空格键滚屏等，要阻止默认的行为就需要在相应的事件上 return false（只能阻止通过 on事件名 绑定的事件）；如果是通过addEventListener()绑定是事件，则通过 e.preventDefalt() 阻止
+document.onkeydown=function(){
+    return false;  //这样就会阻止按空格、上下滚屏的行为了，以及其它所有document上的所有键盘按下行为
+}
+document.oncontextmenu=function(){  //右键菜单（环境菜单）事件
+    return false;
+}
+document.addEventListener('contextmenu',function(e){
+    e.preventDefalt();  //通过addEventListener绑定的事件需要使用preventDefalt阻止
+})
+document.attachEvent('oncontextmenu',function(e){
+    return false;  //IE的增强绑定通过return false就能阻止
+})
+
+// 鼠标滚轮事件
+oDiv.onmousewheel=fn;  //IE、Chrome通过此方法绑定
+if (oDiv.addEventListener) {  //避免IE8以下报错；因为没有addEventListener事件
+    oDiv.addEventListener('DOMMouseScroll',fn);  //FF通过此方法绑定
+}
+function fn(e){
+    var e=e||event;
+    var b=true;  //设置一个布尔值变量b来判断鼠标滚动方向；最终向上为true向下为false
+    if (e.whellDelta) {  //IE、chrome通过whellDelta判断鼠标是向上滚动还是向下滚动
+        b=e.whellDelta>0?true:false;  //大于0则是向上，小于0向下
+    }else{
+        b=e.detail<0?true:false;  //FF通过detail获得滚动方向，并且小于0是向上，大于0向下
+    }
+    alert(b);  //通过上面的兼容写法后，向上滚动b为true，向下滚动b为false
+    if (e.preventDefalt) {  //阻止默认的浏览器滚动条滚动事件
+        e.preventDefalt();
+    }
+    return false;  //阻止默认的浏览器滚动条滚动事件
+}
+
+// 其它事件
+oDiv.onmousedown=function(){...}  //当鼠标在元素上按下时触发
+oDiv.onmouseup=function(){...}  //当鼠标抬起的时候触发
+oDiv.onmousemove=function(){...}  //当鼠标在元素上移动的时候触发；触发频率不是移动1px触发一次，而是间隔很短的事件
+oDiv.onmouseover=function(){...}  //鼠标移入触发
+oDiv.onmouseout=function(){...}  //鼠标移出触发
+
+// 一些技巧
+// JS拖拽元素的事件结构
+oDiv.onmousedown=function(e){
+    var disX=e.clientX-this.offsetLeft;  //点鼠标点下的时候，通过 鼠标到可视区左边的距离-元素到左边的距离 得到鼠标到元素左边的距离
+    var disY=e.clientY-this.offsetLeft;
+    if (oDiv.setCapture) {  //解决IE8以下BUG
+        oDiv.setCapture();
+    }
+    document.onmousemove=function(e){  //在文档上拖动的时候执行
+        oDiv.style.left=e.clientX-disX+'px';  //移动过程中不断修改元素到左边距离的值
+        oDiv.style.top=e.clientY-disY+'px';
+    }
+    document.onmouseup=function(){
+        document.onmousemove=null;  //鼠标抬起的时候清除move事件；把事件绑定在document上可以避免一些BUG，比如拖拽元素在某个元素下方抬起时，如果绑定在拖拽元素上，则无法执行此事件
+        if (oDiv.releaseCapture) {  //解决IE8以下BUG
+            oDiv.releaseCapture();
+        }
+    }
+    return false;  //阻止事件默认行为：文字选中拖拽行为
+}
+
+
+
+// cookie
+// 1、不同的浏览器存放位置不同，不相通；2、cookie的存储是以域名的形式区分的；3、所有cookie键值对存储在一起形成一个字符串，不同键值对之间通过'; '分隔
+// 设置cookie
+var oDate=new Date();
+oDate.setDate(oDate.getDate()+5);  //设置一个日期对象为：当前日期+5天
+var name=encodeURI('Tirion');  //cookie要保存的值最好进行编码，避免里面有特殊符号导致存储不完全；读取的时候使用decodeURI(name)解码
+document.cookie="name="+name+";expires="+oDate.toGMTString();  //设置cookie；参数：键值对和存储时间；时间需要是字符串格式，所以使用toGMTString()转换
+document.cookie="age=28";  //不设置时间的，会话结束自动清除
+function setCookie(key,val,t){  //封装设置cookie函数
+    var oDate=new Date();
+    oDate.setDate(oDate.getDate()+t);  //参数t为有效期，单位为天
+    document.cookie=encodeURI(key+'='+val+';expires='+oDate.toGMTString());
+}
+function setCookie('sex','男',3);
+// 读取cookie
+function getCookie(key){  //封装cookie获取函数
+    var arr1=document.cookie.split("; ")  //获取cookie字符串，并通过'; '分割，将每个键值对存储为一个数组的值
+    var len=arr1.length;
+    for (var i = 0; i < len; i++) {
+        var arr2=arr1[i].split('=');
+        if (arr2[0]==key) {
+            return decodeURI(arr2[1]);
+        };
+    }
+}
+getCookie('name');  //通过封装的函数得到某个cookie值
+
+
+
+
+//注意事项：
+var oUl1=document.getElementById('ul1');  //获取id必须通过document对象
+var olis=oUl1.getElementsByTagName('li');  //获取tag可以通过任意的DOM对象来查找，返回一个对象集
+for (var i = 0; i < arr.length; i++) {  //在使用for循环遍历数组的时候，arr.length这里最好提到上面，避免每次循环都计算一次数组的长度，影响性能
+    document.body.innerHTML+='<button value="按钮"></button>';  //在这循环内，这样的写法也是极其消耗性能的，因为每次遍历都会获取body的innerHTML。解决方法是在循环外创建一个空字符串变量，在for循环内只通过这个变量进行字符串的拼接，然后在for循环下面将这个字符串变量插入body
+};
+图片路径，颜色值等获取后可以用来赋值，但不要拿来做判断，不准确，浏览器兼容等问题得到的结果不同
+为假的类型：0，NaN，''，null，undefined，false，不能找到的元素
+往函数传递参数的类型是引用类型（对象），则在函数内修改这个参数，也会修改外部的对象
+
+</script>
+
+JS解析器：
+1、先将JS代码全盘读入，在里面先找出一些需要的东西（预解析），如var function等。找到var声明的变量会先解析，但是值都是undefined；找到的函数也会解析，值就是函数的内容，这就是为什么函数声明的位置不重要（函数声明提升，意思是在执行代码之前会先读取函数声明）。遇到变量和函数重名，会保留函数，与顺序无关
+2、逐行解析代码，并运行。遇到表达式会修改保存的变量的值如：var a=3，a=a+2，a--，a=Number(a)，参数等能修改一个变量名的值的就是表达式，function a()是函数申明不是表达式。所以在运行代码过程中先声明了一个变量并赋值，然后又申明了一个同名的函数，变量的值会是赋予的值而不是函数，而这个函数也不会保存在代码仓库中，所以a()无法调用。
+因此可以得出，在预解析过程中函数占有优先权，而在解析运行过程中变量声明占有优先权。所以切忌将变量和函数同名（在同一个域中）
+域：每个<script></script>是一个域（全局域），在一个文件中的不同<script></script>属于不同的域，但是使用的是同一个仓库。所以引入的外部文件需要写在前面，这样在解析的时候才会先把那些变量保存在仓库中，之后才能使用；如果写在后面，由于是不同的<script></script>那些引入的代码不在同一个域中，即使是函数也无法正常调用。每个函数内部也会开辟一个新的域（局部域），当调用函数的时候，局部域也会按照全局域相同的模式运行：预解析再解析执行
+例：
+1、
+<script>
+    a();  //会报错，因为声明的函数在不同的域中；当预解析完这个域后，就会立即执行这个域中的代码，而不是将所有域中的都先预解析再执行。但是如果将这句代码写在下句之后则正常；因为下句解析后全局域中就会有了a()函数，这句就能调用到a()函数了
+</script>
+<script>function a(){alert(1);}</script>
+2、
+<script>
+    var a=1;
+    function b(){
+        alert(a);
+        var a=2;
+    }
+    b();  //这里弹出的a为undefined，因为函数里定义了一个新的a，预解析的时候就会有个局部的a为undefined，就不会在作用域链中继续往上寻找到全局的那个a了
+</script>
+中间还有一些其它步骤，比如语法分析等不多做介绍
+
+不要在if或for循环里定义变量或函数，因为FF无法预解析，而别的浏览器可以
+
+for(var i=0;i<10;i++){
+    btn.onclick=function(){
+        alert(i);  //这里的i永远是10.因为onclick是在for循环执行完后生成的点击事件，而for循环执行完了i就变成了10，这个函数内访问i按照作用域链就是访问的外面的i，即10
+    }
+}

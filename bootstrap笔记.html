@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+ <head>
+  <title> new document </title>
+  <meta http-equiv="Content-type" content="text/html; charset=utf-8" />
+  <meta name="generator" content="editplus" />
+  <meta name="author" content="" />
+  <meta name="keywords" content="" />
+  <meta name="description" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"> <!-- 需要加入这句来兼容移动设备；可添加maximum-scale=1.0, user-scalable=no参数禁用缩放 -->
+	<!-- 引入bootstrap核心文件和jquery，这里的bootstrap是在官方网络上的，也可以引用本地的 -->
+	<!-- 最新 Bootstrap 核心 CSS 文件 -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap.min.css">
+	<!-- 可选的Bootstrap主题文件（一般不用引入） -->
+	<link rel="stylesheet" href="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/css/bootstrap-theme.min.css">
+	
+ </head>
+
+ <body>
+	<div class="container"> <!-- .container包裹页面上的内容即可实现居中对齐。由于设置了padding 和 固定宽度，.container不能嵌套。 -->
+		<img src="http://static.bootcss.com/www/assets/img/codeguide.png" class="img-responsive" alt="Responsive image"> <!-- 添加.img-responsive class可以让Bootstrap 3中的图片对响应式布局的支持更友好。其实质是为图片赋予了max-width: 100%; 和height: auto;属性，可以让图片按比例缩放，不超过其父元素的尺寸。 -->
+		<br/>
+
+		<b>*栅格系统</b>
+		<div class="row"> <!-- 使用.row创建一行 -->
+		  <div class="col-xs-12 col-sm-6 col-md-8">.col-xs-12 .col-sm-6 .col-md-8</div> <!-- .col-(column简写)创建一列 -->
+		  <div class="col-xs-6 col-md-4">.col-xs-6 .col-md-4</div> <!-- 有xs,sm,md,lg四种分辨率，1-12列数。 -->
+		</div>
+		<div class="row"> <!-- 当每行的同一分辨率(xs,sm,md,lg)的列数总数为12时，这一行就占满整个屏幕，多出的会换到下一行 -->
+		  <div class="col-xs-6 col-sm-4">.col-xs-6 .col-sm-4</div>
+		  <div class="col-xs-6 col-sm-4">.col-xs-6 .col-sm-4</div>
+		  <!-- Optional: clear the XS cols if their content doesn't match in height -->
+		  <div class="clearfix visible-xs"></div> <!-- 在某些阈值时，一行中某些列可能会出现比别的列高的情况。为了克服这一问题，建议联合使用.clearfix和响应式工具classe。 -->
+		  <div class="col-xs-6 col-sm-4">.col-xs-6 .col-sm-4</div>
+		</div>
+		<br/>
+
+		*列偏移
+		<div class="row">
+		  <div class="col-md-4">.col-md-4</div>
+		  <div class="col-md-4 col-md-offset-4">.col-md-4 .col-md-offset-4</div> <!-- 使用col-md-offset-设置列偏移，使列往右移动n个列的位置 -->
+		</div>
+		<div class="row">
+		  <div class="col-md-3 col-md-offset-3">.col-md-3 .col-md-offset-3</div>
+		  <div class="col-md-3 col-md-offset-3">.col-md-3 .col-md-offset-3</div>
+		</div>
+		<div class="row">
+		  <div class="col-md-6 col-md-offset-3">.col-md-6 .col-md-offset-3</div>
+		</div>
+		<br/>
+
+		*列嵌套
+		<div class="row">
+		  <div class="col-md-9">
+			Level 1: .col-md-9
+			<div class="row"> <!-- 通过添加一个新的.row和一系列.col-md-*列到已经存在的.col-md-*列内即可实现。嵌套row所包含的列加起来应该等于12。 -->
+			  <div class="col-md-6">
+				Level 2: .col-md-6
+			  </div>
+			  <div class="col-md-6">
+				Level 2: .col-md-6
+			  </div>
+			</div>
+		  </div>
+		</div>
+		<br/>
+
+		*列排序
+		<div class="row">
+		  <div class="col-md-9 col-md-push-3">.col-md-9 .col-md-push-3</div> <!-- 通过使用.col-md-push-* 和 .col-md-pull-*就可以很容易的改变列的顺序。 -->
+		  <div class="col-md-3 col-md-pull-9">.col-md-3 .col-md-pull-9</div>
+		</div>
+		<br/>
+
+		<b>*排版相关</b><br/>
+		*标题
+		<!-- 从<h1> 到 <h6> 均可用。另外，还提供了.h1 到.h6 class，为的是给inline属性的文本赋予标题的样式。在标题内还可以包含<small>标签或.small元素，可以用来标记副标题。 -->
+		<h1>h1. Bootstrap heading <small>Secondary text</small></h1> 
+
+		*页面主体
+		<!-- Bootstrap将全局font-size设置为14px，line-height为1.428。这些属性直接赋给<body>和所有段落元素。另外，<p>（段落）还被设置了等于1/2行高的底部外边距（margin）（即10px）。 -->
+		<p>Maecenas sed diam eget risus varius blandit sit amet non magna. Donec id elit non mi porta gravida at eget metus. Duis mollis, est non commodo luctus, nisi erat porttitor ligula, eget lacinia odio sem nec elit.</p>
+		<p class="lead">Nullam quis risus eget urna mollis ornare vel eu leo. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Nullam id dolor id nibh ultricies vehicula.</p><!-- 通过添加.lead可以让段落突出显示。 -->
+		<br/>
+
+		*小号文本 <br/>
+		<small>This line of text is meant to be treated as fine print.</small> <!-- 使用<small>标签包裹，其内的文本将被设置为父容器字体大小的85%。 -->
+		<br/><br/>
+
+		*对齐class
+		<p class="text-left">Left aligned text.</p>
+		<p class="text-center">Center aligned text.</p>
+		<p class="text-right">Right aligned text.</p>
+		<br/>
+
+		<b>*常用标签</b><br/>
+		*列表 <br/>
+		*无样式列表
+		<ul class="list-unstyled"> <!-- 移除了默认的list-style样式和左侧外边距的一组元素（只针对直接子元素）。也就是说，需要对所有嵌套的列表都添加此class才能具有同样的样式。 -->
+		  <li>111</li>
+		  <li>222</li>
+		  <li>333</li>
+		</ul>
+		<br/>
+		*内联列表
+		<ul class="list-inline"> <!-- 通过设置display: inline-block;并添加少量的内补，将所有元素放置于同一列。 -->
+		  <li>111</li>
+		  <li>222</li>
+		  <li>333</li>
+		</ul>
+		<br/>
+
+		*水平排列的描述
+		<dl class="dl-horizontal"> <!-- .dl-horizontal可以让<dl>内短语及其描述排在一行。 -->
+		  <dt>title</dt>
+		  <dd>content</dd>
+		</dl>
+		<br/>
+
+		*表格
+		<table class="table table-bordered table-hover table-responsive"> <!-- 只使用.table定义无边框表格(只有行分割线)，.table-bordered添加边框(外边框，列分割线)，.table-hover使此table支持鼠标悬停状态，.table-responsive创建响应式表格，当分辨率小于768px会在表格下面自动添加水平滚动条 -->
+		  <tr class="active"><td>111</td><td>222</td></tr> <!-- .active当鼠标悬停在所设行或单元格上时，颜色发生变化，需要table-hover的支持 -->
+		  <tr><td>333</td><td>444</td></tr>
+		</table>
+		<br/>
+
+		*表单
+		<!-- 单独的表单控件(没加任何class的)会被自动赋予一些全局样式。所有设置了.form-control的<input>、<textarea>和<select>元素都将被默认设置为width: 100%;。将label和前面提到的这些控件包裹在.form-group中可以获得最好的排列。 -->
+		<br/>
+		*内联表单
+		<form role="form"  class="form-inline"> <!-- 添加.form-inline后，表单内的标签都会变成内联样式，排成一排 -->
+		  <div class="form-group">
+			<label for="exampleInputEmail1">Email address</label> <!-- 为每个输入控件设置label标签，这样点击这个控件的时候，就会通过for定位到相应id的输入框中进行输入 -->
+			<input type="email" class="form-control" id="exampleInputEmail1" placeholder="Enter email">
+		  </div>
+		  <div class="form-group">
+			<label for="exampleInputPassword1">Password</label>
+			<input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
+		  </div>
+		  <div class="form-group">
+			<label for="exampleInputFile" class="sr-only">File input</label> <!-- 设置.sr-only将隐藏此label -->
+			<input type="file" id="exampleInputFile">
+			<p class="help-block">Example block-level help text here.</p>
+		  </div>
+		  <div class="checkbox">
+			<label>
+			  <input type="checkbox"> Check me out
+			</label>
+		  </div>
+		  <button type="submit" class="btn btn-default">Submit</button>
+		</form>
+		<br/>
+		*水平排列表单
+		<form class="form-horizontal" role="form"> <!-- 通过为表单添加.form-horizontal，并使用Bootstrap预置的栅格class可以将label和控件组水平并排布局。这样做将改变.form-group的行为，使其表现为栅格系统中的行（row），因此就无需再使用.row了。 -->
+		  <div class="form-group">
+			<label for="inputEmail3" class="col-sm-1 control-label">Email</label> <!-- 使用栅格class进行布局 -->
+			<div class="col-sm-11">
+			  <input type="email" class="form-control" id="inputEmail3" placeholder="Email">
+			</div>
+		  </div>
+		  <div class="form-group">
+			<label for="inputPassword3" class="col-sm-2 control-label">Password</label>
+			<div class="col-sm-5">
+			  <input type="password" class="form-control" id="inputPassword3" placeholder="Password">
+			</div>
+		  </div>
+		  <div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+			  <div class="checkbox">
+				<label>
+				  <input type="checkbox"> Remember me
+				</label>
+			  </div>
+			</div>
+		  </div>
+		  <div class="form-group">
+			<div class="col-sm-offset-2 col-sm-10">
+			  <button type="submit" class="btn btn-default">Sign in</button>
+			</div>
+		  </div>
+		</form>
+		<br/>
+
+		*内联checkbox
+		<br/>
+		<label class="checkbox-inline"> <!-- 添加.checkbox-inline -->
+		  <input type="checkbox" id="inlineCheckbox1" value="option1"> 1
+		</label>
+		<label class="checkbox-inline">
+		  <input type="checkbox" id="inlineCheckbox2" value="option2"> 2
+		</label>
+		<label class="checkbox-inline">
+		  <input type="checkbox" id="inlineCheckbox3" value="option3"> 3
+		</label>
+		<br/><br/>
+
+		*select标签
+		<br/>
+		<select class="form-control"> <!-- .form-control将宽度100%显示 -->
+		  <option>1</option>
+		  <option>2</option>
+		  <option>3</option>
+		  <option>4</option>
+		  <option>5</option>
+		</select>
+		<select multiple class="form-control"> <!-- multiple参数将多个选项显示 -->
+		  <option>1</option>
+		  <option>2</option>
+		  <option>3</option>
+		  <option>4</option>
+		  <option>5</option>
+		</select>
+		<br/>
+
+		*静态控件
+		<form class="form-horizontal" role="form">
+		  <div class="form-group">
+			<label class="col-sm-2 control-label">Email</label>
+			<div class="col-sm-10">
+			  <p class="form-control-static">email@example.com</p> <!-- 在水平布局的表单中，如果需要将一行纯文本放置于label的同一行，为<p>元素添加.form-control-static即可 -->
+			</div>
+		  </div>
+		  <div class="form-group">
+			<label for="inputPassword" class="col-sm-2 control-label">Password</label>
+			<div class="col-sm-10">
+			  <input type="password" class="form-control" id="inputPassword" placeholder="Password">
+			</div>
+		  </div>
+		</form>
+		<br/>
+
+		*被禁用的输入框
+		<!-- 为输入框设置disabled属性可以防止用户输入，并能改变一点外观，使其更直观。placeholder类似value设置默认值，但只显示在背景，而不是真实的值 -->
+		<input class="form-control" type="text" placeholder="Disabled input here..." disabled>
+		<br/>
+
+		*控件尺寸
+		<div class="row">
+		  <div class="col-xs-2"> <!-- 控制控件的宽度 -->
+			<input type="text" class="form-control input-lg" placeholder=".col-xs-2"> <!-- input-lg调整控件的高度 -->
+		  </div>
+		  <div class="col-xs-3">
+			<input type="text" class="form-control input-sm" placeholder=".col-xs-3">
+		  </div>
+		  <div class="col-xs-4">
+			<input type="text" class="form-control" placeholder=".col-xs-4">
+			<span class="help-block">自己独占一行或多行的块级帮助文本。</span> <!-- 帮助文本 -->
+		  </div>
+		</div>
+		<br/>
+
+		*按钮
+		<br/>
+		<button type="button" class="btn btn-default btn-lg">Default</button> <!-- .btn-default各种样式的按钮 -->
+		<button type="button" class="btn btn-primary btn-sm">Primary</button> <!-- .btn-sm不同大小的按钮 -->
+		<button type="button" class="btn btn-success btn-xs active">Success</button> <!-- .active按钮处于按下状态 -->
+		<a href="#" class="btn btn-primary btn-lg active" role="button">Primary link</a> <!-- a标签也可以 -->
+		<button type="button" class="btn btn-info" disabled="disabled">Info</button> <!--  disabled="disabled"禁用状态 -->
+		<a href="#" class="btn btn-primary btn-lg disabled" role="button">Primary</a> <!-- a标签的禁用状态 -->
+		<button type="button" class="btn btn-warning">Warning</button>
+		<button type="button" class="btn btn-link">Link</button>
+		<button type="button" class="btn btn-danger btn-block">Danger</button> <!-- .btn-block可以使其充满父节点100%的宽度，而且按钮也变为了块级（block）元素。 -->
+		<br/>
+
+		*可做按钮的HTML标签
+		<br/>
+		<a class="btn btn-default" href="#" role="button">Link</a>
+		<button class="btn btn-default" type="submit">Button</button> <!-- 作为最佳实践，我们强烈建议尽可能使用<button>元素以确保跨浏览器的一致性样式。 -->
+		<input class="btn btn-default" type="button" value="Input">
+		<input class="btn btn-default" type="submit" value="Submit">
+		<br/><br/>
+
+		*图片
+		<br/>
+		<img src="http://www.hao5191.cn/uploads/allimg/130417/1JZ49245_1.jpg" alt="..." width='200' class="img-rounded"> <!-- 添加class，让图片变成 -->
+		<img src="http://p6.zbjimg.com/task/2013-02/21/pub/5125e18fe5155.jpg" alt="..." width='200' class="img-circle">
+		<img src="http://www.wumii.com/site_images/f/Q/M/buUZJ31.jpg" alt="..." width='200' class="img-thumbnail">
+		<br/><br/>
+
+		<b>*工具class</b> <br/>
+		*关闭按钮
+		<button type="button" class="close" aria-hidden="true">&times;</button> <!-- 通过使用一个象征关闭的图标，可以用来让模式对话框和警告框消失。 -->
+		<br/><br/>
+
+		*快速设置浮动 <br/>
+		<div class="pull-left">左浮动</div>
+		<div class="pull-right">右浮动</div>
+		<br/><br/>
+		
+		*清除浮动
+		<div class="clearfix">清除浮动</div> <!-- 使用.clearfix清除任意页面元素的浮动 -->
+		<br/>
+
+		*元素居中 <br/>
+		<div class="center-block">元素居中</div> <!-- 将页面元素设置为 display: block并通过设置margin:0 auto使其居中 -->
+		<br/>
+		
+		*显示和隐藏内容
+		<div class="show">显示</div> <!-- 通过.show 和 .hidden可以强制显示或隐藏任一页面元素 -->
+		<div class="hidden">隐藏</div>
+		<br/>
+
+		*响应式工具
+		<!-- 尝试使用这些class并避免创建同一个网站的不同版本，从而能够完善不同设备上的显示效果。响应式工具目前只是针对块级元素， 不支持inline元素和表格元素。 -->
+		.visible-xs  .visible-sm  .visible-md  .visible-lg
+		.hidden-xs  .hidden-sm  .hidden-md  .hidden-lg
+
+	</div>
+
+
+
+
+
+<!-- 备注 -->
+<br/><br/><br/><br/><br/>
+<pre>
+<b>注：</b>
+栅格与全宽布局Grids and full-width layouts：
+对于需要占据整个浏览器视口（viewport）的页面，需要将内容区域包裹在一个容器元素内，并且赋予padding: 0 15px;，为的是抵消掉为.row所设置的margin: 0 -15px;（如果不这样的话，你的页面会左右超出视口15px，页面底部出现横向滚动条）。
+</pre>
+ </body>
+
+
+ JS插件的使用：
+ BS封装了部分常用JS插件（如过渡效果、下拉菜单、标签页、弹出框等），我们可以引入后在项目中使用，从而提高开发效率。详情：http://v3.bootcss.com/javascript/
+ 首先需要引入jquery和bootstrap.min.js
+<!-- jQuery文件。务必在bootstrap.min.js 之前引入 -->
+<script src="http://cdn.bootcss.com/jquery/1.10.2/jquery.min.js"></script>
+<!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+<script src="http://cdn.bootcss.com/twitter-bootstrap/3.0.3/js/bootstrap.min.js"></script>
+ 然后在项目中，按照文档的要求布局好HTML、class，并添加自定义属性data-*来使用JS插件，其中*就是要使用的插件的名称，详情查询相关文档
+ <script>
+// 某些API可能与自己的JS代码冲突，从而需要关闭，可用以下方法关闭
+$(document).off('.data-api')
+ </script>
+</html>
+

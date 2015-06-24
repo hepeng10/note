@@ -1,0 +1,118 @@
+// 注释
+//和/**/两种注释方式，/**/这种在编译后的css文件中会保留
+
+// 导入另一个less
+@import "base.less";  //导入同目录下的base.less
+@import (less) "base.css";  //导入同目录下的base.css
+
+// 变量
+@test-width:500px;  //声明变量：使用 @变量名:值; 定义一个变量
+div{
+    width:@test-width;  //使用变量
+}
+
+// 混合
+.border{
+    border:2px solid black;
+}
+.div{
+    width:@test-width;
+    .border;  //把另一个类中的属性添加到这个类中，实现低耦合
+}
+// 参数混合
+.border(@color){
+    border:2px solid @color;
+}
+.div{
+    width:@test-width;
+    .border(red);  //调用另一个类并传入参数
+}
+// 参数默认值
+.borderRadius(@radius:3px;){  //设置默认值，调用的时候没传参则使用默认值
+    -webkit-border-radius:@radius;
+    -moz-border-radius:@radius;
+    border-radius:@radius;
+}
+.div{
+    width:@test-width;
+    .borderRadius();  //调用另一个类可以不传参
+}
+
+// 匹配模式：类似if语句
+// 说明：用css的border绘制三角的方法
+.sanjiao{
+    width:0px;
+    height:0px;
+    overflow:hidden;
+    border-width:10px;
+    border-color:red transparent transparent transparent;  //三角朝向哪边，则另一边设置颜色
+    border-style:solid dashed dashed dashed;
+}
+// 例
+.triangle(top,@w:5px,@c:#666){  //这里的top属于命名的一部分，调用的时候会根据这个来确定调用的哪个
+    border-width:@w;
+    border-color:transparent transparent @c transparent;  //朝上，则为下面有颜色，其它三面透明
+    border-style:dashed dashed solid dashed;
+}
+.triangle(bottom,@w:5px,@c:#666){
+    border-width:@w;
+    border-color:@c transparent transparent transparent;
+    border-style:solid dashed dashed dashed;
+}
+.triangle(@_){  //用相同的class名，在参数中使用@_，那么在编译的时候，调用这个class名的其它类也会同时调用这个类
+    width:0px;
+    height:0px;
+    overflow:hidden;
+}
+.sanjiao{
+    .triangle(bottom);  //调用的时候会根据传入的这个bottom来确定调用的是bottom的那个triangle
+}
+
+// 运算
+@w:300px;
+@c:#ccc;
+.div{
+    width:@w+100;
+    background-color:@c - 20;  //颜色也能做运算，注意减号必须有空格，不然会被当作一个变量名
+}
+
+// 嵌套
+/*
+.list{}
+.list li{}
+.list a{}
+.list span{}
+*/
+.list{
+    width:600px;
+    list-style:none;
+    li{
+        height:30px;
+        background-color:pink;
+    }
+    a{  //这个a可以写在li里，但是CSS会多一层，降低效率
+        float:left;
+        &:hover{  //使用&代表上一层选择器（.list a）
+            color:red;
+        }
+    }
+    span{
+        float:right;
+    }
+}
+
+// @arguments
+.border(@w:2px,@c:red,@x:solid){
+    border:@arguments;  //表示所有的参数
+}
+
+// 避免编译
+.test{
+    width:calc(300px-30px);  //CSS3中可以使用calc()这样的语法，让浏览器去解析，但是默认情况会被less计算
+    width:~"calc(300px-30px)";  //使用了 ~"..." 能让里面的内容不被less编译
+}
+
+// !important
+.test-important{
+    .borderRadius() !important;  //会给.borderRadius里所有属性加上!important
+}

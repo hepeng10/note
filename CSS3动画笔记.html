@@ -1,0 +1,137 @@
+
+<!-- 主要分为transition和animation两种动画 -->
+
+<!-- transition -->
+<!-- 语法 -->
+缩写：transiton:过度属性名称 过度时间 过度模式;
+完整：transition-property:过度属性名称;  transition-duration:过度时间;  transition-timing-function:过度模式;
+多个属性同时过度：
+transition:属性1 时间1 模式1,属性2 时间2 模式2,属性3 时间3 模式3,...;
+过度模式取值：ease（缓慢开始，缓慢结束）|linear（匀速）|ease-in（缓慢开始）|ease-out（缓慢结束）|ease-in-out（同ease但稍有区别）
+注：过度模式不是必须的，默认为ease
+<!-- 实例 -->
+<style>
+    #div{
+        width:400px;
+        height:400px;
+        margin:0 auto;
+        background-color:blue;
+        transition:background-color 2s;  /*添加transition属性，执行要过度的属性和时间*/
+    }
+    #div:hover{
+        background-color:red;  /*当hover的时候，这个属性会发生变化，而这个属性又正好是transition设置的属性，所以会产生过度动画效果*/
+    }
+</style>
+<div id="div"></div>
+
+
+
+<!-- 设置3D场景 -->
+transform-style:preserve-3d;  通知浏览器设置了此属性的元素里的元素是在3D场景中进行变换
+perspective:800;  表示浏览器中的物体到浏览器这个平面之间的距离
+perspective-origin:50% 50%;  表示视点，即从浏览器哪个位置看进去，这里就是浏览器中心
+
+<!-- 使用transform调整元素成为3D -->
+transform:translateX(npx)|translateY(npx)|tanslateZ(npx);  位移操作
+transform:rotateX(ndeg)|rotateY(ndeg)|rotateZ(ndeg);  旋转操作（旋转到多少度，而不是旋转多少度，平面时为0度）
+transform-origin:left top 100px;  调整旋转中心
+注：Z轴正方向是往屏幕外，负方向是往屏幕内。
+
+<!-- 实例 -->
+<style>
+    #experiment{
+        transform-style:preserve-3d;
+        perspective:800;
+        perspective-origin:50% 50%;
+    }
+    #block{
+        width:500px;
+        height:500px;
+        background-color:blue;
+        margin:100px auto;
+        transform:translateX(50px) translateZ(-20px);  /*translate是往相应的方向进行移动，Z轴进行负数移动后物体会更小*/
+        transform:rotateX(45deg);  /*使用transform将沿着X轴旋转45度（不是往X轴方向旋转，而是以X轴作为一个轴，沿着它旋转，就像单杠一样）*/
+    }
+</style>
+<div id="experiment">
+    <div id="block">
+    </div>
+</div>
+
+<!-- 实例：数字往下翻页效果 -->
+<style>
+    #my3dspace{
+        perspective:800;
+        perspective-origin:50% 50%;
+        overflow:hidden;
+    }
+    #pagegroup{
+        width:400px;
+        height:400px;
+        margin:0 auto;
+        transform-style:preserve-3d;
+        position:relative;
+    }
+    .page{
+        width:360px;
+        height:360px;
+        padding:20px;
+        background-color:black;
+        color:white;
+        font-weight:bold;
+        font-size:360px;
+        line-height:360px;
+        text-align:center;
+        position:absolute;
+    }
+    #page1,#page2,#page3,#page4,#page5,#page6{
+        transform-origin:bottom;  /*沿着底部旋转*/
+        transition:transform 1s linear;  /*过度元素为tansform*/
+    }
+    #page2,#page3,#page4,#page5,#page6{
+        transform:rotateX(90deg);
+    }
+    #op{
+        text-align:center;
+        margin:40px auto;
+    }
+</style>
+<div id="my3dspace">
+    <div id="pagegroup">
+        <div class="page" id="page1"></div>
+        <div class="page" id="page2"></div>
+        <div class="page" id="page3"></div>
+        <div class="page" id="page4"></div>
+        <div class="page" id="page5"></div>
+        <div class="page" id="page6"></div>
+    </div>
+</div>
+<div id="op">
+    <a href="javascript:next();">next</a>　　<a href="javascript:pre();">previous</a>
+</div>
+<script>
+    var curIndex=1;
+    function next(){
+        if (curIndex===6) {return};
+        var curPage=document.getElementById('page'+curIndex);
+        curPage.style.transform="rotateX(-90deg)";  //使用JS来修改元素的transform属性，当属性变化的时候就会产生动画
+        curIndex++;
+        var nextPage=document.getElementById('page'+curIndex);
+        nextPage.style.transform="rotateX(0deg)";
+    }
+    function pre(){
+        if (curIndex===1) {return};
+        var curPage=document.getElementById('page'+curIndex);
+        curPage.style.transform="rotateX(90deg)";  //使用JS来修改元素的transform属性，当属性变化的时候就会产生动画
+        curIndex--;
+        var nextPage=document.getElementById('page'+curIndex);
+        nextPage.style.transform="rotateX(0deg)";
+    }
+</script>
+
+
+
+
+
+
+
