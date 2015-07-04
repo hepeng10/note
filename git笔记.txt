@@ -1,4 +1,4 @@
-使用git bash操作；也可使用SourceTree这个可视化软件进行操作
+Windows上最好使用git bash操作，因为ssh等命令cmd没有，安装git bash时注意勾选GIT BASH HERE选项；也可使用SourceTree这个可视化软件进行操作
 工作区：需要进行版本控制的文件目录
 版本库：工作区里的.git目录
 暂存区：使用git add添加，尚未commit的文件所在目录
@@ -63,13 +63,24 @@ git push origin :refs/tags/v0.9  //删除远程标签，需要先删除本地标
 
 
 // github使用
+// 使用ssh连接，速度更快更稳定。Windows上只能使用git bash
+ssh-keygen -t rsa -C "youremail@example.com"  //在本地创建SSH KEY，然后三个回车即可
+将.ssh目录中(Users/Admin)的id_rsa.pub里的内容完全复制到github设置中的SSH KEYS选项中，Add SSH key复制内容进去，title随意
+测试：ssh git@github.com
+
+    The authenticity of host ‘github.com (207.97.227.239)’ can’t be established.
+    RSA key fingerprint is 16:27:ac:a5:76:28:2d:36:63:1b:56:4d:eb:df:a6:48.
+    Are you sure you want to continue connecting (yes/no)? yes
+    Warning: Permanently added ‘github.com,207.97.227.239′ (RSA) to the list of known hosts.
+    ERROR: Hi tekkub! You’ve successfully authenticated, but GitHub does not provide shell access
+    Connection to github.com closed.
+
+    输出内容与以上类似即成功
 // 全新仓库
-1、ssh-keygen -t rsa -C "youremail@example.com"  //在本地创建SSH KEY
-2、将.ssh目录中(Users/Admin)的id_rsa.pub里的内容完全复制到github设置中的SSH KEYS选项中，Add SSH key复制内容进去，title随意
-3、在github上新建一个仓库test
-4、git remote add origin git@github.com:hepeng10/test.git  //使用git remote连接到github的远程仓库hepeng10/test.git
+1、在github上新建一个仓库test
+2、git remote add origin git@github.com:hepeng10/test.git  //使用git remote连接到github的远程仓库hepeng10/test.git
        git remote -v  //查看远程库的信息，如果没有推送权限则只有petch没有push
-5、在本地git仓库中完成操作后，使用git push就可将本地仓库内容推到远程github仓库了；当新仓库是空的时候使用git push -u origin master命令
+3、在本地git仓库中完成操作后，使用git push就可将本地仓库内容推到远程github仓库了；当新仓库是空的时候使用git push -u origin master命令
 // 已有仓库
 1、git clone https://github.com/hepeng10/test.git  //使用 git clone 命令将github上的项目下载到本地。HTTPS协议
        git clone git@github.com:hepeng10/test.git  //SSH协议，速度更快，每次同步不需要输入帐号密码，但需要本地SSH KEY支持
