@@ -6,6 +6,8 @@
 <script src="../xx.js"></script>  //引入外部JS文件，不写type="text/javascript"默认就是javascript
 <script src="../xx.js" defer="defer"></script>  //添加defer属性作为延迟脚本，引入的js文件遇到</html>标签才执行，只适用于外部脚本文件
 <script src="../xx.js" async></script>  //添加async属性后，页面可异步下载js文件，而不是等到js下载完再往后加载，所以要注意使用时机
+<a href="javascript:JS语句">链接</a>
+<form action="javascript:JS语句"><input type="submit"></form> //可以直接在标签中写JS代码
 
 <!-- 语法 -->
 <script>
@@ -198,7 +200,7 @@ for (var propName in window) {
 var now=new Date();  //获得当前的日期和时间；传入Unix时间戳，则会生成相应的日期时间
 Date.parse("6/13/2014");  //获取指定日期的时间戳
 var time=new Date("6/13/2014");  //效果和parse()相同，会隐式调用parse()方法
-Date.now();  //ES5新增方法：获取当前的时间戳
+Date.now();  //ES5新增方法：获取当前的Unix时间戳
 // 常用日期方法，get都有对应的set
 now.valueOf();  //返回日期的毫秒数；所以可以直接比较两个Date对象的大小，它们会自动调用valueOf()方法
 now.getTime();  //返回表示日期的毫秒数，和valueOf()相同
@@ -1078,6 +1080,191 @@ getCookie('name');  //通过封装的函数得到某个cookie值
 
 
 
+//AJAX：主要用于页面的局部刷新和按需取数据，是一种JS技术
+//ajax分为同步和异步两种，通常使用异步，但有时也会用到同步。同步ajax需要ajax执行完后，才继续执行网页上的代码（详见兄弟连PHP项目视频21）
+//创建AJAX对象：比较复杂，但代码固定
+function createAJAX(){
+    var request=false;
+    
+    //window对象中有XMLHttpRequest存在就是符合W3C标准的浏览器
+    if(window.XMLHttpRequest){
+        request=new XMLHttpRequest();
+        if(request.overrideMimeType){
+            request.overrideMimeType("text/xml");
+        }
+    //window对象中有ActiveXObject属性就是IE6
+    }else if(window.ActiveXObject){
+        request=new ActiveXObject("Microsoft.XMLHTTP");
+    }
+    return request;
+}
+
+var ajax=createAJAX();
+//AJAX的6个方法：用于向服务器发送请求
+setRequestHeader("label","value"); //设置header并和请求一起发送
+getResponseHeader("headerLabel"); //作为字符串返回单个header标签
+getAllResponseHeaders(); //作为字符串返回所有的header标签
+abort() //停止当前请求；以上4个方法通常不用
+open("method","URL"[,asyncFlas,"username","password"]); //设置请求的目标，第一个参数传入get|post，第二个参数是请求的地址，第三个参数传入true|false(通常为true)，后面两个一般不用
+send(content); //发送请求的内容
+ajax.open("get","server.php?key1=value1&key2=value2&random="+Math.random(),true); //使用get方法发送请求，可以直接通过URL请求数据(value1&key2=value2...)，服务器断使用$_GET接收；random=Math.random()的作用是避免每次发送的是同一个请求而导致返回的数据是缓存里的
+ajax.send(null); //发送数据；数据写在了URL里，这里就传空即可
+ajax.open("post","server.php"); //使用post发送请求，第三个参数也不用传
+ajax.send("key1=value1&key2=value2&random"+Math.random()); //就必须把请求内容写在这里了
+ajax.setRequestHeader("Content-Type","application/x-www-form-urlencoded");  //post方式还必须使用这条语句发送头信息；<form action="server.php" method="post" enctype="">form里还需要添加个enctype属性
+//AJAX的6个属性：用于接收服务器发送的数据
+ajax.onreadystatechange=function(){ //状态改变的事件触发器readystatechange 
+    if(ajax.readyState==4){ //数据传输过程中会有0-4种状态，4是完成，只需要获取完成后的状态即可
+        if(ajax.status==200){ //服务器返回的状态码，200是成功，还有404等其它状态码
+            var data=ajax.responseText; //通过responseText获取服务器发送来的数据
+        }
+    }
+}
+responseXML //返回兼容DOM的XML文档对象
+//json：将数组转换为json编码
+$arr=array('a'=>1,'b'=>2,'c'=>3,'d'=>4,'e'=>5);
+json_encode($arr); //将数组转为json格式；json转码后的代码为：{"a":1,"b":2,"c":3,"d":4,"e":5}，这也就是JS快速创建对象的写法
+eval("var obj="+data); //通过ajax获取服务器通过json转码后传送的数据并将数据转为ojb对象，这样就能访问数组的各个数据里，如果没用json转码，获取的数组也只是一个字符串
+alert(obj.a); //就能通过对象中的属性访问值了
+json_decod($json); //反编译json编码，将json编码转为PHP数组
+//服务器端返回json需要使用header()
+header("Content-Type: text/html;charset=utf-8");
+header("Cache-Control: no-cache");
+var obj={'name':'tirion','age':'26'} //最基本的json格式，通过obj.name访问
+var obj=[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}] //并列的多组json数据，通过obj[0].name或obj[1].name访问
+var obj={'people':[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}],'dog':{'name':'wangcai','age':'5'}} //混合的json格式；通过obj.people[0].name访问tirion，通过obj.dog.name访问wangcai
+//创建ajax对象，简化ajax的使用
+function Ajax(recvType){
+    var aj=new Object();
+    aj.recvType=recvType?recvType.toUpperCase():'HTML'
+    aj.targeUrl='';
+    aj.sendString='';
+    aj.createXMLHttpRequest=function(){
+    
+    }
+    aj.get=function(){
+    
+    }
+    aj.post=function(){
+    
+    }
+    return aj;
+}
+//自定义ajax对象简化ajax操作
+function Ajax(recvType){
+    var aj=new Object();
+    aj.recvType=recvType ? recvType.toUpperCase() : 'HTML' //HTML XML
+    aj.targetUrl='';
+    aj.sendString='';
+    aj.resultHandle=null;
+
+    aj.createXMLHttpRequest=function(){
+        var request=false;
+        
+        //window对象中有XMLHttpRequest存在就是非IE，包括（IE7，IE8）
+        if(window.XMLHttpRequest){
+            request=new XMLHttpRequest();
+
+            if(request.overrideMimeType){
+                request.overrideMimeType("text/xml");
+            }
+        
+
+        //window对象中有ActiveXObject属性存在就是IE
+        }else if(window.ActiveXObject){
+            
+            var versions=['Microsoft.XMLHTTP', 'MSXML.XMLHTTP', 'Msxml2.XMLHTTP.7.0','Msxml2.XMLHTTP.6.0','Msxml2.XMLHTTP.5.0', 'Msxml2.XMLHTTP.4.0', 'MSXML2.XMLHTTP.3.0', 'MSXML2.XMLHTTP'];
+
+            for(var i=0; i<versions.length; i++){
+                    try{
+                        request=new ActiveXObject(versions[i]);
+
+                        if(request){
+                            return request;
+                        }
+                    }catch(e){
+                        request=false;
+                    }
+            }
+        }
+        return request;
+    }
+
+    aj.XMLHttpRequest=aj.createXMLHttpRequest();
+
+    aj.processHandle=function(){
+        if(aj.XMLHttpRequest.readyState == 4){
+            if(aj.XMLHttpRequest.status == 200){
+                if(aj.recvType=="HTML")
+                    aj.resultHandle(aj.XMLHttpRequest.responseText);
+                else if(aj.recvType=="XML")
+                    aj.resultHandle(aj.XMLHttpRequest.responseXML);
+            }
+        }
+    }
+
+    aj.get=function(targetUrl, resultHandle){
+        aj.targetUrl=targetUrl; 
+        
+        if(resultHandle!=null){
+            aj.XMLHttpRequest.onreadystatechange=aj.processHandle;  
+            aj.resultHandle=resultHandle;   
+        }
+        if(window.XMLHttpRequest){
+            aj.XMLHttpRequest.open("get", aj.targetUrl);
+            aj.XMLHttpRequest.send(null);
+        }else{
+            aj.XMLHttpRequest.open("get", aj.targetUrl, true);
+            aj.XMLHttpRequest.send();
+        }
+        
+    }
+
+    aj.post=function(targetUrl, sendString, resultHandle){
+        aj.targetUrl=targetUrl;
+
+        if(typeof(sendString)=="object"){
+            var str="";
+            for(var pro in sendString){
+                str+=pro+"="+sendString[pro]+"&";   
+            }
+            aj.sendString=str.substr(0, str.length-1);
+        }else{
+            aj.sendString=sendString;
+        }
+
+        if(resultHandle!=null){
+            aj.XMLHttpRequest.onreadystatechange=aj.processHandle;  
+            aj.resultHandle=resultHandle;   
+        }
+
+        aj.XMLHttpRequest.open("post", targetUrl);
+        aj.XMLHttpRequest.setRequestHeader("Content-Type", "application/x-www-form-urlencoded");
+        aj.XMLHttpRequest.send(aj.sendString);
+        
+    }
+
+    return aj;
+}
+var ajax=Ajax();
+ajax.post("index.php",{name:zhangsan,age:20},function(data){}); //第一个参数指定传入的PHP文件，第二个参数设置传入的数据，第三个参数接收返回的数据
+ajax.get("index.php?name=zhangsan&age=20",function(data){}); //第一个参数指定传入的PHP文件和数据，第二个参数接收返回的数据
+
+
+
+//前端缓存技术：基于javascript传输的数据，只要浏览器没关，都保存在内存中
+//实现方法：创建一个数组，将需要缓存的数据保存在数组中，需要使用时调用即可；参加兄弟连PHP项目视频22第45分钟左右
+var cache=new Array(); //创建一个用于缓存的数组
+function setpage(index,data) {
+    if (!cache[index]) { //当缓存不存在时，则进行缓存
+        cache[index]=data;
+    }else { //缓存存在时，则读取缓存
+        xxx=cache[index];
+    }
+}
+
+
+
 //注意事项：
 var oUl1=document.getElementById('ul1');  //获取id必须通过document对象
 var olis=oUl1.getElementsByTagName('li');  //获取tag可以通过任意的DOM对象来查找，返回一个对象集
@@ -1113,9 +1300,36 @@ JS解析器：
 中间还有一些其它步骤，比如语法分析等不多做介绍
 
 不要在if或for循环里定义变量或函数，因为FF无法预解析，而别的浏览器可以
+<script>
+    for(var i=0;i<10;i++){
+        btn.onclick=function(){
+            alert(i);  //这里的i永远是10.因为onclick是在for循环执行完后生成的点击事件，而for循环执行完了i就变成了10，这个函数内访问i按照作用域链就是访问的外面的i，即10
+        }
+    }
+</script>
 
-for(var i=0;i<10;i++){
-    btn.onclick=function(){
-        alert(i);  //这里的i永远是10.因为onclick是在for循环执行完后生成的点击事件，而for循环执行完了i就变成了10，这个函数内访问i按照作用域链就是访问的外面的i，即10
+
+
+
+
+<!-- 移动端相关知识点 -->
+<!-- touch事件 -->
+<script>
+touchstart(mousedown)  touchmove(mousemove)  touchend(mouseup)
+oUl.ontouchstart=function(e){　　//手指按下事件；e是手指的集合对象
+    var touchs=e.changedTouches[0];  //不能直接通过e进行操作，需要先通过changedTouches[0]来获取一根手指对象；touchs才相当于PC上的e对象
+    var downX=touchs.pageX;  //通过touchs获取触摸位置距离浏览器左边缘的坐标
+    oUl.ontouchmove=function(e){  //手指移动事件
+        var touchs=e.changedTouches[0];
+        this.style.left=touchs.pageX-downX+"px";  //这里的pageX就是在手指滑动过程中不断计算出的值
+    }
+    oUl.ontouchend=function(){  //手指抬起事件
+        // this.ontouchstart=null;  不能清空touchstart，清空了oUl就没了touchstart事件了，就不能再次触发这些效果了
+        this.ontouchmove=null;  //清空touch事件
+        this.ontouchend=null;
     }
 }
+document.ontouchmove=function(e){
+    e.preventDefalt();  //阻止浏览器默认滑动事件，可以解决一些触控BUG。如横向滑动的时候触发浏览器纵向滑动，H5海报纵向滑动不能触发自己写的touchmove事件等
+}
+</script>
