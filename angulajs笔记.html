@@ -1,0 +1,1057 @@
+一切都从模块（module）开始：ng-app
+{{...}}  取值表达式，类似TP模版语法<{...}>
+AngularJS的MVC是借助$scope实现的
+
+controller:
+<div ng-controller='controller'></div>
+不要在controller里操作DOM，效率很低；不要做数据格式化，ng有很好用的表单控件；不要做数据过滤，ng有$filter服务；一般controller间不会互相调用，控制器间交互通过事件进行
+controller里通用的部分是service而不是使用一个父类controller
+
+
+
+<!-- 载入angular.js脚本 -->
+<script src="lib/angular/angular.js"></script>
+
+<!-- 引导AngularJS应用 -->
+<html lang="en" ng-app>  <!-- ng-app指令标记了AngularJS脚本的作用域，表明此标签内是AngularJS应用范围；此属性可应用于任何HTML标签 -->
+    AngularJS应用引导过程有3个重要点：
+    1、注入器(injector)将用于创建此应用程序的依赖注入(dependency injection)；
+    2、注入器将会创建根作用域作为我们应用模型的范围；
+    3、AngularJS将会链接根作用域中的DOM，从用ngApp标记的HTML标签开始，逐步处理DOM中指令和绑定。
+    一旦AngularJS应用引导完毕，它将继续侦听浏览器的HTML触发事件，如鼠标点击事件、按键事件、HTTP传入响应等改变DOM模型的事件。这类事件一旦发生，AngularJS将会自动检测变化，并作出相应的处理及更新。
+
+<!-- 双大括号绑定的表达式 -->
+Hello {{yourname || 'World'}}!  <!-- 这个绑定告诉AngularJS需要运算其中的表达式并将结果插入DOM中；表达式大部分情况与JS表达式相同 -->
+
+<!-- 使用ng-model绑定一个叫yourname的模型变量 -->
+Your name: <input type="text" ng-model="yourname" placeholder="World">
+Hello {{yourname || 'World'}}!  <!-- {{...}}是模版绑定表达式；将yourname模型变量添加到文本 -->
+*双向绑定：input输入框的任何更改会立即反映到模型变量ng-model="yourname"的yourname中（一个方向），模型变量yourname的任何更改都会立即反映到文本yourname中（另一方向）
+
+<!-- 控制器 -->
+ng-controller声明所有被它包含的元素都属于某个控制器
+<div ng-controller='MyController'>
+    <h1>Hello {{ clock }}</h1>
+</div>
+<script>
+// 实现控制器，以$开头的都是angular内置对象
+// $scope是内部数据模型对象，其中的属性可以被视图访问，也可以同控制器进行交互，上面的ng-model中直接绑定的变量就是绑定在这个上面的
+// $timeout是类似setTimeout()的实现
+function MyController($scope,$timeout){
+    var updateClock=function(){
+        $scope.clock=new Date();
+        $timeout(function(){
+            updateClock();
+        },1000);
+    }
+    updateClock();
+}
+</script>
+<!-- 改进 -->
+<div ng-controller='MyController'>
+    <h1>Hello {{ clock.now }}</h1>
+</div>
+<script>
+function MyController($scope){
+    $scope.clock={now:new Date()};  //使用对象的属性而非对象本身是最佳实践
+    var updateClock=function(){
+        $scope.clock.now=new Date();
+    }
+    setInterval(function(){
+        $scope.$apply(updateClock);  //需要这样调用来更新$scope数据模型对象，才能将新数据展示在视图层中
+    }, 1000)
+    updateClock();
+}
+</script>
+
+<!-- 模块 -->
+在AngularJS中，模块是定义应用的最主要方式。模块包含了主要的应用代码。一个应用可以包含多个模块，每一个模块都包含了定义具体功能的代码。
+<script>
+angular.module('myApp', []);  //声明模块：第一个参数是模块的名称；第二个是依赖列表，也就是可以被注入到模块中的对象列表
+angular.module('myApp');  //获取模块，返回一个模块对象，通过这个模块对象来创建应用
+</script>
+
+
+
+<!-- 作用域 -->
+$scope对象是定义应用业务逻辑、控制器方法和视图属性的地方。作用域是应用状态的基础。基于动态绑定，我们可以依赖视图在修改数据时立刻更新$scope，也可以依赖$scope在其发生变化时立刻重新渲染视图。
+作用域包含了渲染视图时所需的功能和数据，它是所有视图的唯一源头。可以将作用域理解成视图模型（view model）。
+AngularJS允许在$scope上设置包括对象在内的任何类型的数据，并且在视图中还可以展示对象的属性。
+将应用的业务逻辑都放在控制器中，而将相关的数据都放在控制器的作用域中，这是非常完美的架构。
+$rootScope是所有$scope对象的最上层，类似全局作用域，尽量不要在上面添加业务逻辑污染全局作用域
+<!-- 例1 -->
+<div ng-app="myApp"> <!-- 使用定义的模块 -->
+    <h1>Hello {{name}}</h1>  <!-- 视图中引用作用域的变量 -->
+</div>
+<script>
+    angular.module("myApp",[]);  //声明模块
+    var m=angular.module("myApp");  //引用模块
+    m.run(function($rootScope){  //创建应用
+        $rootScope.name="World";  //直接将变量挂载$rootScope上，但是这样做并不好
+    });
+    // angular.module("myApp",[]).run(function($rootScope){
+    //     $rootScope.name="World";
+    // });  等同上面
+</script>
+<!-- 例2 -->
+<div ng-app="myApp">
+    <div ng-controller="MyController">  <!-- 用控制器显式创建一个隔离的子$scope对象 -->
+        <h1>Hello {{name}}</h1>
+    </div>
+</div>
+<script>
+    //我们可以创建一个控制器来管理与其相关的变量，而不用将name变量直接放在$rootScope上
+    angular.module("myApp",[]).controller("MyController",function($scope){  //ng-controller指令为这个DOM元素创建了一个新的$scope对象，并将它嵌套在$rootScope中
+        $scope.name="Tirion";
+    });
+</script>
+在创建控制器或指令时， AngularJS会用$injector创建一个新的作用域，并在这个新建的控制器或指令运行时将作用域传递进去。
+
+<!-- ng-click -->
+<div ng-app="myApp">
+    <div ng-controller="MyController">
+        <button ng-click="add(1)">Add</button>  <!-- 使用ng-click绑定点击事件，值为要调用的$scope对象的方法 -->
+        <br>
+        <h4>Current count: {{counter}}</h4>
+    </div>
+</div>
+<script>
+    var app=angular.module("myApp",[]);  //创建模块
+    app.controller("MyController",function($scope){  //在模块中创建控制器
+        $scope.counter=0;  //添加counter在$scope作用域上并赋初值
+        $scope.add=function(amount){  //将add方法添加到这个控制器的$scope作用域上
+            $scope.counter+=amount;  //修改$scope的属性counter
+            //虽然在这个方法中可以操作DOM等，但是别这样，控制器只是视图和$scope之间的桥梁
+        }
+    });
+</script>
+
+<!-- 控制器嵌套 -->
+<div ng-app="myApp">
+    <div ng-controller="ParentController">
+        <div ng-controller="ChildController">  <!-- 嵌套的controller -->
+            <a ng-click="sayHello()">Say hello</a>
+        </div>
+        {{person}}  <!-- 显示JSON文本 -->
+    </div>
+</div>
+<script>
+    var app=angular.module("myApp",[]);
+    app.controller("ParentController",function($scope){
+        $scope.person={greeted:false};
+    });
+    app.controller("ChildController",function($scope){
+        $scope.sayHello=function(){
+            // 自控制器中对父控制器的$scope进行操作，也就是JS的作用域的实现
+            $scope.person.name="Ari Lerner";
+        }
+    });
+</script>
+
+
+
+<!-- 表达式 -->
+<!-- 手动解析表达式 -->
+AngularJS通过$parse这个内部服务来进行表达式的运算，这个服务能够访问当前所处的作用域
+<div ng-app="myApp">
+    <div ng-controller="MyController">
+        <input type="text" ng-model="expr" placeholder="Enter an experession">
+        <h2>{{parseValue}}</h2>
+    </div>
+</div>
+<script>
+    var app=angular.module("myApp",[]);  //angular.xxx也叫工具方法，具体查看工具方法相关内容
+    app.controller("MyController",function($scope,$parse){ //将$parse注入到控制器中；我们同时拥有访问$scope和$parse服务的权限
+        //调用$watch监控$scope的expr属性变化并执行自定义函数
+        $scope.$watch('expr',function(newVal,oldVal,scope){
+            if (newVal!==oldVal) {  //如果新的表达式不等于旧的表达式
+                var parseFun=$parse(newVal);  //解析新的表达式
+                $scope.parseValue=parseFun(scope);  //更新视图
+            }
+        });
+    });
+</script>
+<!-- 字符串插入 -->
+<div ng-app="myApp">
+    <div ng-controller="MyController">
+        <input type="email" ng-model="to" placeholder="Recipient">
+        <textarea ng-model="emailBody"></textarea>
+        <pre>{{previewText}}</pre>
+    </div>
+</div>
+<script>
+    var app=angular.module("myApp",[]);
+    app.controller("MyController",function($scope,$interpolate){  //注入$interpolate进行操作
+        $scope.$watch("emailBody",function(str){  //str的值为emailBody的内容
+            if (str) {
+                var template=$interpolate(str);
+                $scope.previewText=template({v:$scope.v});
+                // $scope.previewText=str;  这句和上句的效果一样
+            };
+        })
+    });
+</script>
+
+
+
+<!-- 表单验证 -->
+<input type="text" required />  required必填验证
+<input type="text" ng-minlength="5" />  ng-minlength最小长度验证
+<input type="text" ng-maxlength="20" />  ng-maxlength最大长度验证
+<input type="text" ng-pattern="[a-zA-Z]" />  ng-pattern正则表达式验证
+<input type="email" />  type="email"邮箱格式验证
+<input type="url" />  type="url"URL格式验证
+<input type="email" novalidate>  阻止验证。比如email输入框，当输入的不为email时，会有红框提示，加上novalidate就没有红框了
+<!-- 表单属性 -->
+通过name属性进行查找，需要和ng-model配合使用
+formName.inputFieldName.$pristine  判断用户是否修改了表单。未修改，值为true，如果修改过值为false
+formName.inputFieldName.$dirty  只要用户修改过表单，无论输入是否通过验证，该值都返回true
+formName.inputFieldName.$valid  如果当前表单内容是合法的，下面属性的值就是true
+formName.inputFieldName.$invalid  如果当前表单内容是不合法的，下面属性的值为true
+formName.inputfieldName.$error  包含当前表单的所有验证内容，以及它们是否合法的信息，如果验证失败，相应的验证内容为true；当多个验证失败的时候，只有第一个为true，所以只要有一个为true则验证失败
+<!-- CSS样式 -->
+AngularJS处理表单时，会根据表单当前的状态添加一些CSS类（例如当前是合法的、未发生变化的，等等），我们可以自定义这些类的样式。和上面的表单属性对应
+.ng-pristine {}
+.ng-dirty {}
+.ng-valid {}
+.ng-invalid {}
+#form1.ng-dirty{}  组合使用，可以实现不同表单有不同的样式
+<!-- 例 -->
+<form action="" name="signup_form">
+    <!-- 验证的数据记录在ng-model的变量中 -->
+    <input type="text"
+        placeholder="Name"
+        name="username"
+        ng-model="signup.name"
+        ng-minlength="3"
+        ng-maxlength="20"
+        ensure-unique="email" required />
+    <!-- 当表单的name="username"为dirty并且invalid时才显示 -->
+    <div class="error" ng-show="signup_form.username.$dirty && signup_form.username.$invalid">
+        <!-- 当没有填写时显示 -->
+        <small class="error" ng-show="signup_form.username.$error.required">Your name is required.</small>
+        <!-- 当minlength验证失败时则显示 -->
+        <small class="error" ng-show="signup_form.username.$error.minlength">Your name is required to be at least 3 characters</small>
+        <!-- 当maxlength验证失败时则显示 -->
+        <small class="error" ng-show="signup_form.username.$error.maxlength">Your name cannot be longer than 20 characters</small>
+    </div>
+    <button type="submit" ng-disabled="signup_form.$invalid">Submit</button>  ng-disabled来判断是否启用按钮
+</form>
+<!-- ngMessages -->
+通过1.3新增的ngMessages可以简化表单验证
+<script>
+var app=angular.module("myApp",["ngMessages"]);  //创建模块时通过第二个参数注入需要依赖的模块
+</script>
+HTML片段：
+<form name="signup_form" novalidate ng-submit="signupForm()" ng-controller="signupController">
+    <label>Your name</label>
+    <input type="text" placeholder="Name" name="name" ng-model="signup.name" ng-minlength=3 ng-maxlength=20 required />
+    <!-- 使用ng-messages替代了ng-show；通常情况一次只能显示一条提示信息，加上ng-messages-multiple可多条显示 -->
+    <div class="error" ng-messages="signup_form.name.$error" ng-messages-multiple>  当$error中某个验证信息为true时，对应的显示
+        <!-- 这里的ng-message与上面的ng-show相比也得到了简化 -->
+        <div ng-message="required">Make sure you enter your name</div>  required为true时显示
+        <div ng-message="minlength">Your name must be at least 3 characters</div>  minlength为true时显示
+        <div ng-message="maxlength">Your name cannot be longer than 20 characters</div>  maxlength为true时显示
+    </div>
+    <button type="submit">Submit</button>
+</form>
+<!-- 将上面的三条错误提示信息保存为一个单独的html文件，通过ng-messages-include实现，可以更好的复用 -->
+<div class='error' ng-messages="signup_form.name.$error" ng-messages-include="templates/errors.html"></div>
+<!-- 自定义指令 -->
+<script>
+angular.module('myApp', [])
+.directive('ensureUnique', ['$http', function($http) {  //directive()创建指令，详情查看指令部分
+  return {
+    require: 'ngModel',
+    link: function(scope, ele, attrs, c) {
+      scope.$watch(attrs.ngModel, function() {
+        $http({
+          method: 'POST',
+          url: '/api/check/' + attrs.ensureUnique,
+          data: {'field': attrs.ensureUnique}
+        }).success(function(data, status, headers, cfg) {
+          c.$setValidity('unique', data.isUnique);
+        }).error(function(data, status, headers, cfg) {
+          c.$setValidity('unique', false);
+        });
+      });
+    }
+  };
+}]);
+</script>
+
+
+
+
+
+
+
+
+
+
+<!-- 依赖注入和作用域 -->
+<div ng-app="myApp">
+    <div ng-controller="c1">{{name}}</div>
+    <div ng-controller="c2">{{age}}</div>
+</div>
+<script>
+    var app=angular.module("myApp",[]);
+    //在controller中注入$scope和$rootScope两个依赖(也叫服务，都以$开头)
+    app.controller("c1",function($scope,$rootScope){
+        $scope.name="Tirion";  //使用$scope给局部作用域的变量赋值
+        $rootScope.age="28";  //使用$rootScope给全局作用域的变量赋值
+    });
+    app.controller("c2",function(){});  //虽然c2中并没有给age赋值，但age会像JS的变量一样跟着作用域链网上查找，找到$rootScope的age
+</script>
+
+
+
+<!-- 指令 -->
+在HTML标签属性中，以ng-开头的属性就是指令，用来完成特定功能
+ng-app：创建模块，定义angularJS应用范围
+<div ng-app="myApp"></div>
+<script>
+    var app=angular.module("myApp",[]);  //第一个参数是模块的名称；第二个参数是要依赖的其它的模块
+</script>
+*注：一个HTML中有多个ng-app，只会解析第一个；要想有多个，只能通过angular.bootstrap()进行动态初始化模块
+
+ng-controller：定义控制器，将数据与视图连接
+<div ng-controller="ctl">{{name}}</div>  在HTML中使用了ng-controller，JS里就必须对它进行实现，否则报错
+<script>
+    app.controller("ctl",function($scope){  //函数的参数是依赖的服务
+        $scope.name="Tirion";
+    });
+</script>
+*注：这样写有个代码压缩的问题，$scope会被压缩为$s这样，导致依赖注入出现问题，因此改用下面的写法
+<script>
+    app.controller("ctl",["$scope",function($s){  //第二个参数改为数组的形式，前面的元素为要注入的服务，最后一个为执行的函数，函数接收的参数与前面注入的服务一一对应，这里$s就是$scope，可以看到即使压缩为了$s也能正常运行
+        $s.name="Tirion";  //当然这里的$s就要对应参数里的$s
+    }]);
+</script>
+
+ng-model：定义模型（数据），实现双向数据绑定，主要用在input标签中
+<input type="text" ng-model="name">  通过ng-model绑定了一个名为name的数据，如果这个ng-model在某个controller中，name就挂载在对应的$scope下；如果直属ng-app下，那就挂载在$rootScope下
+<p>{{name}}</p>
+*MVVM：在input中输入数据是修改视图V，而这时ng-model绑定的name数据也会发生变化，name数据变化会导致下面的{{name}}变化，这就形成了双向数据绑定
+ng-model-options：对ng-model进行配置
+<input type="text" ng-model="name" ng-model-options="{updateOn:'blur'}">  不实时更新数据，当失去焦点的时候才更新
+
+ng-repeat：遍历数组集合
+<div ng-controller="c">
+    <ul>
+        <!-- dataList是$scope中的数据变量，data是自定义变量，每次遍历后得到的数据 -->
+        <li ng-repeat="data in dataList">{{data}} {{$index}} {{$first}} {{$last}} {{$middle}} {{$even}} {{$odd}}</li>  <!-- 会自动生成5个li；$index得到每项的索引号；$first第一项为true，其余的为false；$last,$middle,$even,$odd同理； -->
+        <li ng-repeat="data in dataList" class={{$even ? "active" : ""}}>{{data}}</li>  <!-- 在class中使用表达式，当为奇数行的时候则class="active"，给active设置样式实现隔行换色 -->
+    </ul>
+    <!-- 当要循环展示的数据模版不是包含关系的时候，需要使用ng-repeat-start和ng-repeat-end实现 -->
+    <div ng-repeat-start="data in dataList">{{data}}</div>
+    <p>{{data}}</p>
+    <div ng-repeat-end>{{data}}</div>  <!-- 一次遍历就是这三个为一组了 -->
+</div>
+<script>
+    app.controller("c",["$scope",function($scope){
+        $scope.dataList=["a","b","c","d","e"];
+    }]);
+</script>
+
+<!-- 事件指令 -->
+ng-click：点击指定；点击后会将值里的内容作为JS代码运行
+<div ng-controller="c" ng-click="name='hi'">{{name}}</div>  直接修改$scope下的name变量的值
+<div ng-controller="c" ng-click="show()'">{{name}}</div>  调用$scope下的show方法
+<script>
+    app.controller("c",function($scope){
+        $scope.show=function(){  //创建show方法，挂载$scope下
+            $scope.name="hi";
+        }
+    });
+</script>
+*原生事件如mouseover,focus等通常都有对应的ng-mouseover,ng-focus这样的angularJS指令
+
+ng-selected：当值为true时，则对应的选项被选中
+<input type="checkbox" ng-model="a">  当勾选了这个复选框时，ng-model里的数据变量a会被设置为true
+<select>
+    <option value="1">1</option>
+    <option value="2" ng-selected="a">2</option>  当a被设置为true时，下拉框中的这一项被选中
+</select>
+
+ng-change：输入框中的数据改变时触发，需要和ng-model配合使用
+<input type="text" ng-change="a='hello'" ng-model="a">{{a}}  当在input输入框输入任何数据的时候，都会把a设置为hello
+
+ng-copy ng-cut ng-paste：在输入框中复制，剪切，粘贴时触发
+<input type="text" ng-copy="a='copy'">{{a}}  当在input输入框中按ctrl+c复制内容的时候，就会将a赋值为copy
+<input type="text" ng-cut="b='cut'">{{b}}  当在input输入框中按ctrl+x剪切内容的时候，就会将b赋值为cut
+<input type="text" ng-paste="c='paste'">{{c}}  当在input输入框中按ctrl+v粘贴内容的时候，就会将c赋值为paste
+
+ng-disabled：为true时禁用状态，false时启用状态
+<input type="button" value={{text}} ng-disabled="isDisabled">
+<script>
+    app.controller("c",["$scope","$interval",function($scope,$interval){
+        var iNow=5;
+        $scope.text=iNow+"秒";
+        $scope.isDisabled=true;  //初始化为true，禁用状态
+        var t=$interval(function(){
+            iNow--;
+            $scope.text=iNow+"秒";
+            if (iNow===0) {
+                $interval.cancel(t);  //清除定时器，$timeout.cancel()同理
+                $scope.text="提交";
+                $scope.isDisabled=false;  //启用按钮
+            }
+        },1000);
+    }]);
+</script>
+
+ng-readonly：用于文本框元素的可编辑状态，true为不能编辑，false为可编辑（不是禁用，能获得焦点，但是不能修改）
+<input type="text" value={{text}} ng-readonly="isDisabled">
+
+ng-checked：选框选中状态：true为选中，false为不选中
+<input type="checkbox" value={{text}} ng-checked="isDisabled">
+
+ng-value：类似value属性，但是由于是一个指令，值就不需要{{}}了。当未解析的时候显示为空，而不是{{text}}这样的文本
+<input type="checkbox" ng-value="text" ng-checked="isDisabled">
+
+ng-bind：绑定数据，用于优化用户体验。不会在尚未解析的时候显示{{text}}这样的表达式语法
+<div>{{text}}</div>  这是老式写法，当网络问题等未解析到这里的时候就会原生输出{{text}}
+<div ng-bind="text"></div>  将text绑定到ng-bind中，当未解析到的时候会显示空，用户体验更好
+
+ng-bind-template：可绑定多个表达式的ng-bind
+<div>{{text1}},{{text2}}</div>
+<div ng-bind-template="{{text1}},{{text2}}"></div>
+
+ng-bind-html：解析数据模型的HTML标签，需要angular-sanitize模块支持，可从github下载
+<div ng-bind-html="text"></div>
+<script>
+    var m=angular.module("myApp",['ngSanitize']);  //引入模块
+    m.controller('c',["$scope",function($scope){
+        $scope.text="<h1>hello</h1>";
+    }]);
+</script>
+
+ng-cloak：表达式解析完才显示，也是同ng-bind一样用于提升用户体验
+<div ng-cloak>{{text}}</div>  当没解析的时候，div的display为none，解析后为block显示
+
+ng-non-bindable：不让表达式解析
+<div ng-non-bindable>{{text}}</div>  直接输出{{text}}
+
+<!-- 样式指令：优化用户体验，未解析的时候为空 -->
+ng-class：添加class样式
+<div ng-class="{active:true,back:true}">hello</div>  添加名为active和back的class，多个class用逗号分割
+
+ng-style：添加行内样式
+<div ng-style="{color:'red',background:'blue'}">{{text}}</div>
+<div ng-style="{{style}}">{{text}}</div>  将样式作为数据挂载到$scope下
+$scope.style="{color:'red',background:'blue'}";
+
+ng-href，ng-src：添加链接地址
+
+ng-attr-suffix：通用写法
+<div ng-attr-href="xxx" ng-attr-title="xxx">{{text}}</div>
+
+<!-- DOM相关指令 -->
+ng-show,ng-hide：DOM元素显示隐藏，添加display:hide
+<div ng-show="false">{{text}}</div>  隐藏
+<div ng-hide="btn">{{text}}</div>  与ng-show相反；数据都可以通过$scope来设置
+$scope.btn=true;  可以通过修改btn的值来显示或隐藏
+
+ng-if：也是显示隐藏，但是不是通过CSS样式操作，是判断后确定DOM元素是否存在
+<div ng-if="btn">{{text}}</div>
+$scope.btn=false;  DOM节点不会在HTML中存在
+
+ng-switch：根据switch条件显示隐藏
+<div ng-switch on="btn">  on是switch接收的值
+    <p ng-switch-when="true">btn为true时显示</p>  when是case值
+    <p ng-switch-when="false">btn为false时显示</p>
+    <p ng-switch-when="abc">btn为abc时显示</p>
+    <p ng-switch-default>以上都不是显示</p>  default就是default
+</div>
+$scope.btn="abc";
+
+ng-open：控制details标签的开关
+
+ng-init：初始化数据
+<div ng-init="text='hello'">{{text}}</div>  等同于在controller里通过$scope.text="hello"初始化
+
+ng-include：将模版文件引入到标签内部
+<div ng-include="'test.html'"></div>  div里面就是test.html的内容
+
+<!-- 标签指令 -->
+在angularJS作用范围中的这些标与作用范围以外的会有所区别
+<a href="">a</a>  a标签会阻止默认行为
+
+ng-options：用于自动生成下拉列表，需配合ng-model使用
+<select ng-options="color.name for color in colors" ng-model="myColor">
+    里面会自动生成option标签，选中的数据会赋值给myColor
+</select>
+<a href="">{{myColor.name}}</a>  选中不同的下拉列表，这里也会动态变化
+<script>
+    $scope.colors=[{name:"red"},{name:"green"},{name:"blue"}];
+</script>
+
+<!-- 自定义指令1 -->
+<hello>{{name}}</hello>  E指令
+<div hello>{{name}}</div>  A指令
+<script>
+// 使用directive自定义指令，接收指令名和回调函数，返回一个对象；指令名xx-xx需要写成驼峰法xxXx
+app.directive('hello',function(){
+    return {
+        restrict:"EA",  //定义指令的方式，有四种：E(标签指令，创建<hello></hello>标签，通常用于模版替换)；A(属性指令，<p hello></p>，通常用于功能实现)；C(class指令，<p class="hello"></p>)；M(注释指令<!-- directive:hello -->需要replace:true支持)；区分大小写，可以多个同时使用，如EA，通常使用前两种
+        template:"<div>hello angular</div>",  //模版，内容会添加到指令所在标签内部
+        templateUrl:"temp.html",  //引入外部模版，和template二选一
+        scope:true,  //可选，独立作用域，同一个自定义指令在页面中使用多次时，作用域$scope默认是共用的，设置为true才为独立的
+    };  //需要返回一个对象
+});
+</script>
+<!-- 自定义指令2 -->
+<div ng-controller="c">
+    <my-tab my-id="div1" my-name="name" my-fn="show(num)"></my-tab>  这里的my-id,my-name,my-fn类似传参
+    <my-tab my-id="div2"></my-tab>  在JS中指令名要改为驼峰式myTab，通常xx-xx在JS中都会变为xxXx表示
+</div>
+<script>
+app.controller("c",["$scope",function($scope){
+    $scope.name="miaov";
+    $scope.show=function(n){
+        alert(n);
+    }
+}]);
+app.directive("myTab",function(){
+    return{
+        restrict:"E",
+        template:"<div id='{{mid}}'>\
+                    abc,{{mname}}\
+                    <button ng-click='mfn({num:456})'>button</button>\
+                    </div>",
+        replace:true,  //可选，true时模版不是插入到指令所在标签内部，而是将模版直接替换指令所在标签
+        scope:{  //可选，隔离作用域，不会访问到其它作用域，比如外层controller的以及$rootScope的
+            mid:"@myId",  //绑定策略@(字符串绑定)：解析后template中的mid会解析为myId(my-id)的值div1和div2，这样就不会出现多次使用出现id相同的情况了，当然不仅只用在id属性上
+            mname:"=myName",  //绑定策略=(父级变量绑定)：解析后template中的mname会解析为myName(my-name)的值name对应的父级作用域变量值miaov。注意，不能得到下面的controller中定义的name值
+            mfn:"&myFn"  //绑定策略&(父级函数绑定)：解析后template中的mfn()会调用myFn(my-fn)的值show()对应的父级作用域中的show()函数
+        },
+        controller:['$scope',function($scope){  //定义自定义指令的控制器，当使用隔离作用域时通过这个来创建数据等。这里的数据同一指令是共享的
+            $scope.name="Tirion";
+        }],
+        link:function(scope,element,attr){  //DOM操作。接收三个参数：scope作用域；element为template中的第一级DOM对象；attr为这个DOM对象的所有属性
+            element.css({"width":"500px","background":"red"});  //操作DOM，内置了JQLite，也可以引入JQ用JQ的方法操作
+        },
+    };
+});
+</script>
+<!-- 自定义指令3 -->
+<hello>
+    <hi></hi>  HTML中有两个自定义指令hello和hi，并且hi嵌套在hello里
+</hello>
+<script>
+app.directive("hello",function(){
+    return {
+        restrict:"E",
+        replace:true,
+        transclude:true,  //开启指令嵌套，默认为false。这样在模版替换的时候，template中有ng-transclude指令的标签，就会替换成嵌套的指令hi的template的内容
+        template:'<div>hello <span ng-transclude><span> </div>',  //注意这里span中有ng-transclude指令
+        controller:function($scope){
+            this.name="miaov";  //数据要想和别的指令共用，则挂载到this上，而不是$scope上
+        }
+    };
+});
+app.directive("hi",function(){
+    return {
+        restrict:"E",
+        replace:true,
+        template:'<div>hi</div>',
+        require:"?^hello",  //使用require引入其它指令。三种模式：当引入的指令与自身指令在同一元素上时(hello)；当引入的指令在自身指令所在元素的父级元素上时(^hello)；当引入的指令有可能不存在时可以进行错误抑制(?hello)，为了安全通常会加上?
+        link:function(scope,element,attr,reController){  //第四个参数就是引入指令的controller，通过它可以获取引入指令的数据等
+            console.log(reController.name);  //获取引入指令的数据，得到miaov
+        }
+    };
+});
+</script>
+
+
+
+<!-- 服务 -->
+$scope：局部作用域；每个控制器都有其独自的局部作用域$scope
+
+$rootScope：全局作用域；直接在模块下，不在控制器内的最顶层作用域，当然所有控制器能通过作用域链找到$rootScope
+
+$timeout：定时器，类似JS的setTimeout功能。但在angular中通过setTimeout修改模型数据后视图层的数据不会更新，只能通过angular自己的$timeout来完成
+<script>
+    app.controller("c",function($scope,$timeout){  //注入$timeout服务
+        $scope.name="Tirion";
+        $timeout(function(){  //使用$timeout才能更新视图；setTimeout能修改数据，但是视图不会更新
+            $scope.name="He";
+        },1000);
+    });
+</script>
+
+$watch：挂载在$scope下，监听数据的变化，当数据发生变化时就会执行里面的方法。
+$scope.$watch("监听的数据",执行的回调函数fn,[布尔值]); 
+    1、监听的数据可以是具体的数据变量iphone.num，也可以是数据对象iphone，也可以是会return一个结果的函数
+    2、回调函数fn(newVal,oldVal)可接收两个参数，变化后的数据和变化前的数据
+    3、当监听的数据为对象时，则要设置为true进行深度监听里面每个变量的变化
+<div ng-app="myApp" ng-controller="c">
+    <p>价格：<input type="text" ng-model="iphone.money"></p>
+    <p>个数：<input type="text" ng-model="iphone.num"></p>
+    <p>金额：<span>{{sum()|currency:"￥"}}</span></p>
+    <p>运费：<span>{{iphone.fre|currency:"￥"}}</span></p>
+    <p>总额：<span>{{sum()+iphone.fre|currency:"￥"}}</span></p>
+</div>
+<script>
+    var app=angular.module("myApp",[]);
+    app.controller("c",function($scope){
+        $scope.iphone={"money":5000,"num":1,"fre":10};
+        $scope.sum=function(){
+            return $scope.iphone.money*$scope.iphone.num;
+        }
+        $scope.$watch("iphone",function(newVal,oldVal){  //可以监听iphone.num|iphone|$scope.sum
+            console.log(newVal);
+            console.log(oldVal);
+        },true);
+        $scope.$watch($scope.sum,function(newVal,oldVal){  //监听sum函数返回的总价
+            $scope.iphone.fre=(newVal>=10000?0:10);  //当总价>=10000时，则免运费
+        });
+    });
+</script>
+
+$apply：挂载在$scope下；用于监听数据改变并更新视图层
+$scope.$apply(fn);  接收一个函数，这个函数中对数据的修改会影响到视图的改变
+<script>
+    setTimeout(function(){  //通常setTimeout里修改数据，视图是不会变化的
+        $scope.$apply(function(){  //但使用了$apply就能实现和$timeout一样的视图变化了；$timeout等内部实现也是通过$apply
+            $scope.name="hi";
+        });
+    }, 1000);
+</script>
+
+$filter：过滤器，详见过滤器相关笔记
+
+$http：类似JQ的AJAX操作
+<script>
+app.controller("c",["$scope","$http",function($scope,$http){
+    $http({  //AJAX操作
+        method:"GET",  //请求模式
+        url:test.php,  //请求文件
+    }).success(function(data,[state,headers,config]){  //链式调用，返回服务器发送的数据
+        console.log(data);
+    }).error(function(data){  //请求错误执行内容，不是必须的
+        console.log(data);
+    });
+    $http.get("test.php").success(function(data){  //直接调用get进行请求，简化操作，POST同理
+        console.log(data);
+    });
+    // 使用JSONP获取百度搜索提示信息
+    $http({
+        method:"JSONP",  //使用JSONP
+        url:"https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd="+name+"&cb=JSON_CALLBACK"  //注意这里最后需要使用JSON_CALLBACK才能得到数据，这是angular的要求，不是只针对百度的。wd是搜索的内容
+    }).success(function(data){
+        $scope.data=data.s;  //需要的数据内容在.s中，是一个数组
+    });
+}]);
+</script>
+
+$location：对网址信息location对象的封装\
+<script>
+app.controller('c',['$scope','$location',function($scope,$location){
+    $location.absUrl();  //当前页面的完整网址，和浏览器URL地址中一样(地址中有需要编码的字符会进行编码)
+    $location.path('first/second');  //路由相关，设置路径，地址会变成xxx.xxx.xxx#/first/second。并且会进入历史管理中
+    $location.path('first/second').replace();  //使用了replace则不会加入历史管理中
+    $location.path();  //不传参则是获取路径
+    $location.hash('hello');  //设置hash值，得到xxx.xxx.xxx#hello这样的地址；不传参则是获取
+    $location.search({'age':'20'});  //GET传参，得到xxx.xxx.xxx?age=20；不传参则是获取
+    $location.url();  //获取当前网址所在地址之后的所有参数内容
+    $location.host();  //获取主机名
+    $location.port();  //获取端口
+    $location.protocol();  //获取协议
+}]);
+</script>
+
+$anchorScroll：锚点跳转服务，配合hash()使用
+<div id="parent" ng-controller='c'>
+    <ul>
+        <li ng-repeat='id in [1,2,3,4,5]' ng-click='change("div"+id)'>{{id}}++++++++++</li>  点击li跳转到对应id的div位置
+    </ul>
+    <div ng-repeat='id in [1,2,3,4,5]' ng-attr-id='div{{id}}' style="width:300px;height:500px;border:1px solid black">{{id}}</div>
+</div>
+<script>
+app.controller('c',['$scope','$location','$anchorScroll',function($scope,$location,$anchorScroll){
+    $scope.change=function(id){
+        $location.hash(id);  //修改hash值，因为引入了$anchorScroll服务，就会自动跳到对应位置了
+        $anchorScroll();  //当连续两次跳转的锚点为同一个时，只用上面第二次点击是不会跳转的，所以加上这句手动触发跳转
+    }
+}]);
+</script>
+
+$cacheFactory：缓存操作
+<script>
+app.controller('c',['$scope','$cacheFactory',function($scope,$cacheFactory){
+    var cache=$cacheFactory('myCache');
+    cache.put('name','hello');  //设置缓存信息
+    cache.get('name');  //获取缓存内容
+    cache.remove('name');  //移除缓存内容
+    cache.info();  //得到缓存相关信息
+}]);
+</script>
+
+$interpolate：插值服务，能解析输入内容中的模版语法（{{bodyName}}）
+<input type="text" ng-model='name'>
+<textarea ng-model='body'></textarea>
+<p>{{showText}}</p>
+<script>
+app.controller('c',['$scope','$interpolate',function($scope,$interpolate){
+    $scope.$watch('body',function(newBody){
+        if(newBody){
+            var temp=$interpolate(newBody);  //将textarea的数据交给插值服务
+            $scope.showText=temp({bodyName:$scope.name});  //在textarea中输入{{bodyName}}模版语法的时候，就会替换成$scope.name的值
+        }
+    });
+}]);
+</script>
+
+$q：promise的实现，类似JQ的defer延迟对象，对异步操作功能的扩展
+<script>
+app.controller('c',['$scope','$q',function($scope,$q){
+    var df=$q.defer();  //创建延迟对象
+    function show(){  //定义一个函数，这个函数内有个延迟执行的定时器
+        setTimeout(function(){
+            if(true){
+                df.resolve();  //当这个定时器成功执行的时候调用resolve()
+            }else{
+                df.reject();  //当这个定时器执行失败的时候调用reject()
+            }
+        },2000);
+        return df.promise;  //需要返回一个promise对象
+    }
+    show().then(function(){  //通过返回的promise对象调用then()方法，接收两个函数
+        console.log("成功");  //第一个函数是延迟执行成功后，也就是resolve()，会执行这里的内容
+    },function(){
+        console.log("失败");  //第二个函数是延迟执行失败会执行的内容
+    });
+}]);
+</script>
+
+<!-- angularJS的供应商 -->
+作用是对angularJS的服务进行配置
+<script>
+// 供应商的名字就是服务的名字+Provider，就是这个服务对应的供应商
+app.config(['$interpolateProvider','$anchorScrollProvider',function($interpolateProvider,$anchorScrollProvider){
+    $interpolateProvider.startSymbol('@@');  //这里就对模版语法进行配置
+    $interpolateProvider.endSymbol('@@');  //{{name}}变为了@@name@@
+    $anchorScrollProvider.disableAutoScrolling();  //关闭$anchorScroll的锚点自动跳转，要跳转就必须通过手动调用$anchorScroll()
+}]);
+</script>
+
+<!-- 自定义服务1:factory -->
+factory不能使用供应商config进行配置，而provider可以对这方面进行定义；factory只是简化了provider，内部也会调用provider
+<script>
+// 使用factory自定义服务，参数和别的自定义差不多，第二个参数也可以是数组形式
+app.factory('myRandNum',function(){
+    return function(num1,num2){  //return一个对象、函数、数组等
+        return Math.random()*(num2-num1)+num1;
+    }
+});
+// 在控制器中使用自定义服务
+app.controller('c',['$scope','myRandNum',function($scope,myService){
+    console.log(myRandNum(2,5));
+}]);
+</script>
+<!-- 自定义服务2:provider -->
+<script>
+app.provider('myService',function(){
+    return {  //比factory多一层return和$get
+        $get:function(){  //将要return的对象、函数、数组写在$get的函数中
+            return {
+                name:this.name,
+                show:function(){
+                    return this.name+':angular';
+                }
+            }
+        },
+        name:'hello'  //除开$get的就是可以通过供应商来配置的
+    }
+});
+app.config(['myServiceProvider',function(myServicProvider){
+    console.log(myServicProvider);  //输出的就是provider中第一个return的对象
+    myServicProvider.name='hi';  //所以修改对象的属性就能影响到provider的$get里return的内容，达到配置的效果
+}]);
+app.controller('c',['myService',function(myService){
+    console.log(myService.show());  //没进行配置就是hello:angular，配置后就是hi:angular
+}]);
+</script>
+
+
+
+
+<!-- 工具方法 -->
+var m=angular.module();  创建模块，返回一个模块对象，这个对象下有很多实用方法
+m.controller();  模块中创建控制器
+m.run();  无需创建控制器直接运行；可用来初始化全局数据
+<div>{{name}}</div>  这里没有使用ng-controller创建控制器
+<script>
+    m.run(["$rootScope",function($rootScope){  //接收一个数组，前面是服务，最后一个是执行的函数
+        $rootScope.name="Tirion";  //没有了控制器也就只能挂载在全局的$rootScope下
+    }]);
+</script>
+m.filter();  自定义过滤器，详情查看过滤器相关笔记
+m.directive();  自定义指令，详情查看指令相关笔记
+
+angular.bind();  修改this指向
+<script>
+function show(a,b){
+    alert(a+b);
+    alert(this);  //本来this是指向window的
+}
+var show2=angular.bind(document,show);  //将this改为指向document，返回一个修改了this指向的函数
+show2(1,2);
+</script>
+
+angular.copy();  拷贝对象
+<script>
+    var a={"name":"hello"};
+    var b={"age":20};
+    var c=angular.copy(a);  //c的内容和a的一样
+    c=angular.copy(a,b);  //c和b的内容都和a一样
+    console.log(c);  //console.log可以看到对象的内容，alert只能看到是个object
+</script>
+
+angular.extend();  对象继承
+<script>
+    var a={"name":"hello"};
+    var b={"age":20};
+    c=angular.extend(a,b);  //a会继承b，c和a一样
+    console.log(c);
+</script>
+
+angular.isXxx();  类型判断
+<script>
+    var a=[];
+    angular.isArray(a);
+    angular.isDate();
+    angular.isDefined();
+    angular.isUndefined();
+    angular.isFunction();
+    angular.isNumber();
+    angular.isObject();
+    angular.isString();
+    angular.isElement(document.body);  //支持jquery的DOM对象
+</script>
+
+angular.equals();  判断是否相等
+<script>
+    var a=1;
+    var b=1;
+    angular.equals(a,b);  //两个元素相同的数组，两个NaN也会返回true
+</script>
+
+angular.forEach();  遍历数组或对象，类似jQuery的each()
+<script>
+    var a=["a","b","c"];
+    var r=[];
+    angular.forEach(a,function(v,i){
+        console.log(v);
+        console.log(i);
+        this.push(v+i);  //这里的this就是r，通过往里面push内容得到需要的结果
+    },r);  //第三个参数为可选，用来构造新数组
+    console.log(r)
+</script>
+
+angular.fromJson/toJson();  解析JSON和转化为JSON，类似JSON.parse()和JSON.stringify()
+<script>
+    var s='{"name":"Tirion","age":"28"}';
+    // var s="{'name':'Tirion','age':'28'}";  不能是外面双引号里面单引号
+    var j=angular.fromJson(s);  //将字符串转换为JSON对象
+    console.log(j);
+    var s2=angular.toJson(j,true);  //将JSON对象转换为字符串，第二个参数为可选，对JSON字符串进行格式化
+    console.log(s2);
+</script>
+
+angular.lowercase/uppercase();  大小写转换
+<script>
+    angular.lowercase("HELLO");
+    angular.uppercase("hello");
+</script>
+
+angular.element();  实现了jQuery的部分方法，jqLite（连选择器都没实现，还是引入JQ来操作DOM更好，不冲突）
+<div id="div1">123</div>
+<script>
+    var div=document.getElementById('div1');
+    angular.element(div).css("background","red");  //实现了部分JQ的方法，比如css(),find()等
+</script>
+
+angular.bootstrap();  动态初始化，HTML中可以没有ng-app指令，而通过这个来动态添加ng-app
+<div id="div">...</div>  不需要ng-app="myApp"了
+<div id="div2">...</div>
+<script>
+    var oDiv=document.getElementById("div");
+    var oDiv2=document.getElementById("div2");
+    document.onclick=function(){
+        angular.bootstrap(oDiv,["myApp"]);  //在div上添加了一个ng-app="myApp"；第一个参数是DOM元素，第二个参数是模块名
+        angular.bootstrap(oDiv2,["myApp2"]);  //一个HTML中，通过ng-app初始化只有第一个有效，但动态初始化就能多个有效
+    }
+</script>
+
+angular.injector();  注射器，实现依赖注入，主要是angularJS内部源代码中使用
+
+
+
+<!-- 过滤器 -->
+<!-- HTML模版过滤 -->
+在HTML中的模板绑定符号{{ }}内通过|符号来调用过滤器，过滤器通过:传参，多个参数使用多个:；{{数据|过滤器:参数1:参数2...}}
+<!-- 内置过滤函数 -->
+<!-- uppercase -->
+{{ name | uppercase }}  将字符串转换成大写
+<!-- lowercase -->
+{{ name | lowercase }}  将字符串转换成小写
+<!-- number -->
+{{ 123.456789 | number:2 }}  格式化数字，会在千分位加,这样，参数为保留小数位数，默认为3位，四舍五入
+<!-- currency -->
+{{ 123.455789 | currency:'￥' }}  格式化为货币，默认为$符，保留两位小数
+<!-- date -->
+{{ today | date:'short' }}  日期格式化，today为unix时间戳，也可用new Date()生成，有很多种参数用来格式化
+<!-- JSON过滤器 -->
+{{ {"name":"Ari","City":"Chengdu"} | json }}  将JSON或JS对象转换成字符串，放在pre标签内会格式化为多行，调试用
+<!-- limitTo -->
+{{ This girl is sexy | limitTo:3 }}  字符串截取；这里返回Thi
+{{ ['a','b','c','d','e','f'] | limitTo:2 }}  数组截取；这里返回["a","b"]
+<!-- orderBy -->
+对数组进行排序，可接收两个参数，第一个是必须的，第二个是可选的。第一个参数可以是字符串、数组或函数；第二个参数控制是否倒序，true则降序排序
+{{ [{
+    'name': 'Ari',
+    'status': 'awake'
+    },{
+    'name': 'Q',
+    'status': 'sleeping'
+    },{
+    'name': 'Nate',
+    'status': 'awake'
+}] | orderBy:'name' }}  将根据name进行排序：Ari,Nate,Q
+<!-- filter数组过滤器 -->
+对一个数组使用字符串、对象或函数进行过滤，返回过滤后的新数组；过滤默认为包含关系，第二个参数为true时则为全等关系
+    <!-- 字符串过滤 -->
+{{ ["Ari","Lerner","Likes","To"] | filter:"e" }}  返回包含e字符串的元素的数组["Learner","Likes"]
+{{ ["Ari","Lerner","Likes","To"] | filter:"e":true }}
+    <!-- 对对象数组使用对象进行过滤 -->
+{{ [{"name":"Ari","City":"Chengdu","food":"Pizza"},{"name":"Tiron","City":"Zigong","food":"Meat"}] | filter:{"food":"M"} }}  返回[{"name":"Tiron","City":"Zigong","food":"Meat"}]
+    <!-- 函数过滤 -->
+{{ ["Ari","likes","To"] | filter:isCapitalized }}
+<script>
+    $scope.isCapitalized=function(str){  //写在controller中
+        return str[0]==str[0].toUpperCase();  //返回一个布尔值，为true则为过滤得到的结果；这里过滤后的数组为["Ari","To"]
+    }
+</script>
+<!-- 组合使用过滤器 -->
+{{"abcde" | limitTo:3 | uppercase}}  使用多个|进行多次过滤
+<!-- controller中使用过滤器 -->
+<div ng-app="myApp">
+    <div ng-controller="MyController">
+        {{name}} {{num}}
+    </div>
+</div>
+<script>
+    var app=angular.module("myApp",[]);
+    // 通过$filter服务来过滤
+    app.controller("MyController",["$scope","$filter",function($scope,$filter){
+        $scope.name=$filter("lowercase")("Ari");  //将Ari转换为小写后赋值给name
+        $scope.num=$filter("number")("123.123",2)  //传参在后面的数据中传
+    }])
+</script>
+<!-- 自定义过滤器 -->
+<div ng-app="myApp">
+    <div ng-controller="c">
+        <!-- 一次性调用多个过滤器，capitalize为自定义过滤器 -->
+        <p>{{ 'Ginger Loves Dog Treats' | lowercase | capitalize:2 }}</p>
+    </div>
+</div>
+<script>
+    var app=angular.module("myApp",[]);
+    app.controller("c",function(){});
+    // 定义过滤器
+    app.filter("capitalize",function(){
+        return function(input,num){  //input就是要过滤的数据：'Ginger Loves Dog Treats'
+            if (input) {
+                console.log(num);  //第二个参数num就是自定义过滤器的传参
+                return input[0].toUpperCase()+input.slice(1);
+            }
+        }
+    });
+    *注：自定义过滤器也能在controller中使用$filter调用
+</script>
+
+
+
+<!-- 插件 -->
+需要下载并引入，下载地址：https://github.com/angular/angular.js/tree/master/src
+注意插件与angular的版本要尽量一致，否则可能出现不兼容报错的情况
+
+ngSanitize：对数据中含有的HTML标签进行格式化后输出，见ng-bind-html指令
+
+ngRoute：路由功能。主要用于单页面开发，能实现历史管理，URL中带有hash值也能显示对应链接的内容
+ng-view：ngRoute扩展的指令；作用是要切换视图的主体部分，类似一个iframe
+<div ng-controller='c'>
+    <!-- 链接前需要加#才是hash值，否则就是一个普通链接直接跳转了 -->
+    <a href="#index">首页</a><a href="#student">学员</a><a href="#course">课程</a>
+    <!-- 这里就是主体，要变化的内容：ng-view -->
+    <div ng-view></div>
+</div>
+<script>
+var app=angular.module('myApp',['ngRoute']); //注入插件ngRoute
+app.config(['$routeProvider',function($routeProvider){  //对路由进行配置
+    $routeProvider
+        .when('/index',{  //使用供应商的when方法，每个when就是一个地址，这里的/index就对应#index
+            template:'<p>首页的内容</p>{{name}}',  //template里的内容就会替换ng-view里的
+            // templateUrl:'index.html'  当然可以使用templateUrl来进行大量的替换操作
+            controller:'c'  //设置对应的控制器，控制器不同，变量的数据可能也不同，主要解决数据问题；非必须，默认为ng-view所在控制器的数据
+        })
+        .when('/student/:num',{  //接收一个参数，参数名为num，注意参数前使用:
+            template:'<p>学员的内容</p>{{name}}',  //这里的name值为Owen
+            controller:'c1'
+        })
+        .when('/course',{
+            template:'<p>课程的内容</p>{{name}}'
+        })
+        .otherwise({  //设置默认内容；当没有hash值或hash值错误的时候显示这里配置的
+            redirectTo:'/index'  //这里就是默认显示项
+        });
+}]);
+// 路由的事件操作，挂载在作用域上如$rootScope和$scope
+app.run(['$rootScope',function($rootScope){
+    $rootScope.$on('$routeChangeStart',function(e){  //使用$on绑定事件，这里绑定$routeChangeStart事件，在路由切换时会执行相应的内容
+        console.log('start');
+    });
+}]);
+app.controller('c',['$scope',function($scope){
+    $scope.name='Tirion';
+}]);
+app.controller('c1',['$scope','$routeParams',function($scope,$routeParams){  //使用$routeParams接收参数
+    $scope.name='Owen';
+    console.log($routeParams);  //参数名与值组成的对象；xxx.html#/student/123得到{num:123}
+}]);
+</script>
+
+ngAnimate：动画效果
+.box{width:200px;height:200px;background:red;transition:1s all;}  将transition设置为all
+.box.ng-enter{opacity:0;}  使用.ng-enter类设置过度开始样式
+.box.ng-enter-active{opacity:1;}  使用.ng-enter.active类设置过度到的样式
+<div class="box"></div>
+<script>
+var app=angular.module('myApp',['ngAnimate']);  //注入ngAnimate
+
+</script>
+
+
+
+<!-- 事件相关 -->
+<div ng-controller='c'>  <!-- 一个控制器调用了3次，默认情况下3个是独立的controller对象，数据互不干扰 -->
+    {{count}}
+    <div ng-controller='c' ng-click='$emit(myEvent)'>  <!-- 绑定事件向上传播的方式，点击的时候这个div和上级div的count都会改变；$broadcast(myEvent)来绑定则是向下传播 -->
+        {{count}}
+        <div ng-controller='c' ng-click='count++'>  <!-- 当点击这个div的时候，只会这个div里的count加1，上面两个不变 -->
+            {{count}}
+        </div>
+    </div>
+</div>
+<script>
+app.controller('c',function($scope){
+    $scope.count=0;
+    $scope.$on('myEvent',function(e){
+        $scope.count++;
+        e.stopPropagation();  //加上这句会阻止冒泡，即使上面使用了$emit来冒泡
+    });
+});
+</script>
