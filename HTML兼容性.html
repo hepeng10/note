@@ -1,3 +1,5 @@
+尽量别用CSS HACK而使用下面的方法来解决兼容性问题！
+
 <!-- 子元素撑开父元素 -->
 <div style="width:200px;">
     <div style="width:180px;padding:15px;"></div>
@@ -129,3 +131,34 @@ IE6不支持fixed定位
 </div>
 在IE67下输入类型的表单控件加border:none无效
 解决办法：1、给input加背景色；2、设置border:0
+
+<!-- PNG透明问题 -->
+IE6下不支持PNG透明，需要一个JS插件来实现：DD_belatedPNG.js。并且需要写在IE6的条件注释中，因为其它浏览器不支持这个插件：<!--[if IE 6]>js内容<![endif]-->。另可以使用IE的CSS滤镜解决，但是不支持repeat等属性了
+
+
+
+<!-- 特殊布局 -->
+<!-- 圣杯布局 -->
+三列，左右宽度固定，中间宽度自适应伸缩，并且中间先加载
+<!-- 中间先加载，所以先写中间。左右宽度固定，用margin值将左右宽度空出来放左右两列；不设置宽度，所以自适应宽度 -->
+<div style="height:600px;background:#f60;margin:0 200px;">中间</div>
+<!-- 使用绝对定位将左右两列定位到指定位置即可 -->
+<div style="width:200px;height:600px;background:fc0;position:absolute;left:0;top:0;">左侧</div>
+<div style="width:200px;height:600px;background:fcc;position:absolute;right:0;top:0;">右侧</div>
+
+<!-- 等高布局 -->
+左右两列，高度由内容决定，当其中一列的内容比另一列高时，少的那列高度依然和多的那列相等
+<div style="width:900px;margin:0 auto;overflow:hidden;">
+    <!-- 使用padding-bottom:10000px;margin-bottom:-10000px;实现 -->
+    <!-- margin负值会保持内容的大小而减小容器的大小。这里将padding设置很大，则内容和容器很高；又用margin抵消掉容器的高度，然后在容器上设置overflow:hidden。所以当一侧由内容撑开的时候，另一侧已经由padding设置了高度了，从视觉上实现了等高布局的效果 -->
+    <div style="width:200pc;background:red;float:left;padding-bottom:10000px;margin-bottom:-10000px;">
+        左侧内容<br>
+        左侧内容<br>
+        左侧内容<br>
+        左侧内容<br>
+        左侧内容<br>
+    </div>
+    <div style="width:700px;background:blue;float:right;padding-bottom:10000px;margin-bottom:-10000px;">
+        右侧内容
+    </div>
+</div>
