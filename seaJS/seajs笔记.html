@@ -1,0 +1,123 @@
+<script>
+命名空间：用对象来模拟命名空间；避免对人开发的时候变量或函数的冲突
+var tirion={}  //tirion就是一个命名空间
+tirion.width=100;  //在命名空间下添加变量
+tirion.show=function(){}  //在命名空间下添加函数
+tirion.show();  //调用这个命名空间下的函数，避免多人开发的时候，如果其他人也写了个show方法产生冲突
+
+seaJS：
+进行模块化开发：解决冲突、依赖等问题；采用CMD规范，另一个较有名的requireJS采用AMD规范
+
+如何使用sea.js：
+1、使用script标签引入sea.js库，通常需要给script标签加个id属性，对性能有好处
+
+2、如何创建模块：JS内容必须写在外部的独立的JS文件中，JS文件中的内容使用define()创建模块
+外部JS文件内容：
+//使用define()创建一个模块，参数是一个回调函数；回调函数接收三个参数，并且这三个参数的顺序和名字不能修改
+//require是依赖模块是使用；exports是对外接口；module是模块的一些信息
+define(function(require,exports,module){
+    function show(){  //自己的代码就写在这个回调函数中
+        alert(1);
+    }
+});
+
+3、将模块内容暴露给外部：使用exports参数
+define(function(require,exports,module){
+    function show(){  //自定义show函数
+        alert(1);
+    }
+    exports.myShow=show;  //将show函数挂载到exports对象下以供外部使用；注意不能直接将一个对象赋值给exports，只能添加属性
+    module.exports={  //exports是module.exports的引用，所以也可以直接挂载到module.exports下；这里可以直接赋值对象
+        myShow=show;
+    }
+});
+
+4、调用模块：外部JS模块文件不是使用script标签引入，而是使用seajs.use()来引入
+//使用use引入JS文件，注意引入JS文件的路径是以sea.js文件的相对路径，而不是这个HTML的。这里module1.js和sea.js就是在同一目录下
+seajs.use('module1.js');
+//也可以加上./来引入当前HTML文件的相对路径，注意不是'js/module1.js'
+seajs.use('./js/module1.js');
+//第二个参数是加载完JS文件后的回调函数
+seajs.use('./js/module1.js',function(ex){
+    ex.myShow();  //接收的参数ex就是创建模块时的exports参数，通过这个参数就可以调用模块中挂载在exports对象上的变量或函数了
+    function show(){  //再写个show也不会冲突了
+        alert(2);
+    }
+});
+//一次性加载多个模块（可以使用多个seajs.use()分别加载）
+seajs.use(['./js/module1.js','./js/module2.js'],function(ex1,ex2){  //几个模块就接收几个参数
+    ex1.myShow();  //调用第一个模块的对外方法
+    ex2.show();  //调用第二个模块的对外方法
+})
+
+5、依赖模块
+// 当要依赖的js为普通js文件时
+module2.js中的代码：
+var a=100;
+module1.js中的代码：
+define(function(require,exports,module){
+    require('./module2.js');  //使用require依赖module2
+    require.async('./module2.js',function(){  //可以使用async进行异步加载
+        alert('异步加载完成后执行');
+    })
+    function show(){ 
+        alert(a);  //这里就能访问module2里的a变量了
+    }
+    exports.myShow=show;
+});
+// 当要依赖的js为sea的模块时
+module2.js中的代码：
+define(function(require,exports,module){
+    var a=100;
+    exports.a=a;  //将a对外开放
+});
+module1.js中的代码：
+define(function(require,exports,module){
+    var m2=require('./module2.js');  //使用require依赖module2，返回module2的exports对象
+    var a=m2.a;  //通过module2的exports对象就能得到module2对外的变量和方法
+    function show(){ 
+        alert(a);  //这里就能访问module2里的a变量了
+    }
+    exports.myShow=show;
+});
+
+
+
+// seaJS合并问题
+当使用了gulp或grunt等将多个JS文件合并后，require('./module2.js')就不能正确引入了，那么该怎么办呢？
+上线的版本，若进行了合并操作，define()则要添加两个参数：第一个参数是当前模块的id；第二个参数是依赖模块的数组id。作用是将路径转换为id名，让require()不是去找路径中的文件，而是从本文件中进行id查找引入
+下面是合并后的文件，在同一个文件中：
+//这里就多了两个参数，第一个参数为这个模块的id，通常为这个模块的路径名；第二个参数就是依赖模块的id数组，没有依赖模块则使用空数组即可
+define('./module1.js',['./module2.js'],function(require,exports,module){
+    //因为加了前两个参数，require的路径就是一个id值了，通过require的id找到第二个参数中的id，最后找到名为这个id的模块，将其引入
+    //这里也就可以看出，将路径命名为id，在作为第二个参数的时候就能很好的和require()的路径一致，所以采用此命名规范
+    var m2=require('./module2.js');
+    function show(){ 
+        alert(a);
+    }
+    exports.myShow=show;
+});
+define('./module2.js',[],function(require,exports,module){
+    var a=100;
+});
+注：在合并后的单一文件中添加参数而不能一开始分开写的时候就添加前两个参数，如果那样做就会从相同文件中查找id，而不是从路径引入，从而导致运行出错
+
+*合并和自动添加前两个参数也可以使用gulp自动完成，通过gulp-seajs-combo这个插件
+
+
+
+// seaJS配置
+seajs.config({
+    paths:{  //配置路径简化代码
+        'js':'__PUBLIC__/Home/js'
+    },
+    ...  //各种配置项查看手册
+});
+seajs.use('js/main.js');  //就会替换成__PUBLIC__/Home/js/main.js
+注：配置对seaJS的所有地方有效，不仅是use()，模块中require()这些都有效。
+
+
+
+// seaJS插件
+需要通过node的npm安装spm：https://github.com/seajs/seajs/issues/538
+</script>
