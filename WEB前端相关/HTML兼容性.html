@@ -1,0 +1,298 @@
+<<<<<<< HEAD:HTML兼容性.html
+<!-- 子元素撑开父元素 -->
+<div style="width:200px;">
+    <div style="width:180px;padding:15px;"></div>
+</div>
+标准情况下子元素不会撑大父元素，所以只占200px；而IE6下子元素会撑大父元素，所以占210px
+解决方法：在计算的时候不要让内容的宽高超出父元素设置的宽高
+
+<!-- 浮动元素块级子元素撑开父元素 -->
+<div style="width:400px;">
+    <div style="background:red;float:left;">
+        <h3 style="margin:0;height:30px;">左浮动</h3>
+    </div>
+    <div style="background:blue;float:right;">
+        <h3 style="margin:0;height:30px;">右浮动</h3>
+    </div>
+</div>
+浮动元素如果宽度需要内容撑开，则浮动元素不设置宽度即可，标准情况下浮动元素的宽度为内容的宽度；而IE67下，如果里面的内容为块元素，会占满一行，则父元素也会被撑开占满一行
+解决方法：给里面的元素（h3）也加上浮动
+
+<!-- 三像素BUG -->
+<div>
+    <div style="width:100px;height:100px;background:red;float:left;"></div>
+    <div style="width:200px;height:100px;background:blue;margin-left:100px;"></div>
+</div>
+这里为了让两个DIV处于同一行并紧挨着，第一个DIV使用了float:left，第二个DIV使用margin-left:100px让它刚好处于第一个DIV右边的位置；但这样做在IE67下两个DIV之间会有3px的空隙
+解决方法：所以还是将第二个DIV使用float:left的方法实现紧挨着的效果是最佳的
+
+<!-- 嵌套规范BUG -->
+<p style="width:100px;height:100px;background:red;">
+    <h3></h3>
+</p>
+这里会出现两行红块也就是两个P标签，这是由于嵌套不规范导致的BUG，别乱嵌套标签
+
+<!-- 最小高度BUG -->
+<div style="height:2px;background:red;"></div>
+IE6下元素的高度小于19px会被当作19px来处理
+解决方法：添加overflow:hidden
+
+<!-- 点线边框BUG -->
+<div style="width:100px;height:100px;border:1px dotted black;"></div>
+1px的点线在IE6下不支持，只能使用背景图片平铺解决
+
+<!-- margin传递 -->
+<div style="background:blue;">
+    <div style="width:200px;height:200px;background:red;margin:100px;"></div>
+</div>
+所有浏览器中都有margin传递，以上情况内部div的margin会作用在外部div上，而内部div没有margin效果
+解决方法：1、给外部div或内部div设置浮动；2、给外部div设置overflow:hidden，在IE67下还需要设置zoom:1来触发haslayout；3、给父元素设置边框，IE67下也需要设置zoom:1来触发haslayout
+
+<!-- 双边距BUG -->
+<div style="width:200px;height:200px;background:red;float:left;margin:100;"></div>
+IE6下块元素有浮动和横向的margin值，横向的margin值会被放大成两倍，一行多个浮动DIV时只有最左边和最右边有双边距
+解决方法：display:inline
+
+<!-- li空隙BUG -->
+<ul style='margin:0;padding:0;width:302px;'>
+    <li style="list-style:none;height:30px;border:1px solid black;">
+        <a href="" style="width:100px;float:left;height:30px;background:red;"></a>
+        <span style="width:100px;float:right;height:30px;background:blue;"></span>
+    </li>
+    <li style="list-style:none;height:30px;border:1px solid black;">
+        <a href="" style="width:100px;float:left;height:30px;background:red;"></a>
+        <span style="width:100px;float:right;height:30px;background:blue;"></span>
+    </li>
+    <li style="list-style:none;height:30px;border:1px solid black;">
+        <a href="" style="width:100px;float:left;height:30px;background:red;"></a>
+        <span style="width:100px;float:right;height:30px;background:blue;"></span>
+    </li>
+</ul>
+在IE67下，li自身没设置浮动，但是里面的内容设置了浮动，li底部就会有空隙
+解决方法：1、给li加vertical-align:top；2、给li设置浮动和宽度，如果和19pxBUG同时出现则只能使用第二种方法解决
+
+<!-- 下margin消失BUG -->
+<div style="border:10px solid black;width:600;overflow:hidden;">
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+</div>
+IE6下当一行子元素占有的宽度之和和父级相差超过3px，则下margin会消失。这里4个div宽度+margin+border为600px，父级div宽度设置为600，下margin正常，当宽度设置为603的时候，下margin就会消失
+解决方法：计算出合适的父级元素宽度
+
+<!-- 文字溢出BUG -->
+<div style="width:400px;">
+    <div style="float:left"></div>
+    <span></span>
+    <div style="width:400px;float:right">leo是个大胖子</div>
+</div>
+在IE6下子元素宽度和父元素宽度相差小于3px，并且两个浮动元素中间有注释或内联元素时，则会产生诡异的文字内容多出来的BUG
+解决方法：1、将中间的注释或内嵌使用div块级元素包起来；2、调大父级元素宽度
+
+<!-- 绝对定位元素消失 -->
+<div style="width:200px;height:200px;border:1px solid black;position:relative;">
+    <ul style="width:150px;height:150px;background:red;margin:0 0 0 50px;padding:0;float:left;display:inline;"></ul>
+    <span style="width:50px;height:50px;background:yellow;position:absolute;right:-20px;top:0px;"></span>
+</div>
+IE6下当浮动元素和绝对定位元素是兄弟关系的时候，绝对定位的元素会消失
+解决方法：给绝对定位元素（span）加个div套起来，就不是兄弟关系了
+
+<!-- 相对定位溢出BUG -->
+<div style="width:200px;height:200px;border:1px solid black;overflow:auto;">
+    <div style="width:150px;height:300px;background:yellow;position:relative;"></div>
+</div>
+在IE67下，子元素有相对定位，则父元素包不住子元素，会溢出；因为相对定位提升了层级
+解决方法：给父级元素也加相对定位
+
+<!-- 绝对定位1px偏差BUG -->
+<div style="width:201px;height:201px;border:1px solid black;position:relative;">
+    <span style="width:20px;height:20px;background:yellow;position:absolute;right:-1px;botton:-1px;"></span>
+</div>
+在IE6下，绝对定位元素的父级宽高是奇数的时候，元素的right值和botoom值会有1px的偏差
+解决方法：将父级宽高设置为偶数
+
+<!-- fixed不支持 -->
+<div style="width:100px;height:100px;background:red;position:fixed;left:50px;top:100px;"></div>
+IE6不支持fixed定位
+解决方法：JS解决
+
+<!-- 输入控件1px间隙BUG -->
+<div style="width:200px;height:32px;border:1px solid red;">
+    <input type="text" style="width:100px;height:30px;border:1px solid black;margin:0;padding:0;">
+</div>
+在IE67下，输入类型的表单控件上下各有1px的间隙
+解决方法：给input加浮动
+
+<!-- 输入控件border:none无效 -->
+<div style="width:200px;height:32px;border:1px solid red;">
+    <input type="text" style="width:100px;height:30px;border:none;margin:0;padding:0;">
+</div>
+在IE67下输入类型的表单控件加border:none无效
+解决办法：1、给input加背景色；2、设置border:0
+=======
+尽量别用CSS HACK而使用下面的方法来解决兼容性问题！
+
+<!-- 子元素撑开父元素 -->
+<div style="width:200px;">
+    <div style="width:180px;padding:15px;"></div>
+</div>
+标准情况下子元素不会撑大父元素，所以只占200px；而IE6下子元素会撑大父元素，所以占210px
+解决方法：在计算的时候不要让内容的宽高超出父元素设置的宽高
+
+<!-- 浮动元素块级子元素撑开父元素 -->
+<div style="width:400px;">
+    <div style="background:red;float:left;">
+        <h3 style="margin:0;height:30px;">左浮动</h3>
+    </div>
+    <div style="background:blue;float:right;">
+        <h3 style="margin:0;height:30px;">右浮动</h3>
+    </div>
+</div>
+浮动元素如果宽度需要内容撑开，则浮动元素不设置宽度即可，标准情况下浮动元素的宽度为内容的宽度；而IE67下，如果里面的内容为块元素，会占满一行，则父元素也会被撑开占满一行
+解决方法：给里面的元素（h3）也加上浮动
+
+<!-- 三像素BUG -->
+<div>
+    <div style="width:100px;height:100px;background:red;float:left;"></div>
+    <div style="width:200px;height:100px;background:blue;margin-left:100px;"></div>
+</div>
+这里为了让两个DIV处于同一行并紧挨着，第一个DIV使用了float:left，第二个DIV使用margin-left:100px让它刚好处于第一个DIV右边的位置；但这样做在IE67下两个DIV之间会有3px的空隙
+解决方法：所以还是将第二个DIV使用float:left的方法实现紧挨着的效果是最佳的
+
+<!-- 嵌套规范BUG -->
+<p style="width:100px;height:100px;background:red;">
+    <h3></h3>
+</p>
+这里会出现两行红块也就是两个P标签，这是由于嵌套不规范导致的BUG，别乱嵌套标签
+
+<!-- 最小高度BUG -->
+<div style="height:2px;background:red;"></div>
+IE6下元素的高度小于19px会被当作19px来处理
+解决方法：添加overflow:hidden
+
+<!-- 点线边框BUG -->
+<div style="width:100px;height:100px;border:1px dotted black;"></div>
+1px的点线在IE6下不支持，只能使用背景图片平铺解决
+
+<!-- margin传递 -->
+<div style="background:blue;">
+    <div style="width:200px;height:200px;background:red;margin:100px;"></div>
+</div>
+所有浏览器中都有margin传递，以上情况内部div的margin会作用在外部div上，而内部div没有margin效果
+解决方法：1、给外部div或内部div设置浮动；2、给外部div设置overflow:hidden，在IE67下还需要设置zoom:1来触发haslayout；3、给父元素设置边框，IE67下也需要设置zoom:1来触发haslayout
+
+<!-- 双边距BUG -->
+<div style="width:200px;height:200px;background:red;float:left;margin:100;"></div>
+IE6下块元素有浮动和横向的margin值，横向的margin值会被放大成两倍，一行多个浮动DIV时只有最左边和最右边有双边距
+解决方法：display:inline
+
+<!-- li空隙BUG -->
+<ul style='margin:0;padding:0;width:302px;'>
+    <li style="list-style:none;height:30px;border:1px solid black;">
+        <a href="" style="width:100px;float:left;height:30px;background:red;"></a>
+        <span style="width:100px;float:right;height:30px;background:blue;"></span>
+    </li>
+    <li style="list-style:none;height:30px;border:1px solid black;">
+        <a href="" style="width:100px;float:left;height:30px;background:red;"></a>
+        <span style="width:100px;float:right;height:30px;background:blue;"></span>
+    </li>
+    <li style="list-style:none;height:30px;border:1px solid black;">
+        <a href="" style="width:100px;float:left;height:30px;background:red;"></a>
+        <span style="width:100px;float:right;height:30px;background:blue;"></span>
+    </li>
+</ul>
+在IE67下，li自身没设置浮动，但是里面的内容设置了浮动，li底部就会有空隙
+解决方法：1、给li加vertical-align:top；2、给li设置浮动和宽度，如果和19pxBUG同时出现则只能使用第二种方法解决
+
+<!-- 下margin消失BUG -->
+<div style="border:10px solid black;width:600;overflow:hidden;">
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+    <div style="width:100px;height:100px;border:5px solid #ccc;background:red;margin:20px;float:left;display:inline;"></div>
+</div>
+IE6下当一行子元素占有的宽度之和和父级相差超过3px，则下margin会消失。这里4个div宽度+margin+border为600px，父级div宽度设置为600，下margin正常，当宽度设置为603的时候，下margin就会消失
+解决方法：计算出合适的父级元素宽度
+
+<!-- 文字溢出BUG -->
+<div style="width:400px;">
+    <div style="float:left"></div>
+    <span></span>
+    <div style="width:400px;float:right">leo是个大胖子</div>
+</div>
+在IE6下子元素宽度和父元素宽度相差小于3px，并且两个浮动元素中间有注释或内联元素时，则会产生诡异的文字内容多出来的BUG
+解决方法：1、将中间的注释或内嵌使用div块级元素包起来；2、调大父级元素宽度
+
+<!-- 绝对定位元素消失 -->
+<div style="width:200px;height:200px;border:1px solid black;position:relative;">
+    <ul style="width:150px;height:150px;background:red;margin:0 0 0 50px;padding:0;float:left;display:inline;"></ul>
+    <span style="width:50px;height:50px;background:yellow;position:absolute;right:-20px;top:0px;"></span>
+</div>
+IE6下当浮动元素和绝对定位元素是兄弟关系的时候，绝对定位的元素会消失
+解决方法：给绝对定位元素（span）加个div套起来，就不是兄弟关系了
+
+<!-- 相对定位溢出BUG -->
+<div style="width:200px;height:200px;border:1px solid black;overflow:auto;">
+    <div style="width:150px;height:300px;background:yellow;position:relative;"></div>
+</div>
+在IE67下，子元素有相对定位，则父元素包不住子元素，会溢出；因为相对定位提升了层级
+解决方法：给父级元素也加相对定位
+
+<!-- 绝对定位1px偏差BUG -->
+<div style="width:201px;height:201px;border:1px solid black;position:relative;">
+    <span style="width:20px;height:20px;background:yellow;position:absolute;right:-1px;botton:-1px;"></span>
+</div>
+在IE6下，绝对定位元素的父级宽高是奇数的时候，元素的right值和botoom值会有1px的偏差
+解决方法：将父级宽高设置为偶数
+
+<!-- fixed不支持 -->
+<div style="width:100px;height:100px;background:red;position:fixed;left:50px;top:100px;"></div>
+IE6不支持fixed定位
+解决方法：JS解决
+
+<!-- 输入控件1px间隙BUG -->
+<div style="width:200px;height:32px;border:1px solid red;">
+    <input type="text" style="width:100px;height:30px;border:1px solid black;margin:0;padding:0;">
+</div>
+在IE67下，输入类型的表单控件上下各有1px的间隙
+解决方法：给input加浮动
+
+<!-- 输入控件border:none无效 -->
+<div style="width:200px;height:32px;border:1px solid red;">
+    <input type="text" style="width:100px;height:30px;border:none;margin:0;padding:0;">
+</div>
+在IE67下输入类型的表单控件加border:none无效
+解决办法：1、给input加背景色；2、设置border:0
+
+<!-- PNG透明问题 -->
+IE6下不支持PNG透明，需要一个JS插件来实现：DD_belatedPNG.js。并且需要写在IE6的条件注释中，因为其它浏览器不支持这个插件：<!--[if IE 6]>js内容<![endif]-->。另可以使用IE的CSS滤镜解决，但是不支持repeat等属性了
+
+
+
+<!-- 特殊布局 -->
+<!-- 圣杯布局 -->
+三列，左右宽度固定，中间宽度自适应伸缩，并且中间先加载
+<!-- 中间先加载，所以先写中间。左右宽度固定，用margin值将左右宽度空出来放左右两列；不设置宽度，所以自适应宽度 -->
+<div style="height:600px;background:#f60;margin:0 200px;">中间</div>
+<!-- 使用绝对定位将左右两列定位到指定位置即可 -->
+<div style="width:200px;height:600px;background:fc0;position:absolute;left:0;top:0;">左侧</div>
+<div style="width:200px;height:600px;background:fcc;position:absolute;right:0;top:0;">右侧</div>
+
+<!-- 等高布局 -->
+左右两列，高度由内容决定，当其中一列的内容比另一列高时，少的那列高度依然和多的那列相等
+<div style="width:900px;margin:0 auto;overflow:hidden;">
+    <!-- 使用padding-bottom:10000px;margin-bottom:-10000px;实现 -->
+    <!-- margin负值会保持内容的大小而减小容器的大小。这里将padding设置很大，则内容和容器很高；又用margin抵消掉容器的高度，然后在容器上设置overflow:hidden。所以当一侧由内容撑开的时候，另一侧已经由padding设置了高度了，从视觉上实现了等高布局的效果 -->
+    <div style="width:200pc;background:red;float:left;padding-bottom:10000px;margin-bottom:-10000px;">
+        左侧内容<br>
+        左侧内容<br>
+        左侧内容<br>
+        左侧内容<br>
+        左侧内容<br>
+    </div>
+    <div style="width:700px;background:blue;float:right;padding-bottom:10000px;margin-bottom:-10000px;">
+        右侧内容
+    </div>
+</div>
+>>>>>>> 4389a499048546ed7da2fa00bb7df3e638b8c82f:WEB前端相关/HTML兼容性.html
