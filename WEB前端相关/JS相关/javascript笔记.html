@@ -1340,5 +1340,6 @@ document.ontouchmove=function(e){
 <script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
 如果CDN地址加载失败，则使用自己服务器上的：
 <script type="text/javascript">
-!window.jQuery && document.write('<script src="js/jquery.min.js"><\/script>');
+//<\/script>如果没加转义符，那么浏览器可能会把它当做script的结束标签来解析，从而导致JS出错
+!window.jQuery && document.write('<script src="js/jquery.min.js"><\/script>');  
 </script>
