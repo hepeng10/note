@@ -1333,3 +1333,12 @@ document.ontouchmove=function(e){
     e.preventDefalt();  //阻止浏览器默认滑动事件，可以解决一些触控BUG。如横向滑动的时候触发浏览器纵向滑动，H5海报纵向滑动不能触发自己写的touchmove事件等
 }
 </script>
+
+<!-- CDN优化 -->
+使用CDN优化可以加快用户访问速度，比如加载jQuery，通常使用自己服务器上的jQuery，那么用户在首次访问的时候就会下载jQuery文件；而如果我们使用百度CDN上的jQuery，那么只要用户访问过百度，在首次访问自己的网站时也已经存在jQuery而无需下载了
+引入百度CDN的jQuery：
+<script src="http://libs.baidu.com/jquery/1.9.1/jquery.min.js"></script>
+如果CDN地址加载失败，则使用自己服务器上的：
+<script type="text/javascript">
+!window.jQuery && document.write('<script src="js/jquery.min.js"><\/script>');
+</script>
