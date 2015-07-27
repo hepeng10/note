@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    #div1{width:100px;height:100px;background-color:red;position:absolute;}
+    #div2{width:100px;height:100px;background-color:blue;position:absolute;left:100px;}
+    #div3{width:100px;height:100px;background-color:yellow;position:absolute;left:200px;}
+    #div4{width:100px;height:100px;background-color:green;position:absolute;left:300px;}
+    </style>
+</head>
+<body>
+    <div id="div1"></div>
+    <div id="div2"></div>
+    <div id="div3"></div>
+    <div id="div4"></div>
+
+    <script>
+    function override(obj1,obj2){
+        for(var attr in obj2){
+            obj1[attr]=obj2[attr];
+        }
+    }
+    // 拖拽构造函数
+    function Drag(){
+        this.obj=null;
+        this.disX=0;
+        this.disY=0;
+        this.config={  //默认参数
+            // id:'',  因为id是必传参数，所以可以不写入默认参数中
+        }
+    }
+    // 初始化，不同的组件传不同的参数可得到不同的特征
+    Drag.prototype.init=function(opt){
+        override(this.config,opt);  //配置参数覆盖默认参数
+        this.obj=document.getElementById(opt.id);  //从参数中获取id
+        var _this=this;
+        // 按下事件
+        this.obj.onmousedown=function(e){
+            var e=e||window.event;
+            _this.fnDown(e);
+            // 调用自定义事件而不是参数中的事件
+            fireEvent(_this,'toDown');
+            // 移动事件；绑定到document上是为了防止拖动到另外的元素下面时，不能触发的BUG
+            document.onmousemove=function(e){
+                var e=e||window.event;
+                _this.fnMove(e);
+            }
+            // 抬起事件
+            document.onmouseup=function(){
+                _this.fnUp();
+                fireEvent(_this,'toUp');
+            }
+            return false;
+        }
+    }
+    // 要执行的行为封装成独立的方法，而不是直接写在onmousedown里，便于继承的对象对行为进行修改
+    Drag.prototype.fnDown=function(e){
+        this.disX=e.clientX-this.obj.offsetLeft;
+        this.disY=e.clientY-this.obj.offsetTop;
+    }
+    Drag.prototype.fnMove=function(e){
+        this.obj.style.left=e.clientX-this.disX+'px';
+        this.obj.style.top=e.clientY-this.disY+'px';
+    }
+    Drag.prototype.fnUp=function(e){
+        document.onmousemove=null;
+        document.onmouseup=null;
+    }
+
+    // 自定义事件
+    function bindEvent(obj,e,fn){
+        obj.listeners=obj.listeners||{};
+        obj.listeners[e]=obj.listeners[e]||[];
+        obj.listeners[e].push(fn);
+        // 因为是面向对象，传入的obj不一定是DOM对象了，所以需要进行判断
+        if(obj.nodeType){
+            if(obj.addEventListener){
+                obj.addEventListener(e,fn,false);
+            }else{
+                obj.attachEbent('on'+e,fn);
+            }
+        }
+    }
+
+    function fireEvent(obj,e){
+        // 在调用的时候就要判断对象是否绑定了这个事件，绑定了才调用
+        if(obj.listeners&&obj.listeners[e]){
+            for(var i=0;i<obj.listeners[e].length;i++){
+                obj.listeners[e][i]();
+            }
+        }
+    }
+
+
+
+    // 组件调用
+    // 组件1
+    var div1=new Drag();
+    div1.init({id:'div1'});
+    // 组件2
+    var div2=new Drag();
+    div2.init({
+        id:'div2'
+    });
+    // 将配置参数中的函数提取出来作为自定义事件
+    bindEvent(div2,'toDown',function(){
+        document.title='Down';
+    })
+    // 组件3
+    var div3=new Drag();
+    div3.init({
+        id:'div3'
+    });
+    bindEvent(div3,'toDown',function(){
+        document.title='Down';
+    })
+    // 自定义事件就可以将一个函数中的内容分为多次来写，有助于多人开发；比如另一个人开发了给toDown将背景色变黑，不用改上面你写的toDown
+    bindEvent(div3,'toDown',function(){
+        document.body.style.background='black';
+    })
+    bindEvent(div3,'toUp',function(){
+        document.title='Up';
+    })
+    // 组件4
+    var div4=new Drag();
+    div4.init({
+        id:'div4'
+    });
+    bindEvent(div4,'toUp',function(){
+        document.title='Up';
+    })
+    </script>
+</body>
+</html>

@@ -398,7 +398,9 @@ var ajax=Ajax();
 ajax.post("index.php",{name:zhangsan,age:20},function(data){}); //第一个参数指定传入的PHP文件，第二个参数设置传入的数据，第三个参数接收返回的数据
 ajax.get("index.php?name=zhangsan&age=20",function(data){}); //第一个参数指定传入的PHP文件和数据，第二个参数接收返回的数据
 
-// 对象详解
+
+
+// 面向对象详解
 // 数据属性
 对象的属性包含四种行为（用两个中括号[[..]]表示这些特性是内部值，不能直接访问）：
 [[Configurable]] ：表示能否通过 delete 删除属性从而重新定义属性，能否修改属性的特性，或者能否把属性修改为访问器属性。默认为true
@@ -580,6 +582,9 @@ Sub.prototype.self=function(){...}  //扩展子类的方法
 // 例：
 function Super(name){
     this.name=name;
+}
+Super.prototype.showName=function(){
+    alert(this.name);
 }
 function Sub(name,age){
     Super.call(this,name);
@@ -781,7 +786,6 @@ function B(){
 var a=new A();
 B();  //调用了一次B()，从而修改了a.color的值
 alert(a.color);  //所以输出yellow
-
 
 // 事实上，传递参数并非apply()和call()真正的用武之地；它们真正强大的地方是能够扩充函数赖以运行的作用域
 window.color = "red"; 

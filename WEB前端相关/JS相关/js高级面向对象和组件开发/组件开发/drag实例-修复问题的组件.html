@@ -1,0 +1,106 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    #div1{width:100px;height:100px;background-color:red;position:absolute;}
+    #div2{width:100px;height:100px;background-color:blue;position:absolute;left:100px;}
+    #div3{width:100px;height:100px;background-color:yellow;position:absolute;left:200px;}
+    #div4{width:100px;height:100px;background-color:green;position:absolute;left:300px;}
+    </style>
+</head>
+<body>
+    <div id="div1"></div>
+    <div id="div2"></div>
+    <div id="div3"></div>
+    <div id="div4"></div>
+
+    <script>
+    function override(obj1,obj2){
+        for(var attr in obj2){
+            obj1[attr]=obj2[attr];
+        }
+    }
+    // 拖拽构造函数
+    function Drag(){
+        this.obj=null;
+        this.disX=0;
+        this.disY=0;
+        this.config={  //默认参数
+            // id:'',  因为id是必传参数，所以可以不写入默认参数中
+            toDown:function(){},
+            toUp:function(){}
+        }
+    }
+    // 初始化，不同的组件传不同的参数可得到不同的特征
+    Drag.prototype.init=function(opt){
+        override(this.config,opt);  //配置参数覆盖默认参数
+        this.obj=document.getElementById(opt.id);  //从参数中获取id
+        var _this=this;
+        // 按下事件
+        this.obj.onmousedown=function(e){
+            var e=e||window.event;
+            _this.fnDown(e);
+            _this.config.toDown();  //从默认参数中调用函数，调用组件的时候传了这个属性则会覆盖默认参数
+            // 移动事件；绑定到document上是为了防止拖动到另外的元素下面时，不能触发的BUG
+            document.onmousemove=function(e){
+                var e=e||window.event;
+                _this.fnMove(e);
+            }
+            // 抬起事件
+            document.onmouseup=function(){
+                _this.fnUp();
+                _this.config.toUp();  //从默认参数中调用函数
+            }
+            return false;
+        }
+    }
+    // 要执行的行为封装成独立的方法，而不是直接写在onmousedown里，便于继承的对象对行为进行修改
+    Drag.prototype.fnDown=function(e){
+        this.disX=e.clientX-this.obj.offsetLeft;
+        this.disY=e.clientY-this.obj.offsetTop;
+    }
+    Drag.prototype.fnMove=function(e){
+        this.obj.style.left=e.clientX-this.disX+'px';
+        this.obj.style.top=e.clientY-this.disY+'px';
+    }
+    Drag.prototype.fnUp=function(e){
+        document.onmousemove=null;
+        document.onmouseup=null;
+    }
+
+    // 组件调用
+    // 组件1
+    var div1=new Drag();
+    div1.init({id:'div1'});
+    // 组件2
+    var div2=new Drag();
+    div2.init({
+        id:'div2',
+        toDown:function(){  //传入的toDown会覆盖默认的toDown
+            document.title='Down';
+        }
+    });
+    // 组件3
+    var div3=new Drag();
+    div3.init({
+        id:'div3',
+        toDown:function(){
+            document.title='Down';
+        },
+        toUp:function(){
+            document.title='Up';
+        }
+    });
+    // 组件4
+    var div4=new Drag();
+    div4.init({
+        id:'div4',
+        toUp:function(){
+            document.title='Up';
+        }
+    });
+    </script>
+</body>
+</html>
