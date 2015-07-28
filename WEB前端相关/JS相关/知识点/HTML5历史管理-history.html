@@ -1,0 +1,42 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <input id='input' type="button" value="35选7">
+    <div id='div'></div>
+
+    <script>
+    // 使用history网址不会变化，没有hash值；只支持较现代的浏览器（IE10+），Android也支持不好
+    var oInput=document.getElementById('input');
+    var oDiv=document.getElementById('div');
+    oInput.onclick=function(){
+        var number=randomNum(35,7);
+        oDiv.innerHTML=number;
+        history.pushState(number,'');  //使用history.pushState保存数据，第二个参数目前不支持，但必须写
+    };
+
+    // 当使用浏览器的前进后退按钮时，会触发popstate事件
+    window.onpopstate=function(e){
+        var number=e.state||'';  //从事件对象e中读取数据
+        oDiv.innerHTML=number;
+    };
+    
+    // 封装随机取数
+    function randomNum(totle,num){
+        var arr=[];
+        var newArr=[];
+        for(var i=1;i<=totle;i++){
+            arr[i]=i;
+        }
+        // 
+        for(var i=0;i<num;i++){
+            newArr.push(arr.splice(Math.floor(Math.random()*arr.length),1));
+        }
+        return newArr;
+    }
+    </script>
+</body>
+</html>
