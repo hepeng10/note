@@ -1,0 +1,125 @@
+一、减少操作DOM的次数
+<script>
+    var oDiv=document.getElementById('div');
+    // 错误的方法：将a一个个的往DOM添加，添加5000次
+    console.time('test');
+    for(var i=0;i<5000;i++){
+        oDiv.innerHTML+='a';
+    }
+    console.timeEnd('test');
+    // 正确的做法：在JS中用个变量保存5000个a，一次性添加到DOM中
+    var str='';
+    console.time('test');
+    for(var i=0;i<5000;i++){
+        str+='a';
+    }
+    oDiv.innerHTML=str;
+    console.timeEnd('test');
+</script>
+
+二、使用cloneNode克隆DOM节点
+<script>
+    var oUl=document.getElementById('ul');
+    // 每次使用createElement()创建节点
+    var str='';
+    console.time('test');
+    for(var i=0;i<5000;i++){
+        var oLi=document.createElement('li');
+        oLi.innerHTML='li';
+        oUl.appendChild(oLi);
+    }
+    console.timeEnd('test');
+
+    // 使用createElement()创建一个借点后，之后的就用cloneNode()进行克隆而不是创建
+    console.time('test');
+    var oLi=document.createElement('li');
+    oLi.innerHTML='li';
+    for(var i=0;i<5000;i++){
+        var newLi=oLi.cloneNode(true);
+        oUl.appendChild(newLi);
+    }
+    console.timeEnd('test');
+</script>
+
+三、不重复获取相同数据；比如不在for循环中获取数组长度，多次获取的DOM对象保存为一个变量而不每次都去获取等
+<script>
+    // 低性能
+    for(var i=0;i<aLi.length;i++){
+        ...
+    }
+    // 高性能：不会每次循环都去获取一次数组的长度
+    var len=aLi.length;
+    for(var i=0;i<aLi.len;i++){
+        ...
+    }
+</script>
+
+四、使用更精确的获取DOM节点的操作
+<script>
+    childNodes  //获取元素节点、文本节点
+    children  //只获取元素节点
+    *当只需要获取元素节点的时候使用children就比childNodes性能更好
+
+    document.getElementsByClassName('class');
+    oDiv.getElementsByClassName('class');
+    *缩小范围来获取DOM节点性能更好
+</script>
+
+五、使用新的API
+<script>
+    // 原始方式
+    var oUl=document.getElementById('ul');
+    var aLi=oUl.getElementsByTagName('li');
+
+    // IE9+及移动端
+    var aLi=document.querySelectorAll('#ul li');
+</script>
+
+六、避免重排、重绘等
+<script>
+    1、注意元素添加顺序
+    for(var i=0;i<5000;i++){
+        var oLi=document.createElement('li');
+        oLi.innerHTML='li';
+        oUl.appendChild(oLi);
+        // oLi.innerHTML='li';  创建元素后先把内容添加到元素中再添加到DOM中，而不是先把元素添加到DOM中再添加内容，那样会进行两次DOM操作
+    }
+
+    2、使用cssText
+    for(var i=0;i<5000;i++){
+        var oLi=document.createElement('li');
+        // oLi.style.width:'100px';
+        // oLi.style.height:'100px';
+        // oLi.style.background='red';
+        oLi.style.cssText='width:100px;height:100px;background:red';
+        oUl.appendChild(oLi);
+    }
+
+    3、缓存布局信息
+    var oDiv=document.getElementById('div');
+    // 每次都要获取一次offsetLeft
+    setInterval(function(){
+        oDiv.style.left=oDiv.offsetLeft+1+'px';
+        oDiv.style.top=oDiv.offsetTop+1+'px';
+    },30);
+
+    // 将offsetLeft存到一个变量中，对变量累加即可
+    var L=oDiv.offsetLeft;
+    var T=oDiv.offsetTop;
+    setInterval(function(){
+        L++;
+        T++;
+        oDiv.style.left=L+'px';
+        oDiv.style.top=T+'px';
+    },30);
+
+    4、使用createDocumentFragment
+    var oUl=document.getElementById('ul');
+    var oFrag=document.createDocumentFragment();
+    for(var i=0;i<5000;i++){
+        var oLi=document.createElement('li');
+        // oUl.appendChild(oLi);
+        oFrag.appendChild(oLi);  //先存到frag中
+    }
+    oUl.appendChild(oFrag);  //再一次性添加到DOM中
+</script>
