@@ -1,0 +1,24 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <input type="button" value="改变" id="input1">
+    <iframe id="iframe1" src="iframe1.html" frameborder="0"></iframe>
+
+    <script>
+    var oInput=document.getElementById('input1');
+    var oIframe=document.getElementById('iframe1');
+    oInput.onclick=function(){
+        var iframeWindow=oIframe.contentWindow;  //通过contentWindow获取iframe的window对象
+        var oDiv=iframeWindow.document.getElementById('div1');  //获取iframe中的元素
+        oDiv.style.color='red';
+        
+        var oDiv=oIframe.contentDocument.getElementById('div1');  //通过contentDocument直接获取iframe的document对象；IE67不支持
+        oDiv.style.color='blue';
+    }
+    </script>
+</body>
+</html>
