@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>事件源</title>
+</head>
+<body>
+    <ul id='ul1'>
+        <li>111</li>
+        <li>222</li>
+        <li>333</li>
+        <li>444</li>
+    </ul>
+
+    <script>
+    var oUl=document.getElementById('ul1');
+    var aLi=oUl.getElementsByTagName('li');
+
+    // 原始的事件绑定
+    /*for(var i=0;i<aLi.length;i++){
+        aLi[i].onmouseover=function(){
+            this.style.background='red';
+        }
+        aLi[i].onmouseout=function(){
+            this.style.background='';
+        }
+    }*/
+    
+    // 事件委托
+    oUl.onmouseover=function(e){
+        var e=e||window.event;
+        var target=e.target||e.srcElement;  //获取到事件源
+        // console.log(target.nodeName);
+        if(target.nodeName.toLowerCase()=='li'){  //获取事件源的标签
+            target.style.background='red';
+        }
+    };
+    oUl.onmouseout=function(e){
+        var e=e||window.event;
+        var target=e.target||e.srcElement;  //获取到事件源
+        // console.log(target.innerHTML);
+        target.style.background='';
+    };
+    </script>
+</body>
+</html>

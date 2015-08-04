@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>通过事件委托动态添加的元素可以拥有事件</title>
+</head>
+<body>
+    <ul id='ul1'>
+        <li>111</li>
+        <li>222</li>
+        <li>333</li>
+        <li>444</li>
+    </ul>
+    <input type="button" value="添加" id="btn">
+
+    <script>
+    var oUl=document.getElementById('ul1');
+    var aLi=oUl.getElementsByTagName('li');
+    // 动态添加元素
+    var oBtn=document.getElementById('btn');
+    var iNow=4;
+    oBtn.onclick=function(){
+        iNow++;
+        var oLi=document.createElement('li');
+        oLi.innerHTML=111*iNow;
+        oUl.appendChild(oLi);
+    }
+
+    // 原始的事件绑定，动态添加的元素无法拥有事件；因为循环已结束，并没有给动态添加的元素绑定事件
+    /*for(var i=0;i<aLi.length;i++){
+        aLi[i].onmouseover=function(){
+            this.style.background='red';
+        }
+        aLi[i].onmouseout=function(){
+            this.style.background='';
+        }
+    }*/
+
+    // 事件委托可以让动态添加的元素有事件；因为事件是绑定在父级上的，动态添加的li当mouseover的时候会冒泡到ul上触发事件
+    oUl.onmouseover=function(e){
+        var e=e||window.event;
+        var target=e.target||e.srcElement;  //获取到事件源
+        // console.log(target.nodeName);
+        if(target.nodeName.toLowerCase()=='li'){
+            target.style.background='red';
+        }
+    };
+    oUl.onmouseout=function(e){
+        var e=e||window.event;
+        var target=e.target||e.srcElement;  //获取到事件源
+        // console.log(target.innerHTML);
+        target.style.background='';
+    };
+    </script>
+</body>
+</html>
