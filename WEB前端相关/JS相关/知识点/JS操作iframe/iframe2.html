@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <input id="input1" type="button" value="改变">
+
+    <script>
+    var oInput=document.getElementById('input1');
+    var fWindow=window.parent;
+    oInput.onclick=function(){
+        fWindow.document.getElementById('div1').style.color='red';
+    }
+    </script>
+</body>
+</html>

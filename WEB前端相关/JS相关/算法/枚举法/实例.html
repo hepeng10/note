@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>枚举法实例</title>
+</head>
+<body>
+    <p>点击城市添加到ul中，如果ul中存在则不添加</p>
+    <a href="javascript:;">北京</a>
+    <a href="javascript:;">上海</a>
+    <a href="javascript:;">深圳</a>
+    <a href="javascript:;">广州</a>
+    <a href="javascript:;">成都</a>
+    <a href="javascript:;">重庆</a>
+    <a href="javascript:;">杭州</a>
+    <ul id="ul">
+    </ul>
+
+    <script>
+    var aA=document.getElementsByTagName('a');
+    var oUl=document.getElementById('ul');
+    var aLi=oUl.getElementsByTagName('li');
+    for(var i=0;i<aA.length;i++){
+        aA[i].onclick=function(){
+            if(mj(this.innerHTML)){
+                var oLi=document.createElement('li');
+                oLi.innerHTML=this.innerHTML;
+                oUl.insertBefore(oLi,aLi[0]);
+            }else{
+                mj2(this.innerHTML);
+            }
+        }
+    }
+
+    // 通过枚举法判断ul中是否存在
+    function mj(text){
+        var result=true;
+        for(var i=0;i<aLi.length;i++){
+            if(aLi[i].innerHTML==text){
+                result=false;
+            }
+        }
+        return result;
+    }
+    // 如果存在则放到第一位
+    function mj2(text){
+        for(var i=0;i<aLi.length;i++){
+            if(aLi[i].innerHTML==text){
+                oUl.insertBefore(aLi[i],aLi[0]);
+            }
+        }
+    }
+    </script>
+</body>
+</html>

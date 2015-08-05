@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <input id='input' type="button" value="35选7">
+    <div id='div'></div>
+
+    <script>
+    // 通过onhashchange事件实现：当hash值有变化的时候就会触发；支持IE8及以上
+    
+    var oInput=document.getElementById('input');
+    var oDiv=document.getElementById('div');
+    var obj={};
+    oInput.onclick=function(){
+        var number=randomNum(35,7);
+        // oDiv.innerHTML=number;  因为使用了hashchange事件来进行历史管理，所以把行为写到hashchange中
+        var rand=Math.random();  //生成一个随机数作为hash值，而不是直接把数据内容作为hash值，有助于用户体验
+        obj[rand]=number;  //obj对象中生成一组以随机数为名，以数据为值的键值对
+        window.location.hash=rand;  //修改location的hash值，每次修改在地址栏中都会产生一次这个hash值的历史，可以通过前进后退切换，但通常情况下只有地址栏中的hash值切换，网页内容不会变化
+    };
+
+    // 当使用window.location.hash=number修改hash值和前进后退按钮的时候，触发hashchange事件，获取到hash数据应用到页面中
+    window.onhashchange=function(){
+        // 从location.hash中取出随机数，要删除第一个#；然后从obj对象中取出这个随机数对应的数据
+        var number=obj[window.location.hash.substring(1)];
+        if(number){
+            oDiv.innerHTML=number;
+        }else{
+            oDiv.innerHTML='';
+        }
+    };
+    // 注：当使用hash进行历史管理的时候，因为window.location.hash保存hash的时候就会触发hashchange事件；所以hashchange里的会覆盖赋值前的，因此最好把所有操作都写在hashchange中
+    
+    // 封装随机取数
+    function randomNum(totle,num){
+        var arr=[];
+        var newArr=[];
+        for(var i=1;i<=totle;i++){
+            arr[i]=i;
+        }
+        // 
+        for(var i=0;i<num;i++){
+            newArr.push(arr.splice(Math.floor(Math.random()*arr.length),1));
+        }
+        return newArr;
+    }
+    </script>
+</body>
+</html>

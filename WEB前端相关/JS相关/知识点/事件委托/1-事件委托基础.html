@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <ul id='ul1'>
+        <li>111</li>
+        <li>222</li>
+        <li>333</li>
+        <li>444</li>
+    </ul>
+
+    <script>
+    var oUl=document.getElementById('ul1');
+    var aLi=oUl.getElementsByTagName('li');
+
+    // 给每个li加点击事件执行同一个动作
+    /*for(var i=0;i<aLi.length;i++){
+        aLi[i].onclick=function(){alert(123)};
+    }*/
+    
+    // 那么就可以把事件绑定到ul上，点击li由于冒泡机制也会触发ul上的事件；并且这个只给一个元素绑定了事件，上面给四个元素绑定事件
+    oUl.onclick=function(){alert(123)};
+    </script>
+</body>
+</html>

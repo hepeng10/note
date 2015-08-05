@@ -1,0 +1,41 @@
+跨域：不同域名下的数据交互。通常情况下出于安全考虑，浏览器是不允许跨域的
+例：
+www.a.com和www.a.com/xxx/xxx 只有域名相同才不会存在跨域问题，其它都存在
+www.a.com和bbs.a.com 即使主域和子域之间也会存在跨域问题
+
+AJAX：使用XMLHttpRequest()，默认不能跨域
+解决：
+1、子域和主域之间的跨域：给子域和主域都设置document.domain为主域document.domain='a.com'
+2、不同域名之间的跨域：服务器代理：XMLHttpRequest代理文件，会增加服务器压力
+3、script标签：JSONP：json+padding(内填充)——较常用的方式
+
+JSONP：把JSON放在一个盒子里
+<script>
+function box(json){
+    alert(json.name);
+}
+box({name:'miaov'});
+</script>
+例：
+当前是a.com要从b.com的xxx.php中获取数据
+<script src="xxx.php?k1=v1&k2=v2"></script>
+因为script标签具有跨域功能，所以能轻松的获取到数据
+动态创建script标签：
+<script>
+    function box(json){
+        alert(json.name);
+    }
+    function createJs(sUrl){
+        var oScript=document.createElement('script');
+        oScript.type='text/javascript';
+        oScript.src=sUrl;
+        document.getElementsByTagName('head')[0].appendChild(oScript);  //返回的数据是调用box函数的字符串，所以要添加到末尾，避免因为执行顺序出错
+    }
+    createJs('jsonp.php');  //嗲用createJs，后台就会返回box({name:'miaov'})这样的数据，调用了我们定义的函数，实现相应的功能
+    createJs('jsonp.php?callback=fn');  //也可以多传入一个参数用来指定函数名，增加灵活性，这里就会返回fn({name:'miaov'})，我们定义的函数也应该名为fn
+</script>
+
+4、location.hash跨域：iframe，通过一个主域的代理文件
+5、windows.name跨域：类似location.hash
+6、flash
+7、html5 postMessage
