@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    body,div,section{margin:0px;padding:0px;}
+    /*将容器宽高设置为100%并设置相对定位*/
+    #wrapper{width:100%;height:100%;position:relative;background-color:blue;}
+    /*
+    要定位到中心的元素：
+    1、元素肯定是有宽高的，设置宽高
+    2、设置绝对定位，top:50%;left:50%;将左上角定位到了中心位置
+    3、设置margin的left和top为负值，值为元素的宽度和高度的一半，元素就在中心了
+    */
+    #position{
+        width:300px;height:400px;position:absolute;top:50%;left:50%;background-color:red;
+        margin-left:-150px;margin-top:-200px;
+    }
+    </style>
+</head>
+<body>
+    <section id="wrapper">
+        <div id="position"></div>
+    </section>
+    <script>
+    // 设置body的高度为可视区高度，wrapper的100%才有效
+    document.body.style.height=document.documentElement.clientHeight+'px';
+    </script>
+</body>
+</html>
