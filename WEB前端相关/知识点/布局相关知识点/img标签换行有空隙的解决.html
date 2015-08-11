@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+    <style>
+    img{border:0;}
+    </style>
+</head>
+<body>
+    多个img标签并排排列，即使css中设置了border:0，但图片间也会有3px间隙
+    解决方法，这里例举三种：
+    1、将img标签写在同一行（麻烦！）
+    2、给img标签设置浮动（可能因为布局问题不能使用）
+    3、在父级加上font-size:0（简单方便，不会破坏布局，推荐使用）
+    <div style="font-size:0;">
+        <img src="a.jpg" alt="">
+        <img src="b.jpg" alt="">
+        <img src="c.jpg" alt="">
+    </div>
+</body>
+</html>
