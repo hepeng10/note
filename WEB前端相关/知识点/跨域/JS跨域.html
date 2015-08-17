@@ -15,16 +15,22 @@ function box(json){
     alert(json.name);
 }
 box({name:'miaov'});
+
+function box(json){...}  就是我们自己定义的一个用来执行跨域请求后的函数
+box({...})  就是服务器返回的数据内容，而这个内容的语句正好是调用我们定义的那个函数
 </script>
 例：
 当前是a.com要从b.com的xxx.php中获取数据
 <script src="xxx.php?k1=v1&k2=v2"></script>
-因为script标签具有跨域功能，所以能轻松的获取到数据
+我们只需要在a.com中使用script标签引入b.com的xxx.php文件，并传入服务端要求的参数，服务端返回一个我们定义的box(json)这样的内容即可。因为script标签具有跨域功能，所以能轻松的获取到数据
+
 动态创建script标签：
 <script>
+    // 定义一个JSONP
     function box(json){
         alert(json.name);
     }
+    // 动态创建script标签获取执行的JSONP，主要是要将script标签添加到末尾，避免先调用后定义导致出错的BUG
     function createJs(sUrl){
         var oScript=document.createElement('script');
         oScript.type='text/javascript';

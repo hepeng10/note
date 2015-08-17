@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <button id="btn">点我</button>
+
+    <script>
+    var oBtn=document.getElementById('btn');
+    
+    oBtn.onclick=function(){
+        var xhr=new XMLHttpRequest();
+        xhr.open('get','1.txt',true);
+        xhr.send();
+        xhr.onreadystatechange=function(){
+            if(xhr.readyState==4){
+                alert(xhr.responseText);
+            }
+        }
+    }
+    </script>
+</body>
+</html>

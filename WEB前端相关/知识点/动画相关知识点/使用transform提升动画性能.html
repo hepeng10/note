@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title></title>
+    <link rel="stylesheet" href="">
+    <style>
+    /*
+    1、使用CSS将布局定位到最终的位置
+    2、在keyframes中的0%里设置动画开始的初始位置
+    3、在keyframes中的100%里没设置的属性就会通过动画从0%中的参数过渡到css中的参数
+     */
+    #div1{margin:20px auto;width:500px;height:500px;background-color:blue;position:relative;}
+    #div2{width:100px;height:100px;background-color:white;position:absolute;left:200px;top:100px;opacity:0;animation:move 1s forwards;}  /*opacity从0过度到1，为了让动画结束后是1，使用forwards停留在最后一帧*/
+    @keyframes move{
+        0%{transform:translateY(200px);}  /*使用transform完成动画性能更好*/
+        100%{opacity:1;}  /*没写的会从0%的参数过渡到CSS中的参数（translateY）*/
+    }
+    </style>
+</head>
+<body>
+    <div id="div1">
+        <div id="div2">使用transform完成动画性能更好</div>
+    </div>
+</body>
+</html>
