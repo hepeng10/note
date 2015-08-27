@@ -413,10 +413,10 @@ JS触发：定义一个具有动画animation的class，满足条件的时候为�
 animation-name:none|ident;  //设置动画的标识符（名称），none为默认值，将没有任何动画效果，可以用于覆盖任何动画
 
 <!-- animation-duration -->
-animation-duration:time;  //设置动画播放时间0%-100%，单位为s
+animation-duration:time;  //设置动画播放时间0%-100%，单位为s（播放一遍所需时间）
 
 <!-- animation-timing-function -->
-animation-timing-function:ease|linear|ease-in|ease-out|ease-in-out...;  //和过渡效果的transition-timing-function取值相同
+animation-timing-function:ease|linear|ease-in|ease-out|ease-in-out|step-start|step()...;  //和过渡效果的transition-timing-function取值相同。注：step(n,start)中的n表示@keyframes动画设置中每个节点间过度的帧数，设置为1就能实现每个节点间样式的直接切换而没有过度效果（为1时和step-start效果相同）
 
 <!-- animation-delay -->
 animation-delay:time;  //延迟或提前执行
