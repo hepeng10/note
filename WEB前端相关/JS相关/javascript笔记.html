@@ -720,7 +720,7 @@ dom.style.cssText='width:350px;height:25px';  //设置DOM元素的样式，可�
 dom.style.width;  //可以通过一个DOM的style属性来获取它的行内样式，也就是style='width:500px'这样的，不能获取CSS里写的
 dom.clientWidth;  //获取可视区宽，包括padding
 dom.offsetWidth;  //获取占位宽：可视区宽+border
-getComputedStyle(dom.width)  //获取计算后的样式，也就是当前DOM实际的样式（这里就是当前DOM的宽度），不论是CSS，style，JS设置的
+getComputedStyle(dom.width)  //获取计算后的样式，也就是当前DOM实际的样式，不论是CSS、style、JS设置的（这里就是当前DOM的宽度，带单位，不包含padding：offsetWidth和clientWidth都包含padding并且不带单位）
 dom.currentStyle.width  //同上，IE678专用
 // 浏览器兼容-属性判断法
 if (dom.currentStyle) {
