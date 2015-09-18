@@ -253,20 +253,3 @@ function detect(e){  //接收一个事件对象
 注：strokeStyle,stroke(),fillStyle,fill(),beginPath(),closePath()都是绘制各种类型的图形通用的
 格子系统：x,y为左上角坐标，r为圆半径，n为圆与格子的间距（内边距），i为行数，j为列数。确定每个格子中心的位置公式：X=x+j*2*(r+n)+(r+n);Y=y+i*2*(r+n)+(r+n); 可以根据需要改变公式，比如不要n
 
-
-<!-- <script>
-var canvas=document.getElementById('canvas');
-canvas.width='1024';
-canvas.height='768';
-var cxt=canvas.getContext('2d');
-context.beginPath();  //当要绘制多个图形的时候，后面的会覆盖前面的，所以需要使用beiginPath()声明一个新路径
-context.closePath();  //使用了closePath()会自动创建一条线将绘制的重点和起点首尾相连，形成闭合路径。使用beginPath()和closePath()结合是绘制封闭图形的标准做法。可以解决线条太宽导致的封闭处有缺口的问题
-context.moveTo(100,100);  //起点。笔尖放到哪，不会画线，多条线段就可以使用多次moveTo()
-context.lineTo(700,700);  //终点。画到哪
-context.lineWidth=5;  //设置线条的宽度
-context.fillStyle='rgba(0,0,200,0.5)';  //设置填充样式，可以使用rgb,rgba等格式
-context.strokeStyle='#ff0000';  //设置线条的样式
-context.fill();  //填充。非封闭的路径会用一条线段将首尾相连，类似closePath()的效果。先填充后描边才会得到正常的描边宽度
-context.stroke();  //绘制（描边）
-
-</script> -->

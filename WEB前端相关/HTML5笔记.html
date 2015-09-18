@@ -7,6 +7,8 @@
     <link rel="stylesheet" href="">
 </head>
 <body>
+	通过http://caniuse.com/可以查看各浏览器对HTML5的支持程度
+
 	<!-- 全局属性：所有标签都能使用的属性 -->
 	data-**="xx"  也就是自定义属性，但是规范了写法，加上data-前缀的就表示是自定义的
 	hidden  隐藏标签
@@ -15,13 +17,23 @@
 	contenteditable="true"  这个标签内的内容可编辑
 	window.document.desginMode="on";  JS中加上这段代码后，页面中所有内容都变成可编辑状态
 
-	<!-- 新增有用标签 -->
-	<nav>  <!-- 定义导航 -->
-		<a href="index.asp">Home</a>
-		<a href="html5_meter.asp">Previous</a>
-		<a href="html5_noscript.asp">Next</a>
-	</nav>
+	<!-- IE标签兼容 -->
+	<script>
+	// 使用javascript创建一下用到的HTML5标签，这样在低版本IE中就能使用这个标签了；但是创建的标签是inline属性的，所以需要在CSS中将这些标签设置为block属性
+	document.createElement('header');
+	document.createElement('article');
+	document.createElement('aside');
+	document.createElement('section');
+	document.createElement('footer');
+	</script>
+	<style>
+	/*将所有用到的HTML5标签设置为block*/
+	header,article,aside,section,footer{display:block};
+	</style>
+	注：可以使用html5shiv.js这个插件来实现兼容（只针对布局类标签，功能类的无效）。
 
+	<!-- 新增有用标签 -->
+	<!-- 布局划分标签 -->
 	<header>  <!-- 定义头部/页眉 -->
 		<h1>Welcome to my homepage</h1>
 		<p>My name is Donald Duck</p>
@@ -29,14 +41,24 @@
 
 	<footer>...</footer> <!-- 定义尾部/页脚 -->
 
+	<nav>  <!-- 定义导航 -->
+		<a href="index.asp">Home</a>
+		<a href="html5_meter.asp">Previous</a>
+		<a href="html5_noscript.asp">Next</a>
+	</nav>
+
 	<section id="activity">...</section> <!-- 定义一块内容，划分网页，没有布局的作用。可以加上id方便JS操作 -->
 
-	<article>...</article>  <!-- 定义文章 -->
+	<article>...</article>  <!-- 定义文章、帖子、回帖等 -->
 
-	<aside>...</aside>  <!-- 定义 article 以外的内容。aside 的内容应该与 article 的内容相关 -->
+	<aside>...</aside>  <!-- 定义 article 以外的内容。aside 的内容应该与 article 的内容相关。如帖子左边的发帖人信息、侧边栏、友情链接等 -->
 
-	<address>...</address>  <!-- 定义地址 -->
+	<!-- 语义化标签 -->
+	<time>...</time>  <!-- 时间标签 -->
 
+	<address>...</address>  <!-- 地址标签 -->
+
+	<!-- 功能标签 -->
 	<embed src="helloworld.swf" width="500" height="300" />  <!-- 定义嵌入的内容 -->
 
 	<p>Do not forget to buy <mark>milk</mark> today.</p>  <!-- mark:里面的内容会添加背景色进行标注 -->
@@ -49,13 +71,14 @@
 		0<input type="range" id="a" value="50">100
 		+<input type="number" id="b" value="50">
 		=<output name="x" for="a b"></output>  <!-- 是一个输出域。for标签指定相关的元素 -->
-	</form> 
+	</form>
 
 	<p contenteditable="true">这是一段可编辑的段落。请试着编辑该文本。</p>  <!-- 用户可以编辑里面的内容 -->
 
 	<p hidden="hidden">这个段落应该被隐藏。</p>  <!-- 隐藏元素 -->
 
-	<li data-animal-type="bird">Owl</li>  <!-- data-*属性用来嵌入自定义数据。属性名不应该有大写字母 -->
+	<li data-animal-type="bird">Owl</li>  <!-- data-*属性用来嵌入自定义数据。属性名不应该有大写字母；可通过oLi.dataset.animalType来获取 -->
+	注：写在HTML中的自定义属性不能通过oLi.dataAnimalType直接获取，只有通过JS添加的自定义属性才能直接这样获取。之前是通过getAttribute()来获取HTML中的自定义属性，IE67下有兼容问题
 
 
 
@@ -170,175 +193,7 @@
 
 
 	<!-- canvas -->
-	<canvas id='myCanvas' width='500' height='500' style='border:1px solid #666;'></canvas>
-	<script type="text/javascript">
-		var c=document.getElementById('myCanvas');  //获取canvas元素
-		var cxt=c.getContext('2d');  //通过canvas对象创建context对象；getContext("2d")对象是内建的HTML5对象，拥有多种绘制路径、矩形、圆形、字符以及添加图像的方法
-
-		//通过context对象绘制图像
-		//填充颜色
-		cxt.fillStyle='#FF0000'; 
-		//描边颜色
-
-		cxt.strokeStyle='#0000FF';
-
-		//绘制矩形
-		cxt.fillRect(0,0,150,75);  //绘制并填充颜色。参数：x,y,width,height
-		cxt.strokeRect(20,20,150,100);  //绘制并描边。通常有fillxxx的就有strokexxx。一个是填充，一个是描边
-		cxt.clearRect(10,10,100,50);  //擦除指定的矩形区域，并且用一个透明的颜色填充它
-
-		//绘制线段
-		cxt.moveTo(10,10);  //设置起点坐标
-		cxt.lineTo(150,50);  //设置终点坐标
-		cxt.lineTo(10,50);  //继续绘制线段，以前面的终点作为起点(150,50)
-		cxt.stroke();  //绘制线段需要调用stroke()方法才会进行绘制。stroke作用是绘制边框
-
-		//路径相关
-		ctx.rect(20,20,150,100);
-		if (ctx.isPointInPath(20,50)){  //isPointInPath(x,y)判断一个坐标是否在绘制的路径上，在则返回ture
-			ctx.stroke();
-		};
-		ctx.beginPath();  //beginPath()开始一条新路径
-		ctx.strokeStyle="blue";
-		ctx.moveTo(50,0);
-		ctx.lineTo(150,130);
-		ctx.stroke();
-
-		//绘制文字
-		ctx.font="40px Arial";  //设置字体
-		var text="Hello World";
-		ctx.measureText(text).width;  //调用measureText(text).width可以得到text文本占的宽度为多少像素
-		ctx.fillText(text,10,50);  //设置文本和坐标（0,0是文本的左下角对应画布的左上角）
-
-		//文本对齐
-		ctx.textAlign="start";  //文本以fillText()坐标指定的位置开始
-		ctx.fillText("textAlign=start",150,60);
-		ctx.textAlign="end";  //文本以fillText()坐标指定的位置结束
-		ctx.fillText("textAlign=end",150,80);
-		ctx.textAlign="left";  //文本以fillText()坐标指定的位置左对齐（类似start）
-		ctx.fillText("textAlign=left",150,100);
-		ctx.textAlign="center";  //文本以fillText()坐标指定的位置居中对齐
-		ctx.fillText("textAlign=center",150,120);
-		ctx.textAlign="right";  //文本以fillText()坐标指定的位置右对齐（类似end）
-		ctx.fillText("textAlign=right",150,140);
-		
-		//文本基准线
-		ctx.textBaseline="top";
-		ctx.fillText("Top",5,100);
-		ctx.textBaseline="bottom";
-		ctx.fillText("Bottom",50,100);
-		ctx.textBaseline="middle";
-		ctx.fillText("Middle",120,100);
-		ctx.textBaseline="alphabetic";
-		ctx.fillText("Alphabetic",190,100);
-		ctx.textBaseline="hanging";
-		ctx.fillText("Hanging",290,100);
-
-		//绘制圆形：通过路径来绘制，和绘制矩形原理不同的
-		cxt.fillStyle='#FF0000'; 
-		cxt.beginPath();  //beginPath()方法在一个画布中开始子路径的一个新的集合；beginPath()丢弃任何当前定义的路径并且开始一条新的路径。它把当前的点设置为(0,0)；当一个画布的环境第一次创建，beginPath()方法会被显式地调用
-		cxt.arc(70,18,15,0,Math.PI*2,true);  //arc用于绘制部分或一个圆形。参数：圆心坐标x；圆心坐标y；半径；开始的角度；结束的角度；逆时针(true)顺时针(false)
-		*arcTo(x1,y1,x2,y2,radius)  //通过两个点的左边和半径绘制圆弧
-		cxt.closePath();  //如果画布的子路径是打开的，closePath()通过添加一条线条连接当前点和子路径起始点来关闭它；如果子路径已经闭合了，这个方法不做任何事情
-		cxt.fill();  //fill()方法使用fillStyle属性所指定的颜色、渐变和模式来填充当前路径
-
-		//缩放
-		ctx.strokeRect(5,5,25,15);  //绘制个矩形
-		ctx.scale(2,2);  //缩放当前绘制的图形。参数：宽的缩放比例和高的缩放比例；2就是200%，0.5就是50%
-		ctx.strokeRect(5,5,25,15);  //缩放后再绘制一个矩形。注意这里的传入的参数和缩放前的是一样的，但是得到的结果却是放大一倍的
-
-		//旋转
-		ctx.rotate(20*Math.PI/180);  //参数：旋转角度，以弧度计
-		ctx.fillRect(50,20,100,50);
-
-		//变换
-		ctx.fillStyle="yellow";
-		ctx.fillRect(0,0,250,100);  //先绘制了一个矩形
-		ctx.transform(0.5,0.7,-0.5,1,30,10);  //复制了一份当前绘制的图像，然后通过参数变换这个图形。参数：水平缩放，水平倾斜，垂直倾斜，垂直缩放，水平移动，垂直移动
-		ctx.fillStyle="red";  //重新设置填充色
-		ctx.fillRect(0,0,250,100);
-		ctx.transform(1,0.5,-0.5,1,30,10);  //这次复制的就是上一个缩放后的图像了，red图像
-		*ctx.setTransForm(1,0.5,-0.5,1,30,10);  //setTransForm()复制的是非transform出来的图像，这里也就是第一个yellow图像
-		ctx.fillStyle="blue";
-		ctx.fillRect(0,0,250,100);
-
-		//透明度
-		ctx.fillStyle="red";
-		ctx.fillRect(20,20,75,50);  //先绘制个红色的矩形
-		ctx.globalAlpha=0.2;  //调节透明度
-		ctx.fillStyle="blue";
-		ctx.fillRect(50,50,75,50);  //再绘制个透明度20%的蓝色矩形
-
-		//阴影
-		ctx.shadowBlur=10;  //设置阴影的模糊等级
-		ctx.shadowOffsetX=20;  //设置阴影的x轴位移
-		ctx.shadowOffsetY=20;  //设置阴影的y轴位移
-		ctx.shadowColor="black";  //设置阴影的颜色
-
-		//绘制渐变背景
-		var grd=createLinearGradient(0,0,175,50);  //createLinearGradient()方法创建一条线性颜色渐变并返回一个新的CanvasGradient对象。参数：起点坐标和终点坐标
-		*createLinearGradient(xStart, yStart, radiusStart, xEnd, yEnd, radiusEnd)  //绘制放射渐变。参数：开始圆的圆心的坐标；开始圆的直径；结束圆的圆心的坐标；结束圆的直径
-		grd.addColorStop(0,"#FF0000");  //在渐变中的某一点添加一个用于颜色渐变的颜色
-		grd.addColorStop(1,"#00FF00");  //参数：0-1之间取值，0为CanvasGradient对象的起点，1为终点；颜色
-		cxt.fillStyle=grd;  //将CanvasGradient对象赋值给fillStyle完成渐变填充色的设置
-		*cxt.strokeStyle=grd;  //也可以描边，当然下面要调用的就是strokeRect()了
-		cxt.fillRect(0,0,175,50);  //绘制一个形状，这个形状的显示区域会填充渐变色
-
-		//把一副图像放置到画布上
-		var img=new Image();
-		img.src="flower.png";
-		cxt.drawImage(img,0,0,100,50);  //参数：image对象或Canvas元素；图像的左上角坐标；宽度；高度
-
-		//重复图像
-		var img=document.getElementById("lamp");  //获得img标签的dom对象
-		var pat=ctx.createPattern(img,'repeat');  //指定要使用的图片和排列方式no-repeat,repeat,repeat-x,repeat-y
-		ctx.rect(0,0,150,100);  //创建一个矩形。rect(x,y,width,height)。fillRect()是绘制并填充，这个是只绘制
-		ctx.fillStyle=pat;  //将填充设置为自定义的图像
-		ctx.fill();  //填充当前绘制的路径
-
-		//ImageData对象
-		var imgData=ctx.createImageData(100,100);  //createImageData(w,h)创建一个空白的ImageData对象；默认值为(0,0,0,0)即黑色透明
-		for (var i=0;i<imgData.data.length;i+=4){  //imgData.data.length得到imgData的所有像素的信息。每个像素包含R,G,B,A四个值，所以这里的长度就为100x100x4。每相邻的四个值就是一个像素的R,G,B,A信息
-		  imgData.data[i+0]=0;  //给一个像素的R赋值
-		  imgData.data[i+1]=255;  //给一个像素的G赋值
-		  imgData.data[i+2]=0;  //给一个像素的B赋值
-		  imgData.data[i+3]=255;  //给一个像素的A赋值
-		}
-		ctx.putImageData(imgData,10,10);  //putImageData(imageData,x,y),将ImageData对象的图像数据放回画布
-		var imgData=ctx.getImageData(10,10,50,50); //getImageData(x,y,w,h)获取画布上一个矩形区域的图像信息。技巧：遍历这个imgData对象，将每个imgData.data[i]=255-imgData.data[i]就能完成图像颜色的反相
-		ctx.putImageData(imgData,50,50);  //然后可以直接通过putImageData()将这些数据放置到画布上。可以理解为复制一个矩形区域然后粘贴到指定的位置
-
-		//重设原点
-		ctx.fillRect(10,10,100,50);  //画个矩形
-		ctx.translate(50,50);  //重置(0,0)原点的位置到(50,50)
-		ctx.fillRect(10,10,100,50);  //再画矩形的时候原点就在(50,50)坐标了
-
-		//globalCompositeOperation
-		ctx.fillStyle="red";
-		ctx.fillRect(20,20,75,50);  //先绘制一个图形
-		ctx.globalCompositeOperation="source-over";  //将刚才绘制的图形作为源，并指定需要的模式（source-atop：在源上，超出源的部分隐藏；source-over：在源上，超出部分也会显示；source-in：源隐藏，与源重合的部分显示；source-out：源隐藏，与源不重合的部分显示...）
-		ctx.fillStyle="blue";
-		ctx.fillRect(50,50,75,50);  //绘制新的图形，与先前绘制的图像按照globalCompositeOperation的值进行相互作用
-		ctx.fillStyle="red";
-		ctx.fillRect(150,20,75,50);  //绘制一个新图形，这个图形和上面的没有关系了
-		ctx.globalCompositeOperation="destination-over";  //这个就和刚绘制的新图形相互作用了
-		ctx.fillStyle="blue";
-		ctx.fillRect(180,50,75,50);
-
-		//save()和restore()
-		 ctx.fillRect(10,10,150,150);  //先绘制个矩形，默认为黑色填充
-		 ctx.save();  //使用save()保存当前状态，类似一个快照
-		 ctx.fillStyle="white";
-		 ctx.fillRect(30,30,110,110);  //再绘制个白色的矩形
-		 ctx.save();  //继续保存当前状态，不会覆盖，而是推入堆中（堆和栈一样，先进后出）
-		 ctx.fillStyle="blue";
-		 ctx.fillRect(50,50,70,70);  //再绘制个蓝色的矩形
-		 ctx.restore();  //调用restore()会回到上一个状态,即 ctx.fillStyle="white";
-		 *ctx.restore();  //如果再次调用restore()就会继续回溯，即 ctx.fillStyle="black";第一个矩形，默认的黑色填充
-		 ctx.save();
-		 ctx.fillRect(70,70,30,30);//所以此处没有设定fillStyle的时候颜色为white，注意哦！如果在白色矩形后面也restore一下刚此处的fillStyle就为黑色了
-		 ctx.restore();
-	</script>
+	详情查看canvas笔记
 	
 
 
@@ -358,6 +213,37 @@
 	<script type="text/javascript">
 		sessionStorage.lastname="Smith";  //使用sessionStorage对象来存储数据，浏览器窗口(标签)关闭后失效，即使统一网站的不同窗口也不会共享sessionStorage。也是保存在本地
 		document.write(sessionStorage.lastname);
+	</script>
+
+
+
+	<!-- 新增JS API -->
+	<script>
+	// 新增选择器
+	document.querySelector('#div1');  //获取ID为div1的元素，同getElementById('div1')
+	document.querySelector('.box');  //通过class获取元素
+	document.querySelector('div');  //通过标签获取元素
+	document.querySelector('[title=hello]');  //通过属性（title="hello"）获取元素
+	注：querySelector()只能获取一个元素，如通过class来获取，只能获取所有class中的第一个；获取一组元素通过querySelectorAll()
+	document.querySelectorAll('.box');  //获取一组元素
+	document.getElementsByClassName('box');  //只针对class获取
+
+	// 操作class
+	var oDiv=document.getElementById('div1');
+	var aList=oDiv.classList;  //获取元素的class列表，返回这个元素拥有的所有class的一个数组对象集合
+	oDiv.classList.add('box');  //给这个元素添加新的class
+	oDiv.classList.remove('box');  //删除这个元素指定的class
+	oDiv.classList.toggle('box');  //如果这个元素中的class中有box，则删除；没有，则添加
+
+	// JSON的解析
+	var str='{"name":"Tirion","age":20}';  //格式必须为严格的JSON形式，引号要正确使用
+	var json=JSON.parse(str);  //将字符串解析为JSON（类似eval），字符串里不是JSON格式，则报错
+	var str2=JSON.stringify(json);  //将JSON转换为字符串
+	var json2=JSON.parse(str2);  //通过将一个JSON转换为字符串，再将字符串转换为JSON，就能实现JSON的拷贝；当修改json2的数据时不会影响到json1
+	注：IE67可使用json2.js这个插件来实现兼容
+
+	// 历史管理：当URL中的hash值发生变化时会触发浏览器的历史管理
+	详情查看知识点笔记中的历史管理相关内容
 	</script>
 </body>
 </html>
