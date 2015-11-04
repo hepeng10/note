@@ -55,6 +55,7 @@ window.onload=function(){
     context.rect(x,y,width,height);  //只是规划了路径，需要后续自己调用fill和stroke
     context.fillRect(x,y,width,height);  //会根据设置的fillStyle自动填充
     context.strokeRect(x,y,width,height);  //会根据设置的strokeStyle自动描边。两个一起使用就可以既填充也描边
+    注：描边和填充的顺序不一样，效果会略有不同。因为描边是从边界往内外同时绘制的，后填充则不会看到往内的描边
 
     // 线条属性
     // lineCap设置线条两端的形状，默认为butt没有头，可设置为round圆头,square方头。当设置了头后线条两端会长出一截头的距离
@@ -73,6 +74,7 @@ window.onload=function(){
     // 绘图状态保存与恢复
     context.save();  //保存当前绘图状态，包括所有设置的状态，如颜色，基准点坐标等
     context.restore();  //恢复上次save()保存的状态。这样就可以在一次绘图中设置各种状态之前save()，绘制完再restore()快速恢复修改绘图状态之前的状态
+    注：save()方法会将当前绘图环境压入堆栈顶部，对应的restore()方法则会从堆栈顶部弹出一组状态信息，并据此恢复当前绘图环境的各个状态。这意味着可以嵌套式的调用save()/restore()方法。
 
     // 变换矩阵（图形学）
     a c e    //a表示水平缩放（默认值1）；c表示垂直倾斜（默认值0）；e表示水平位移（默认值0）

@@ -25,8 +25,8 @@ var i=072;  //将一个八进制的数字赋值给变量，如果数字里有大
 8.3%4 //当求模的时候，PHP会自动转化为整数，而JS不会，所以不要用浮点数求模
 Infinity,-Infinity;  //正无穷和负无穷；可使用isFinite()函数来判断一个数字是否处于之间，是则返回true
 NaN;  //not a number；可使用isNaN()来判断一个变量是否为数字，会尝试将其它类型转为数字类型；使用typeof(NaN)结果为number
-Number(x);  //试图将任意类型转换为数字类型，转换失败则为NaN
-parseInt("AF",16) parseFloat()  //将字符串转换为数字类型；parseInt()可设置进制
+Number(x);  //试图将任意类型转换为数字类型，转换失败则为NaN。不会试图一个个的字符转，比如'1a'转换结果是NaN
+parseInt("AF",16) parseFloat()  //将字符串转换为数字类型；parseInt()可设置进制。会试图一个个字符的转，比如'1a'会转换成1
 
 //字符串
 var str="javascript";  //声明字符串；字符串是不可变的，只会产生新的字符串
@@ -35,11 +35,12 @@ num.toString(8);  //调用toString()方法可以将一个其它类型的值转�
 str.charAt(0);  //获取字符串第一个字符
 str.charCodeAt(0);  //获取字符串第一个字符的编码值
 String.fromCharCode(22937);  //通过编码得到相应的字
-str.substring(0,2);  //截取字符串；若参数中为负值的则会转换为0；若前面的数字大于后面，则会自动交换位置
-str.substr(0,2);  //和substring()类似，不同的是参数为负数时，第一个参数会加上字符串的长度，第二个参数转换为0
-str.slice(-5,-2);  //和substring()类似，不同的是参数为负值，两个参数都会转换为和字符串长度相加的值
+var str='0123456789';
+str.substring(0,2);  //截取字符串（从第0个开始取到第2个之前，结果：01）；若参数中为负值的则会转换为0；若前面的数字大于后面，则会自动交换位置；第二个参数没有则取到末尾，第二个参数小于等于第一个参数，则取不出值
+str.slice(-5,-2);  //和substring()类似，不同的是参数为负值，两个参数都会转换为和字符串长度相加的值；第二个参数也不应该小于第一个
+str.substr(2,2);  //截取字符串（从第2个开始取出2个，结果：23）；第一个参数可为负数，会自动转换为加上字符串长度后的数；第二个参数没有则取到末尾
 str.toLowerCase()||toUpperCase()  //将一个字符串转换为小写字母或大写字母
-str.split(',');  //字符串分割，返回一个数组；参数可以使用正则。str.split('')会把字符串每个字符作为数组的一个元素；str.split(',',3)限制长度
+str.split(',');  //字符串分割，返回一个数组；参数为使用字符串中的哪个字符进行切割，可以使用正则。str.split('')会把字符串每个字符作为数组的一个元素；str.split(',',3)限制长度
 str.split('').reverse().join('');  //这样调用后可以将字符串反转
 str.indexOf('a',0);  //结果为1，查询子字符串在字符串中的位置，没找到则返回-1；第二个参数为从第几位开始查找
 str.lastIndexOf('a');  //同上，结果为9
@@ -105,7 +106,7 @@ for(var propName in window){  //使用for in语句枚举对象的属性
 }
 
 var num=0;
-outermost：  //创建一个标识，用于跳出多层循环等操作
+outermost:  //创建一个标识，用于跳出多层循环等操作
 for (var i = 0; i < 100; i++) {
     for (var j = 0; i < 100; j++) {
         if (i==50 && j==50) {
@@ -116,7 +117,7 @@ for (var i = 0; i < 100; i++) {
     }
 }
 
-with(obj){  //使用with语句，将多个属性或方法添加到对象中；简化操作，性能较差
+with(obj){  //使用with语句，将多个属性或方法添加到对象中；简化操作，性能较差，严格模式不支持
     var name="abc";
     var age=20;
     var sex="male";
@@ -140,8 +141,8 @@ colors.pop();  //pop()取得数组最后一项
 colors.shift();  //shift()取得数组第一项
 colors.unshift("white","orange");  //unshift()往数组前端添加项，返回新数组的长度；white在orange之前
 colors.reverse();  //reverse()反转数组排序，返回一个新数组
-num.sort();  //升序排列数组，返回一个新数组；结果可能是这样：1 10 5 8
-num.sort(compare);  //接收一个比较函数，这个函数需要接收两个参数，通过比较这两个参数返回正数、0、负数进行排序
+colors.sort();  //升序排列数组，返回一个新数组；结果可能是这样：1 10 5 8
+colors.sort(compare);  //接收一个比较函数，这个函数需要接收两个参数，通过比较这两个参数返回正数、0、负数进行排序
 function compare(v1,v2){  //通过这个函数排序就会是：1 5 8 10
     if (v1<v2) {
         return -1; 
@@ -197,7 +198,7 @@ for (var propName in window) {
 }
 
 // Date对象
-var now=new Date();  //获得当前的日期和时间；传入Unix时间戳，则会生成相应的日期时间
+var now=new Date();  //获得当前的日期和时间；可以传入Unix时间戳，然后使用下面的getXxx来获取需要的日期格式
 Date.parse("6/13/2014");  //获取指定日期的时间戳
 var time=new Date("6/13/2014");  //效果和parse()相同，会隐式调用parse()方法
 Date.now();  //ES5新增方法：获取当前的Unix时间戳
@@ -217,7 +218,7 @@ Math.random();  //返回0-1之间的小数
 Math.round(num);  //四舍五入
 Math.floor(num);  //向下取整
 Math.ceil(num);  //向上取整
-Math.round(Math.random()*(y-x)+x);  //取得x到y（包括x和y）的数的公式
+Math.round(Math.random()*(y-x)+x);  //取得x到y（包括x和y）的数的公式（x和y只能为整数）
 Math.min(2,12,54,132);  //取得一组数中的最小值
 Math.max(2,12,54,132);  //取得一组数中的最大值
 var arr = [1, 2, 3];
@@ -856,7 +857,7 @@ function cancel(obj,eName,fn){
     }
 }
 
-// 键盘事件
+// 键盘事件：发生在当前拥有焦点的HTML元素身上，假如没有元素拥有焦点，那么事件就会上移至window和document对象；比如input标签可以绑定键盘事件，而canvas要绑定就只能绑定到window或document上
 document.onkeydown=function(e){  //按下时执行；如果按住不放会连续触发，中间会有一定时间的间隔，第一次的间隔时间较长，可用定时器解决这个问题
     var e=e||event;
     e.keyCode;  //获取按下按键的值，是一个数字
