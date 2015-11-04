@@ -1,0 +1,19 @@
+本地存储和cookie的使用类似，可以看作cookie的升级版
+cookie只能存储4k数据，而本地存储可存储5M数据（浏览器所能保存的，而不是一个网站所能保存的）
+
+sessionStorage：临时性的，只有当前页面有效
+localStorage：永久性的，此域名共享
+
+<script>
+API:
+sessionStorage:
+window.sessionStorage.setItem('name','aaa');  //设置本地存储
+window.sessionStorage.getItem('name');  //获取本地存储
+window.sessionStorage.removeItem('name');  //删除某个本地存储
+window.sessionStorage.clear();  //删除所有本地存储
+localStorage:
+window.localStorage.setItem('name','aaa');
+window.localStorage.getItem('name');
+window.localStorage.removeItem('name');
+window.localStorage.clear();
+</script>

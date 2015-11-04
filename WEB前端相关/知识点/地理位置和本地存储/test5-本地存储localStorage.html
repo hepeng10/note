@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>本地存储</title>
+</head>
+<body>
+    <input type="button" name="" value="设置">
+    <input type="button" name="" value="获取">
+    <input type="button" name="" value="删除">
+    <input type="text" name="" value="" placeholder="">
+
+    <script type="text/javascript">
+    var aInput=document.getElementsByTagName('input');
+    // 设置
+    aInput[0].onclick=function(){
+        window.localStorage.setItem('name',aInput[3].value);
+    }
+    aInput[1].onclick=function(){
+        alert(window.localStorage.getItem('name'));
+    }
+    aInput[2].onclick=function(){
+        window.localStorage.removeItem('name');
+        window.localStorage.clear();
+    }
+    </script>
+</body>
+</html>

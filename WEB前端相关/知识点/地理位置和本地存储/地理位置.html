@@ -1,0 +1,35 @@
+地理位置：经度和纬度构成
+位置信息从何而来：IP地址、WIFI、GPS、基站等
+LBS：基于地理位置信息的应用
+
+注：获取地理位置信息需要用户确认通过才行，浏览器会弹出一个提示框请求获取地理位置信息
+
+地理位置对象：
+navigator.geolocation
+-单次定位请求：getCurrentPosition(请求成功,请求失败,数据收集方式)
+ navigator.geolocation.getCurrentPosition(fn1(pos){},fn2(err){},{json})
+ -fn1请求成功：在回调函数fn1中可通过接收的参数获取到相关地理位置信息：
+ 经度：pos.coords.longitude  （浮点数值）
+ 纬度：pos.coords.latitude
+ 准确度：position.coords.accuracy
+ 海拔：position.coords.altitude
+ 海拔准确度：position.coords.altitudeAcuracy
+ 行进方向：position.coords.heading
+ 地面速度：position.coords.speed
+ 时间戳：new Date(position.timestamp)
+ -fn2请求失败：在回调函数fn2中可通过接收的参数获取到失败所返回的编号
+ 通过err.code获取返回的编号：0，1，2，3
+ 1：用户拒绝浏览器获取位置信息
+ 2：尝试获取用户信息，但失败了
+ 3：设置了timeout值，获取位置超时了
+ -{json}：配置
+ enableHighAcuracy：更精确的查找，默认false
+ timeout：获取位置允许最长时间，默认infinity
+ maximumAge：位置可以缓存的最大时间，默认0
+
+-多次定位请求：watchPosition，类似setInterval，会不断的请求地理位置信息
+ 使用方法和单次请求几乎一样，只是将getCurrentPosition改为watchPosition，会返回一个定时器
+ timer=navigator.geolocation.watchPosition(fn1(pos){},fn2(err){},{json})
+ 配置里多一个参数：frequency为更新频率
+-关闭更新请求：clearWatch，类似clearInterval
+ navigator.geolocation.clearWatch(timer);

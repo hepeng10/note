@@ -35,9 +35,10 @@ box({...})  就是服务器返回的数据内容，而这个内容的语句正�
         var oScript=document.createElement('script');
         oScript.type='text/javascript';
         oScript.src=sUrl;
+        // 妙味的JS写在head里的，我们通常写在body尾部，所以这里应该需要将head改为body
         document.getElementsByTagName('head')[0].appendChild(oScript);  //返回的数据是调用box函数的字符串，所以要添加到末尾，避免因为执行顺序出错
     }
-    createJs('jsonp.php');  //嗲用createJs，后台就会返回box({name:'miaov'})这样的数据，调用了我们定义的函数，实现相应的功能
+    createJs('jsonp.php');  //调用createJs，后台就会返回box({name:'miaov'})这样的数据，调用了我们定义的函数，实现相应的功能
     createJs('jsonp.php?callback=fn');  //也可以多传入一个参数用来指定函数名，增加灵活性，这里就会返回fn({name:'miaov'})，我们定义的函数也应该名为fn
 </script>
 

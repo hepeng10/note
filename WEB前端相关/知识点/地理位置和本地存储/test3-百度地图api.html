@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>百度地图应用</title>
+    <style>
+        #div1{width:400px;height:400px;border:1px solid black;}
+    </style>
+    <!-- 引入百度地图API -->
+    <script type="text/javascript" src="http://api.map.baidu.com/api?v=2.0&ak=您的密钥"></script>
+</head>
+<body>
+    <input type="button" name="" value="请求" id="input1">
+    <div id="div1"></div>
+    <script>
+    var oInput=document.getElementById('input1');
+    oInput.onclick=function(){
+        navigator.geolocation.getCurrentPosition(function(position){
+            var x=position.coords.latitude;  //获取到经度和纬度
+            var y=position.coords.longitude;
+            // 百度地图的使用
+            var map=new BMap.Map('div1');  //通过id获取要插入地图的div
+            var pt=new BMap.Point(y,x);  //传入经度和纬度
+            map.centerAndZoom(pt,14);  //设置地图的层级（街道、城市、国家...），越高显示越多
+            map.enableScrollWheelZoom();  //启用滚轮放大缩小
+            map.enableContinuousZoom();  //启动地图惯性拖拽
+            // 创建标注
+            var marker1=new BMap.Marker(pt);  //创建地图上的红色标注
+            map.addOverlay(marker1);  //将红色标注添加到地图上
+            // 使用自定义图片标注，与上面那个标注2选1即可
+            var myIcon=new BMap.Icon('miaov.png',new BMap.Size(30,30));
+            var marker2=new BMap.Marker(pt,{icon:myIcon});
+            map.addOverlay(marker2)
+            // 创建信息窗口提示
+            var opts={
+                width:200,
+                height:60,
+                title:"妙味课堂"
+            };
+            var infoWindow=new BMap.InfoWindow('IT培训机构',opts);  //创建信息窗口内容
+            map.openInfoWindow(infoWindow,pt);  //将信息窗口添加到相应的位置
+            // 其它API自己查看............
+        });
+    }
+    </script>
+</body>
+</html>
