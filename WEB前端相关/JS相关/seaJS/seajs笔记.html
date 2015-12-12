@@ -14,7 +14,7 @@ seaJS：
 2、如何创建模块：JS内容必须写在外部的独立的JS文件中，JS文件中的内容使用define()创建模块
 外部JS文件内容：
 //使用define()创建一个模块，参数是一个回调函数；回调函数接收三个参数，并且这三个参数的顺序和名字不能修改
-//require是依赖模块是使用；exports是对外接口；module是模块的一些信息
+//require是依赖模块时使用；exports是对外接口；module是模块的一些信息
 define(function(require,exports,module){
     function show(){  //自己的代码就写在这个回调函数中
         alert(1);

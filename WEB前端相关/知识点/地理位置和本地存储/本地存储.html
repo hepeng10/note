@@ -1,7 +1,7 @@
 本地存储和cookie的使用类似，可以看作cookie的升级版
 cookie只能存储4k数据，而本地存储可存储5M数据（浏览器所能保存的，而不是一个网站所能保存的）
 
-sessionStorage：临时性的，只有当前页面有效
+sessionStorage：临时性的，只有当前页面有效（当前页面中的iframe页面中也能访问）
 localStorage：永久性的，此域名共享
 
 <script>
@@ -16,4 +16,16 @@ window.localStorage.setItem('name','aaa');
 window.localStorage.getItem('name');
 window.localStorage.removeItem('name');
 window.localStorage.clear();
+storage事件：可用于多页面数据的同步更新，如购物车等
+// 当本地存储修改或删除时触发storage事件（注：当前页面修改、删除不会触发）
+// 可通过此事件，实现网站不同页面的同步更新功能
+window.addEventListener('storage',function(e){
+    alert(123);
+    // 事件对象所拥有的属性
+    console.log(e.key);  //修改或删除的key
+    console.log(e.newValue);  //新设置的值
+    console.log(e.oldValue);  //以前的值
+    console.log(e.storageArea);  //storage对象
+    console.log(e.url);  //触发事件页面的url
+});
 </script>

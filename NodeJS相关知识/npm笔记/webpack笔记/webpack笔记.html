@@ -1,0 +1,118 @@
+教程：http://www.w2bc.com/Article/50764
+
+<!-- 配置 -->
+类似gulp，在webpack.config.js文件中进行配置（也可以将配置写入gulp中）
+与gulp配合：
+我们可以这样混搭：
+<script type="text/javascript">
+gulp.task("webpack", function(callback) {
+    // run webpack
+    webpack({
+        // configuration
+    }, function(err, stats) {
+        if(err) throw new gutil.PluginError("webpack", err);
+        gutil.log("[webpack]", stats.toString({
+            // output options
+        }));
+        callback();
+    });
+});
+</script>
+当然我们只需要把配置写到 webpack({ ... }) 中去即可，无须再写 webpack.config.js 了。
+
+<!-- 安装loader -->
+loader可以替代部分gulp的工作，如代码压缩，less编译等
+使用npm安装各种loader，如：
+cnpm install style-loader --save-dev  重要！这个才会把样式打包到js中，引入打包后的js，页面才会有css样式。css-loader,less-loader这些只会编译样式等，而不会打包到js中
+cnpm install css-loader --save-dev
+cnpm install less-loader --save-dev  要使用less，需要在loader配置中 loader: 'style!css!less-loader' 这三个loader才行
+cnpm install less-loader --save-dev
+cnpm install style-loader css-loader url-loader babel-loader sass-loader file-loader --save-dev
+一次性安装多个loader，当然，使用package.js来配置也就更方便了
+
+<!-- 运行 webpack -->
+webpack 的执行也很简单，直接执行
+$ webpack --display-error-details
+即可，后面的参数“--display-error-details”是推荐加上的，方便出错时能查阅更详尽的信息（比如 webpack 寻找模块的过程），从而更好定位到问题。
+其他主要的参数有：
+$ webpack --config XXX.js   //使用另一份配置文件（比如webpack.config2.js）来打包
+$ webpack --watch   //监听变动并自动打包
+$ webpack -p    //压缩混淆脚本，这个非常非常重要！
+$ webpack -d    //生成map映射文件，告知哪些模块被最终打包到哪里了
+*其中的 -p 是很重要的参数，曾经一个未压缩的 700kb 的文件，压缩后直接降到 180kb（主要是样式这块一句就独占一行脚本，导致未压缩脚本变得很大）。
+
+<!-- HTML -->
+直接在页面引入 webpack 最终生成的页面脚本即可
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title>demo</title>
+</head>
+<body>
+  <script src="dist/js/page/common.js"></script>
+  <script src="dist/js/page/index.js"></script>
+</body>
+</html>
+
+<!-- JS -->
+各脚本模块可以直接使用 commonJS 来书写，并可以直接引入未经编译的模块，比如 JSX、sass、coffee等（只要你在 webpack.config.js 里配置好了对应的加载器）。
+<script type="text/javascript">
+// 在webpack.config.js中，由于var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');使用的common.js，所以js文件可以使用common.js来编写
+require('../../css/reset.scss'); //加载初始化样式
+require('../../css/allComponent.scss'); //加载组件样式
+var React = require('react');
+var AppWrap = require('../component/AppWrap'); //加载组件
+var createRedux = require('redux').createRedux;
+var Provider = require('redux/react').Provider;
+var stores = require('AppStore');
+
+var redux = createRedux(stores);
+
+var App = React.createClass({
+    render: function() {
+        return (
+            <Provider redux={redux}>
+                {function() { return <AppWrap />; }}
+            </Provider>
+        );
+    }
+});
+
+React.render(
+    <App />, document.body
+);
+</script>
+
+<!-- commonjs -->
+使用webpack，我们最好使用commonjs的规范来编写代码，主要用到commonjs的require()和exports两个东西
+<script type="text/javascript">
+index.js文件，我们要引入另外的文件
+// 我们使用require()引入外部的css或js等文件
+// 引入css文件：引入的css文件最终会编译到js中，js中通过创建link标签来插入到html中实现样式。当然也可以在webpack的配置中将css单独打包
+require(a.css);  //css文件直接引入即可
+require(b.less);  //less文件也直接引入，在打包时会使用webpack的less-loader进行编译
+// js文件相对来说要复杂一点，因为commonjs存在模块作用域（一个js文件就是一个模块），我们在编写js时需要提供对外接口。引入时就需要从对外接口中引入
+var c=require('./c.js');  // 把加载的模块的对外接口整个赋值给一个变量
+c.b();  //调用c.js对外接口中的b()
+var b=require('./c.js').b;  // 把加载的模块的对外接口的某个属性赋值给一个变量
+b();  //由于赋值的时候就是将对外接口中的b方法赋给b，所以这里直接调用b即可
+// c();  c.js中的c方法调用不到，因为没有对外，会报错
+function a(){
+    console.log(1)
+}
+a();  //当然，自己模块中的函数能直接使用
+
+c.js文件
+// 将要提供给别的模块的变量或方法，需要挂载到exports对象下
+exports.b=function (){
+    console.log(2)
+}
+// 完整写法需要加上module，但是模块中内部实现了exports=module.exports，所以不需要加module
+// module.exports.a=function (){
+//     console.log(1)
+// }
+var c=function(){  //这是一个没有对外的函数，别的模块引入了这个函数也调用不到
+    console.log(3)
+}
+</script>

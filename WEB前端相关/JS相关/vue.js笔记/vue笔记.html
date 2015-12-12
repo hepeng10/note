@@ -1,0 +1,967 @@
+使用script标签引入vue文件：
+<script src="http://libs.cdnjs.net/vue/1.0.9/vue.min.js"></script>
+
+<div id="app">
+    <!-- 使用{{...}}模版引擎 -->
+    <p>{{ message }}</p>
+    <!-- 使用v-model="name"来绑定数据，注意：要默认显示name的值，就不能设置value=""这个属性，这样值就会显示为value的空值 -->
+    <input type="text" name="" placeholder="" v-model="message">
+</div>
+<script type="text/javascript">
+// 构造器：使用new Vue(json)来创建vue应用
+var vm=new Vue({  //一个 Vue 实例其实正是一个 MVVM 模式中所描述的 ViewModel - 因此在文档中经常会使用 vm 这个变量名。
+            // 选项
+            el: '#app',  //el：通过id来找到vue所管理的应用范围
+            data: {  //data：绑定数据
+                message: 'Hello Vue.js!'
+            }
+        })
+
+// 每个vue实例都会代理其data对象里所有的属性
+var data={a:1};
+var vm=new Vue({
+    data:data
+})
+vm.a===data.a;  //true
+//设置属性也会影响到原始数据
+vm.a=2;
+data.a;  //2
+//反之亦然
+data.a=3;
+vm.a;  //3
+*注意只有这些被代理的属性是响应的。如果在实例创建之后添加新的属性到实例上，它不会触发视图更新。
+
+// 以$开头的变量是实例属性和方法
+vm.$data===data;  //true
+vm.$el===document.getElementById('example');  //true
+vm.$watch('a',function(newVal,oldVal){
+    // 这个回调将在 vm.a 改变后调用
+});
+
+// 实例生命周期：Vue 实例在创建时有一系列初始化步骤——例如，它需要建立数据观察，编译模板，创建必要的数据绑定。在此过程中，它也将调用一些生命周期钩子，给自定义逻辑提供运行机会。
+var vm=new Vue({
+    data:{
+        a:1
+    },
+    created:function(){  //这个created钩子，就是在实例创建后调用
+        // this指向vm实例
+        console.log('a is:'+this.a);
+    }
+});
+*其它生命周期钩子：compiled、ready、destroyed（详情查看lifecycle.png生命周期图），钩子的this指向调用它的Vue实例。Vue.js没有控制器的概念，组件的自定义逻辑可以分割在这些钩子中
+
+
+
+// 数据绑定语法
+// 插值：往Mustache标签内插入数据
+<span>Message:{{msg}}</span>  //模板语法使用Mustache语法（双大括号）
+<span>This will never change:{{*msg}}</span>  //单次插值：使用*号，今后的数据变化就不会再引起插值更新了
+// 原始的HTML
+// 双Mustahe标签将数据解析为纯文本，而不是HTML。要输出HTML需要使用三Mustache标签
+<div id="app">{{{msg}}}</div>  //使用{{{...}}}才会解析i标签，如果是{{...}}则页面上会看到<i>标签字符串
+new Vue({
+    el:"#app",
+    data:{
+        msg:'<i>hello</i>'
+    }
+*在网站上动态渲染任意 HTML 是非常危险的，因为容易导致 XSS 攻击。记住，只对可信内容使用 HTML 插值，永不用于用户提交的内容。
+// HTML属性
+// Mustache标签也可以用在HTML标签的属性内
+<div id="item-{{id}}"></div>
+*注意在 Vue.js 指令和特殊特性内不能用插值。不必担心，如果 Mustache 标签用错了地方 Vue.js 会给出警告。
+
+// 绑定表达式：放在 Mustache 标签内的文本称为绑定表达式。在 Vue.js 中，一段绑定表达式由一个简单的 JavaScript 表达式和可选的一个或多个过滤器构成。
+// javascript表达式：Mustache标签内支持各种javascript表达式，有点类似eval
+{{number+1}}
+{{ok:'yes':'no'}}
+{{message.split('').reverse().join('')}}
+*一个限制是每个绑定只能包含单个表达式，因此下面的语句是无效的：
+{{var a=1}}  //这是一个语句，不是一个表达式
+{{if(ok){return message}}}  //流程控制也不可以，可改用三元表达式
+// 过滤器
+// 在表达式后使用管道符|添加可选的过滤器
+{{message|capitalize}}  //这里的capitalize是vue.js内置的过滤器，当然也可以自定义过滤器
+{{message|filterA|filterB}}  //接收多个过滤器
+{{message|filterA 'arg1' arg2}}  //过滤器也可以接收参数：过滤器函数始终以表达式的值作为第一个参数。带引号的参数视为字符串，而不带引号的参数按表达式计算。这里，字符串 'arg1' 将传给过滤器作为第二个参数，表达式 arg2 的值在计算出来之后作为第三个参数。
+
+
+
+// 指令：指令 (Directives) 是特殊的带有前缀 v- 的特性。指令的值限定为绑定表达式，因此上面提到的 JavaScript 表达式及过滤器规则在这里也适用。指令的职责就是当其表达式的值改变时把某些特殊的行为应用到 DOM 上。
+<p v-if="greeting">hello</p>  //这里v-if指令将根据表达式greeting的值的真假插入/删除<p>元素
+// 带参数的指令：有些指令可以在其名称后面带一个“参数” (Argument)，中间放一个冒号隔开
+<a v-bind:href="url"></a>  //这里 href 是参数，它告诉 v-bind 指令将元素的 href 属性跟表达式 url 的值绑定。可能你已注意到可以用属性插值 href="{{url}}" 获得同样的结果：这样没错，并且实际上在内部属性插值会转为 v-bind 绑定。
+<a v-on:click="doSomething">  //这里的参数是呗监听的时间的名称
+
+
+
+// 修饰符：修饰符 (Modifiers) 是以 . 开始的特殊后缀，用于表示指令应当以特殊方式绑定
+<a v-bind:href.literal="/a/b/c"></a>  //这里的.literal修饰符告诉指令，它的值解析为一个字面字符串，而不是一个表达式
+
+
+
+// 缩写：某些v-bind和v-on可以缩写
+// v-bind缩写：将 v-bind: 改为 :
+<button v-bind:disabled="someDynamicCondition">Button</button>
+<button :disabled="someDynamicCondition">Button</button>
+// v-on缩写：将 v-on: 改为 @
+<a v-on:click="doSomething"></a>
+<a @click="doSomething"></a>
+
+
+
+// 计算属性：模板是为了描述视图的结构。在模板中放入太多的逻辑会让模板过重且难以维护。这就是为什么 Vue.js 将绑定表达式限制为一个表达式。如果需要多于一个表达式的逻辑，应当使用计算属性。
+<div id="example">
+    a={{a}}, b={{b}}
+</div>
+var vm=new Vue({
+    el:"#example",
+    data:{
+        a:1
+    },
+    computed:{
+        // 一个计算属性的getter：这里b的值就来自函数中返回的值，如果b的值需要复杂的运算，就在这个函数中进行，而不应该将表达式写在模板中
+        b:function(){
+            // this指向vm实例
+            return this.a+1;  //当我们修改a的值后，b的值也会更新
+        }
+    }
+})
+
+// $watch：类似于AngularJS的$watch，当观察的数据变化时它会运行。不过，通常更好的办法是使用计算属性而不是一个命令式的 $watch 回调。
+<div id="demo">{{fullName}}</div>
+var vm=new Vue({
+    data:{
+        firstName:'Foo',
+        lastName:'Bar',
+        fullName:'Foo Bar'
+    }
+})
+// 使用$watch来观察
+vm.$watch('firstName',function(val){
+    this.fullName=val+''+this.lastName;
+})
+vm.$watch('lastName',function(val){
+    this.fullName=this.firstName+''+val;
+})
+// 使用计算属性
+var vm=new Vue({
+    data:{
+        firstName:'Foo',
+        lastName:'Bar'
+    },
+    computed:{
+        fullName:function(){  //可见，计算属性在某些方面比$watch更好
+            return this.firstName+''+this.lastName;
+        }
+    }
+})
+
+// 计算setter：计算属性默认只有getter，我们可以添加一个setter
+// ...
+computed:{
+    fullName:{  //值为函数改为值为对象，传入两个参数get和set
+        // getter：用于设置fullName，当函数里的数据发生变化时调用
+        get:function(){
+            return this.firstName+''+this.lastName;
+        },
+        // setter：fullName发生变化时调用
+        set:function(newValue){
+            var names=newValue.split('');
+            this.firstName=names[0];
+            this.lastName=names[names.length-1];
+        }
+    }
+}
+
+
+
+// 绑定Class
+// 使用v-bind:class，值为一个对象，当属性的值为true，则这个属性存在；这个可以和普通的class属性共存
+<div class="static" v-bind:class="{'class-a':isA,'class-b':isB}"></div>
+data:{
+    isA:true,
+    isB:false
+}
+渲染为：<div class="static class-a"></div>
+// 也可以直接绑定一个对象
+<div v-bind:class="classObject"></div>
+data:{
+    classObject:{
+        'class-a':true,
+        'class-b':false
+    }
+}
+// 还可以绑定一个返回一个对象的计算属性
+<div v-bind:class="computedObject"></div>
+computed:{  //这是一个计算属性
+    computedObject:function(){
+                        return {  //返回了一个对象
+                            "class-a":true,
+                            "class-b":false
+                        }
+                    }
+}
+// 数组语法：通过数组应用一个class列表
+<div v-bind:class="[classA,classB]"></div>
+data:{
+    classA:'class-a',
+    classB:'class-b'
+}
+渲染为：<div class="class-a class-b"></div>
+// 三元表达式绑定
+<div v-bind:class="[classA, isB ? classB : '']">
+
+// 绑定内联样式：使用v-bind:style="{...}"
+// 也是接收一个JSON对象，键名就是CSS的属性名，可以用驼峰式，也可以用短横分割；值就是计算的表达式
+<div v-bind:style="{color:activeColor,fontSize:fontSize+'px'}"></div>
+data:{
+    activeColor:'red',
+    fontSize:30
+}
+// 直接绑定到一个样式对象通常更好，让模板更清晰
+<div v-bind:style="styleObject"></div>
+data:{
+    styleObject:{
+        color:'red',
+        fontSize:'13px'
+    }
+}
+// 也可以绑定一个返回对象的计算属性
+略：与上面的class相同
+// 数组语法：将多个样式对象应用到一个元素上
+<div v-bind:style="[styleObjectA,styleObjectB]"></div>
+// 自动添加前缀
+使用v-bind:style绑定的属性需要浏览器前缀时，会自动侦测并添加相应前缀
+
+
+
+// 条件渲染
+// v-if：包括模版语法和指令两种
+// 模版语法
+{{#if ok}}
+    <h1>Yes</h1>
+{{/if}}
+// 指令
+<h1 v-if="ok">Yes</h1>
+<h1 v-else>No</h1>  //还可以使用else，必须立即跟在 v-if 或 v-show 元素的后面——否则它不能被识别
+// template v-if：可以将v-if添加到template标签上，来控制一块标签的显示或隐藏，template标签不会解析为HTML标签
+<template v-if="ok">
+  <h1>Title</h1>
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+</template>
+// 这样也是可以的，但是div是一个具有意义的HTML标签，有时这里h1和p元素并不是包裹在div里的，就要用到template标签了
+<div v-if="ok">
+  <h1>Title</h1>
+  <p>Paragraph 1</p>
+  <p>Paragraph 2</p>
+</div>
+
+// v-show：v-if是控制元素是否存在，而v-show是控制是否显示，通过display属性
+<h1 v-show="ok">Yes</h1>
+
+
+
+// 列表渲染
+// v-for：基于一个数组渲染一个列表
+<ul id="example-1">
+    <li v-for="item in items">  //每次遍历会生成一个li，当然可以使用在其它HTML标签上
+        {{item.message}}
+    </li>
+</ul>
+var example1=new Vue({
+    el:'#example-1',
+    data:{
+        items:[
+            {message:'Foo'},
+            {message:'Bar'},
+            {a:'a'}  //这个需要item.a才会显示，虽然不显示，但是同样存在一个内容为空的li元素
+        ]
+    }
+});
+// 更简单的数组
+<ul id="example-1">
+    <li v-for="item in items">
+        {{item}}
+    </li>
+</ul>
+var example1=new Vue({
+    el:'#example-1',
+    data:{
+        items:[
+            'Foo',
+            'Bar'
+        ]
+    }
+});
+// v-for访问父组件作用域内的属性和$index
+<ul id="example-2">
+  <li v-for="item in items">
+    //可访问到parentMessage，$index是当前的数字索引，从0开始
+    {{ parentMessage }} - {{ $index }} - {{ item.message }}
+  </li>
+</ul>
+var example2 = new Vue({
+  el: '#example-2',
+  data: {
+    parentMessage: 'Parent',
+    items: [
+      { message: 'Foo' },
+      { message: 'Bar' }
+    ]
+  }
+})
+
+// template v-for：类似template v-if
+<ul>
+  <template v-for="item in items">
+    <li>{{ item.msg }}</li>
+    <li class="divider"></li>
+  </template>
+</ul>
+
+// 数组变动检测
+// 变异方法
+上面的items数组，可以通过修改它的值来更新视图。另外vue.js也对 push()、pop()、shift()、unshift()、splice()、sort()、reverse() 这些数组方法进行了包装，故对items数组使用这些方法的时候，视图也会更新
+如：在控制台修改 example1.items.push({message:'Baz'})
+
+// 替换数组
+变异方法修改了原始数组。非变异方法不会修改原始数组而是返回一个新数组，如：filter()、concat()、slice()。在使用非变异方法时，可以直接用新数组替换旧数组
+example1.items=example1.items.filter(function(item){  //对items数组使用filter()进行过滤，会返回一个新数组，而将这个新数组直接赋值给items
+    return item.message.match(/Foo/);
+})
+注：用另一个数组替换数组，并不会完全重新渲染整个列表DOM，是个非常高效的操作
+
+// track-by：用于数组对象中有个唯一id的数组，避免DOM全完重新渲染
+{
+    items:[
+        {uid:'1',...}
+        {uid:'2',...}
+    ]
+}
+<div v-for="item in items" track-by="uid">  //对于这样的数组，最好加上track-by
+    ...
+</div>
+
+*问题：
+因为 JavaScript 的限制，Vue.js 不能检测到下面数组变化：
+1、直接用索引设置元素，如 vm.items[0] = {}  //但是通过修改数组对象中的某个值可以，如vm.items[0].message=1，这里不是修改items[0]，而是修改下面的message
+2、修改数据的长度，如 vm.items.length = 0
+解决：
+1、使用$set()方法：
+example1.items.$set(0,{childMsg:'Changed'});
+2、使用一个空数组替换items，而不是将length设置为0
+
+// $remove()
+移除数组中某个元素，通常会使用 splice() 方法，而vue.js添加了$remove()方法来查找并删除元素
+// 原始代码
+var index=this.items.indexOf(item);
+if(index!==-1){
+    this.items.splice(index,1);
+}
+// 使用$remove()
+this.items.$remove(item);
+
+// 对象v-for
+可以使用v-for遍历对象，除了$index之外，还有另一个特殊变量$key
+<ul id="repeat-object" class="demo">
+    <li v-for="value in object">
+        {{$key}}：{{value}}
+    </li>
+</ul>
+new Vue({
+    el:'#repreat-object',
+    data:{
+        object:{
+            FirstName:'John',
+            LastName:'Doe',
+            Age:30
+        }
+    }
+})
+
+// 值域v-for
+v-for也可以接收一个整数，此时它将重复模板数次
+<div>
+  <span v-for="n in 10">{{ n }} </span>
+</div>
+输出：0123456789
+
+// 显示过滤/排序后的结果
+有时我们想显示过滤/排序过的数组，同时不实际修改或重置原始数据。有两个办法：
+1、创建一个计算属性，返回过滤/排序过的数组：具有更强的定制性
+2、使用内置的过滤器 filterBy 和 orderBy：更方便
+
+
+
+// 方法与事件处理器
+// 方法处理器
+使用v-on指令监听DOM事件：
+<div id="example">
+    <button v-on:click="greet">Greet</button>
+</div>
+var vm=new Vue({
+    el:'#example',
+    data:{
+        name:'Vue.js'
+    },
+    // 在methods对象中定义方法
+    methods:{
+        greet:function(e){
+            // 方法内的this指向vm
+            alert(this.name);
+            // e是原生DOM事件
+            alert(e.target.tagName);
+        }
+    }
+});
+vm.greet();  //也可以在JS中调用方法
+
+// 内联语句处理
+<div id="example-2">
+  <button v-on:click="say('hi')">Say Hi</button>
+  <button v-on:click="say('what')">Say What</button>
+</div>
+new Vue({
+  el: '#example-2',
+  methods: {
+    say: function (msg) {
+      alert(msg)
+    }
+  }
+})
+
+// 内敛语句处理DOM事件：传入一个$event对象
+<button v-on:click="say('hello!', $event)">Submit</button>
+methods: {
+  say: function (msg, e) {
+    // 接收$event对象后，使用形参访问原生事件对象
+    e.preventDefault()
+  }
+}
+
+// 事件修饰符
+主要用来替代原生事件的e.preventDefault()和e.stopPropagation()，使用prevent和stop
+<form v-on:submit.prevent="onSubmit"></form>  //提交事件不再重载页面
+<a v-on:click.stop="doThis"></a>  //阻止单击事件冒泡
+<a v-on:click.stop.prevent="doThat">  //修饰符可以串联
+<form v-on:submit.prevent></form>  //只有修饰符
+
+// 按键修饰符
+用来简化获取按键事件
+<input v-on:keyup.13="submit">  //通过keyCode
+<input v-on:keyup.enter="submit">  //通过更方便记忆的按键字母
+
+
+
+// 表单控件绑定
+// 基础用法
+使用v-model进行双向绑定绑定，根据控件类型（text、checkbox、radio、select等）它自动选取正确的方法更新元素。
+<div id="app">
+    <span>Message is: {{ message }}</span>
+    <br>
+    <input type="text" v-model="message" placeholder="edit me">
+</div>
+new Vue({
+    el:'app'
+});
+详见：http://cn.vuejs.org/guide/forms.html#Radio
+
+// 值绑定
+对于单选按钮，勾选框及选择框选项，v-model 绑定的值通常是静态字符串（对于勾选框是逻辑值）
+//当选中时，`picked` 为字符串 "a"
+<input type="radio" v-model="picked" value="a">
+//`toggle` 为 true 或 false
+<input type="checkbox" v-model="toggle">
+//当选中时，`selected` 为字符串 "abc"
+<select v-model="selected">
+  <option value="abc">ABC</option>
+</select>
+
+有时我们想绑定值到 Vue 实例一个动态属性上。可以用 v-bind 做到。 而且 v-bind 允许绑定输入框的值到非字符串值。
+// checkbox
+<input
+  type="checkbox"
+  v-model="toggle"
+  v-bind:true-value="a"  //使用了true-value和false-value来绑定
+  v-bind:false-value="b">
+vm.toggle === vm.a  // 选中
+vm.toggle === vm.b  // 取消选中
+// radio
+<input type="radio" v-model="pick" v-bind:value="a">  //直接使用value进行绑定
+vm.pick===vm.a  //选中
+// select options
+<select v-model="selected">
+  <option v-bind:value="{ number: 123 }">123</option>  //对象字面量
+</select>
+typeof vm.selected // 'object'
+vm.selected.number // 123
+
+
+
+// 参数特性
+// lazy：在默认情况下，v-model 在input 事件中同步输入框值与数据，使用 lazy，从而改到在 change 事件中同步
+<input v-model="msg" lazy>  //在change而不是input事件中更新
+// number：如果想自动将用户的输入保持为数字，可以添加一个特性 number
+<input v-model="age" number>
+// debounce：设置一个最小的延时，在每次敲击之后延时同步输入框的值与数据。如果每次更新都要进行高耗操作（例如在输入提示中 Ajax 请求），它较为有用
+<input v-model="msg" debounce="500">
+注意 debounce 参数不会延迟 input 事件：它延迟“写入”底层数据。因此在使用 debounce 时应当用 vm.$watch() 响应数据的变化。若想延迟 DOM 事件，应当使用 debounce 过滤器。
+
+
+
+// 过渡效果
+通过 Vue.js 的过渡系统，可以在元素从 DOM 中插入或移除时自动应用过渡效果。为了应用过渡效果，需要在目标元素上使用 transition 特性
+<div v-if="show" transition="my-transition"></div>
+transition 特性可以与下面资源一起用：
+1、v-if
+2、v-show
+3、v-for （只为插入和删除触发）
+4、动态组件 （介绍见组件）
+5、在组件的根节点上，并且被 Vue 实例 DOM 方法（如 vm.$appendTo(el)）触发。
+当插入或删除带有过渡的元素时，Vue 将：
+1、尝试以 ID "my-transition" 查找 JavaScript 过渡钩子对象——通过 Vue.transition(id, hooks) 或 transitions 选项注册。如果找到了，将在过渡的不同阶段调用相应的钩子。
+2、自动嗅探目标元素是否有 CSS 过渡或动画，并在合适时添加/删除 CSS 类名。
+3、如果没有找到 JavaScript 钩子并且也没有检测到 CSS 过渡/动画，DOM 操作（插入/删除）在下一帧中立即执行。
+// CSS过渡
+<div v-if="show" transition="expand">hello</div>  //将transition属性的值设为expand。当show的值发生改变时会进行过渡效果，插入或删除div元素
+然后为 .expand-transition, .expand-enter 和 .expand-leave 添加 CSS 规则:
+/* .expand-transition：必需，始终保留在元素上 */
+.expand-transition {
+  transition: all .3s ease;
+  height: 30px;
+  padding: 10px;
+  background-color: #eee;
+  overflow: hidden;
+}
+/* .expand-enter 定义进入的开始状态。只应用一帧然后立即删除。 */
+/* .expand-leave 定义离开的结束状态。在离开过渡开始时生效，在它结束后删除。 */
+.expand-enter, .expand-leave {
+  height: 0;
+  padding: 0 10px;
+  opacity: 0;
+}
+如果 transition 属性没有值，类名默认是 .v-transition, .v-enter 和 .v-leave。
+另外，可以提供 JavaScript 钩子:
+Vue.transition('expand', {
+  // 当show变为true时，依次执行
+  beforeEnter: function (el) {
+    // 所有的钩子函数在调用时，它们的this均指向所属的Vue实例
+    el.textContent = 'beforeEnter'
+  },
+  enter: function (el) {
+    el.textContent = 'enter'
+  },
+  afterEnter: function (el) {
+    el.textContent = 'afterEnter'
+  },
+  enterCancelled: function (el) {  //如果过渡还在进行中时，删除元素触发cancelled钩子
+    // handle cancellation
+  },
+  // 当show变为false时依次执行
+  beforeLeave: function (el) {
+    el.textContent = 'beforeLeave'
+  },
+  leave: function (el) {
+    el.textContent = 'leave'
+  },
+  afterLeave: function (el) {
+    el.textContent = 'afterLeave'
+  },
+  leaveCancelled: function (el) {
+    // handle cancellation
+  }
+})
+
+// CSS动画
+CSS 动画用法与 CSS 过渡，区别是在动画中 v-enter 类名在节点插入 DOM 后不会立即删除，而是在 animationend 事件触发时删除。
+<span v-show="show" transition="bounce">Look at me!</span>  //也是使用transition属性，当show发生变化的时候触发enter或leave
+.bounce-enter {  //当show变为true的时候会添加这个class
+  animation: bounce-in .5s;
+}
+.bounce-leave {  //当show变为false的时候会移除这个class
+  animation: bounce-out .5s;
+}
+@keyframes bounce-in {
+  0% {
+    transform: scale(0);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+@keyframes bounce-out {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.5);
+  }
+  100% {
+    transform: scale(0);
+  }
+}
+
+// javascript过渡
+<p transition="fade"></p>  //使用transition设置过渡名称
+Vue.transition('fade', {
+  css: false,  //将CSS检测设置为false
+  enter: function (el, done) {  //enter和leave都需要调用done回调
+    // 元素已被插入 DOM
+    // 在动画结束后调用 done
+    $(el)  //引入了jquery
+      .css('opacity', 0)
+      .animate({ opacity: 1 }, 1000, done)
+  },
+  enterCancelled: function (el) {
+    $(el).stop()
+  },
+  leave: function (el, done) {
+    // 与 enter 相同
+    $(el).animate({ opacity: 0 }, 1000, done)
+  },
+  leaveCancelled: function (el) {
+    $(el).stop()
+  }
+})
+
+// 渐进过渡
+transition 与 v-for 一起用时可以创建渐近过渡。给过渡元素添加一个特性 stagger, enter-stagger 或 leave-stagger：
+<div id="demo">
+    <input v-model="query">
+    <ul>
+        <li v-for="item in list | filterBy query"
+            transition="staggered"
+            stagger="100">  //添加了stagger属性，设置每次渐进的时间
+          {{item.msg}}
+         </li>
+    </ul>
+</div>
+ul {
+    padding-left: 0;
+    font-family: Helvetica, Arial, sans-serif;
+}
+.staggered-transition {
+    transition: all .5s ease;
+    overflow: hidden;
+    margin: 0;
+    height: 20px;
+}
+.staggered-enter, .staggered-leave {
+    opacity: 0;
+    height: 0;
+}
+new Vue({
+    el: '#demo',
+    data: {
+        query: '',
+        list: [
+            { msg: 'Bruce Lee' },
+            { msg: 'Jackie Chan' },
+            { msg: 'Chuck Norris' },
+            { msg: 'Jet Li' },
+            { msg: 'Kung Fury' }
+        ]
+    }
+})
+或者，提供一个钩子 stagger, enter-stagger 或 leave-stagger，以更好的控制：
+Vue.transition('stagger', {
+  stagger: function (index) {
+    // 每个过渡项目增加 50ms 延时
+    // 但是最大延时限制为 300ms
+    return Math.min(300, index * 50)
+  }
+})
+
+
+
+// 组件
+组件的使用：
+<div id="example">
+  <my-component></my-component>  //这是一个自定义组件
+</div>
+组件的注册：
+var MyComponent = Vue.extend({  //定义组件，使用Vue.extend()
+  template: '<div>A custom component!</div>'  //使用template定义模版
+})
+Vue.component('my-component', MyComponent)  //将组件注册为一个HTML标签
+new Vue({  //实例化Vue.js。定义和注册组件必须在实例化Vue之前
+  el: '#example'
+})
+组件的渲染：
+<div id="example">
+  <div>A custom component!</div>  //组件标签渲染为了我们定义的内容
+</div>
+
+// 局部注册
+不需要全局注册每个组件。可以让组件只能用在其它组件内，用实例选项 components 注册。
+var Child=Vue.extend({...});  //定义一个子组件
+var Parent=Vue.extend({  //定义一个父组件
+    template:'...',
+    components:{  //使用components来定义只能使用在这个父组件内的子组件
+        'my-component':Child
+    }
+})
+*这种封装也适用于其它资源，如指令、过滤器和过渡
+
+// 注册语法糖
+为了让事件更简单，可以直接传入选项对象而不是构造器给 Vue.component() 和 component 选项。Vue.js 在背后自动调用 Vue.extend()
+Vue.component('my-component',{  //使用Vue.component()直接注册组件
+    template:'<div>A custom component!</div>'
+})
+var Parent=Vue.extend({
+    components:{
+        'my-component':{  //局部注册也可以这么做
+            template:'<div>A custom component!</div>'
+        }
+    }
+})
+
+// 组件选项问题
+由于组件的作用是封装后方便复用，所以data和el两个选项，最好使用函数返回，否则这个组件的多次使用，会共用同一个data和el，这样通常不是我们希望的
+var MyComponent = Vue.extend({
+  data: function () {  //这里通过函数返回一个对象，每个组件的data就是独立的数据了
+    return { a: 1 }
+  }
+})
+
+// is特性
+一些 HTML 元素，如 <table>，限制什么元素可以放在它里面。自定义元素不在白名单上，将被放在元素的外面，因而渲染不正确。这时应当使用 is 特性，指示它是一个自定义元素
+<table>
+  <tr is="my-component"></tr>  //table里不能使用自定义HTML标签，所以我们使用tr标签，并通过is属性指定要使用的组件
+</table>
+
+// 使用Props传递数据
+组件实例的作用域是孤立的。这意味着不能并且不应该在子组件的模板内直接引用父组件的数据。可以使用 props 把数据传给子组件。可以是数组或对象。数组只接收数据，对象用于高级配置，如类型检查，自定义验证，默认值等。
+Vue.component('child', {  //这是一个子组件
+  props: ['msg'],  // 声明 props。“prop” 是组件数据的一个字段，期望从父组件传下来。msg是父组件的数据
+  template: '<span>{{ msg }}</span>'  //使用msg，也可以用this.msg
+})
+<child msg="hello!"></child>  //使用组件的时候可以往通过属性的方式给数据赋值。当然，修改父组件中的msg的值，子组件也会更新
+*HTML属性不区分大小写，因此属性名为驼峰式时，需要转为-连接
+
+// 动态Props
+<child v-bind:msg="parentMsg"></child>  //使用v-bind绑定数据，传入的便不是字符串，而是一个数据变量
+
+// Prop绑定类型
+prop 默认是单向绑定：当父组件的属性变化时，将传导给子组件，但是反过来不会。不过，也可以使用 .sync 或 .once 绑定修饰符显式地强制双向或单次绑定
+<child :msg="parentMsg"></child>  //默认为单向绑定
+<child :msg.sync="parentMsg"></child>  //双向绑定
+<child :msg.once="parentMsg"></child>  //单次绑定
+*注：注意如果 prop 是一个对象或数组，是按引用传递。在子组件内修改它会影响父组件的状态，不管是使用哪种绑定类型。
+*组件相关暂略...具体查看相应文档
+
+
+
+// 深入响应式原理
+// $nextTick()
+由于vue.js的内部机制，在数据修改后，DOM不会立即更新，如果想在DOM状态更新后才执行的内容，需要使用$nextTick()
+Vue.component('example', {
+  template: '<span>{{msg}}</span>',
+  data: function () {
+    return {
+      msg: 'not updated'
+    }
+  },
+  methods: {
+    updateMessage: function () {
+      this.msg = 'updated'  //当调用updateMessage更新了msg的数据时
+      console.log(this.$el.textContent) // 输出'not updated'，因为DOM还未更新，通过DOM获取内容还是以前的内容
+      this.$nextTick(function () {  //使用$nextTick()就会在DOM更新后才执行
+        console.log(this.$el.textContent) // => 输出'updated'
+      })
+    }
+  }
+})
+
+// 计算属性关闭缓存
+var vm = new Vue({
+  data: {
+    msg: 'hi'
+  },
+  // 原始
+  computed: {
+    example: function () {  //虽然Date.now()一直在变，但每次访问example的值，可能并不会改变。因为vue.js的底层具有缓存机制，只有当观察的数据（msg）发生变化时，example才会重新运算一次
+      return Date.now() + this.msg
+    }
+  }
+  // 更新
+    computed: {
+      example: {  //通过将example的值设置为对象
+        cache: false,  //通过cache来关闭缓存
+        get: function () {  //通过get获取数据。这下每次访问example就会得到Date.now()的数据了。注：只在JS中访问才是每次都是最新的，DOM上也需要修改了msg才会更新
+          return Date.now() + this.msg
+        }
+      }
+    }
+})
+
+
+
+// 自定义指令
+Vue.directive('my-directive', {  //使用directive()添加自定义指令，第一个参数是指令名称，第二个参数为对象
+  bind: function () {  //只调用一次，在指令第一次绑定到元素上时调用
+    // 准备工作
+    // 例如，添加事件处理器或只需要运行一次的高耗任务
+  },
+  update: function (newValue, oldValue) {  //在 bind 之后立即以初始值为参数第一次调用，之后每当绑定值变化时调用，参数为新值与旧值
+    // 值更新时的工作
+    // 也会以初始值为参数调用一次
+  },
+  unbind: function () {  //只调用一次，在指令从元素上解绑时调用
+    // 清理工作
+    // 例如，删除 bind() 添加的事件监听器
+  }
+})
+Vue.directive('my-directive', function (value) {  //当第二个参数为函数时，这个函数为update()
+  ...  // 这个函数用作 update()
+})
+<div v-my-directive="someValue"></div>  //注意自定义指令名称之前还要添加v-前缀
+
+// 指令实例属性
+<div id="demo" v-demo:hello.a.b="msg"></div>
+Vue.directive('demo', {
+  bind: function () {
+    console.log('demo bound!')
+  },
+  update: function (value) {
+    // 指令中this指向这个指定对象
+    this.el.innerHTML =  //el-指令绑定的元素
+      'name - '       + this.name + '<br>' +  //name-指令的名字，不包含前缀：demo
+      'expression - ' + this.expression + '<br>' +  //expression-指令的表达式，不包括参数和过滤器：msg
+      'argument - '   + this.arg + '<br>' +  //arg-指令的参数：hello
+      'modifiers - '  + JSON.stringify(this.modifiers) + '<br>' +  //modifiers-一个对象，包含指令的修饰符：{"b":true,"a":true}
+      'value - '      + value  //指令的数据：hello!
+  }
+})
+var demo = new Vue({
+  el: '#demo',
+  data: {
+    msg: 'hello!'
+  }
+})
+
+// 对象字面量
+如果指令需要多个值，可以传入一个 JavaScript 对象字面量。记住，指令可以使用任意合法的 JavaScript 表达式
+<div v-demo="{ color: 'white', text: 'hello!' }"></div>
+Vue.directive('demo', function (value) {
+  console.log(value.color) // "white"
+  console.log(value.text) // "hello!"
+})
+
+// 字面修饰符
+当指令使用了字面修饰符，它的值将按普通字符串处理并传递给 update 方法。update 方法将只调用一次，因为普通字符串不能响应数据变化
+<div v-demo.literal="foo bar baz">  //使用了literal
+Vue.directive('demo', function (value) {
+  console.log(value) // "foo bar baz"
+})
+
+// 元素指令
+有时我们想以自定义元素的形式使用指令，而不是以特性的形式。元素指令可以看做是一个轻量组件。
+Vue.elementDirective('my-directive', {  //使用elementDirective来定义元素指令
+  // API 同普通指令
+  bind: function () {
+    // 操作 this.el...
+  }
+})
+<my-directive></my-directive>  //使用的时候直接用标签，而不是属性了
+*元素指令不能接受参数或表达式，但是它可以读取元素的特性从而决定它的行为。
+
+// params
+自定义指令可以接收一个 params 数组，指定一个属性列表，Vue 编译器将自动提取绑定元素的这些属性。
+<div v-example a="hi"></div>  //通过属性提供数据
+Vue.directive('example', {
+  params: ['a'],  //使用params数组指定属性列表
+  bind: function () {
+    console.log(this.params.a) // -> "hi"
+  }
+})
+// 动态属性
+<div v-example v-bind:a="someValue"></div>  //使用v-bind绑定一个动态属性a
+Vue.directive('example', {
+  params: ['a'],
+  paramWatchers: {  //使用paramWatchers来观察params中指定的属性变化
+    a: function (val, oldVal) {  //当属性的值变化时执行
+      console.log('a changed!')
+    }
+  }
+})
+
+// deep
+如果自定义指令用在一个对象上，当对象内部属性变化时要触发 update，则在指令定义对象中指定 deep: true
+<div v-my-directive="obj"></div>
+Vue.directive('my-directive', {
+  deep: true,  //对对象需要进行深度观察
+  update: function (obj) {
+    // 在 `obj` 的嵌套属性变化时调用
+  }
+})
+
+// twoWay
+如果指令想向 Vue 实例写回数据，则在指令定义对象中指定 twoWay: true 
+Vue.directive('example', {
+  twoWay: true,  //进行双向绑定
+  bind: function () {
+    this.handler = function () {
+      // 将数据写回 vm
+      // 如果指令这样绑定 v-example="a.b.c"
+      // 它将用给定值设置 `vm.a.b.c`      
+      this.set(this.el.value)  //使用this.set()来设置数据
+    }.bind(this)  //使用bind()方法传入this来修改this指向
+    this.el.addEventListener('input', this.handler)
+  },
+  unbind: function () {
+    this.el.removeEventListener('input', this.handler)
+  }
+})
+
+
+
+// 自定义过滤器
+类似于自定义指令，可以用全局方法 Vue.filter() 注册一个自定义过滤器，它接收两个参数：过滤器 ID 和过滤器函数。过滤器函数以值为参数，返回转换后的值
+Vue.filter('reverse',function(value){  //自定义了一个名为reverse的过滤器
+    return value.split('').reverse().join('');  //返回过滤后的值
+})
+<span v-text="message | reverse"></span>
+
+// 过滤器接收任意个参数
+Vue.filter('wrap',function(value,begin,end){  //定义了一个wrap过滤器，接收三个参数。第一个参数始终是要过滤的值，后面的参数是传的参
+    return begin+value+end;
+})
+<span v-text="message | wrap 'before' 'after'"></span>  //使用wrap过滤器，并传入before和after两个字符串
+
+// 双向过滤器
+目前我们使用过滤器都是在把来自模型的值显视在视图之前转换它。不过也可以定义一个过滤器，在把来自视图（<input> 元素）的值写回模型之前转换它
+Vue.filter('currencyDisplay',{  //第二个参数是对象了，里面有两个函数
+    read:function(val){  //model->view：在更新<input>元素之前格式化值（js中修改数据，会过滤后更新视图的内容）
+        return '$'+val.toFixed(2);
+    },
+    write:function(val,oldVal){  //view->model：在写回数据之前格式化值（input标签中进行修改，会过滤后修改js中的数据）
+        var number=+val.replace(/[^\d.]/g,'');
+        return isNaN(number)?0:parseFloat(number.toFixed(2));
+    }
+})
+
+// 动态参数
+如果过滤器参数没有用引号包起来，则它会在当前 vm 作用域内动态计算。另外，过滤器函数的 this 始终指向调用它的 vm
+<input v-model="userInput">
+<span>{{msg | concat userInput}}</span>  //这里使用了concat过滤器，传入的userInput参数没有使用引号，则userInput参数是个数据变量
+Vue.filter('concat', function (value, input) {
+  // `input` === `this.userInput`
+  return value + input
+})
+*上例比较简单，也可以用表达式达到相同的结果，但是对于更复杂的逻辑——需要多于一个语句，这时需要将它放到计算属性或自定义过滤器中
+
+
+
+// 混合
+略，太复杂，需要时看相关文档：http://cn.vuejs.org/guide/mixins.html
+
+
+
+// 插件
+略，需要时查看相关文档：http://cn.vuejs.org/guide/plugins.html
+</script>

@@ -43,8 +43,8 @@ E:enabled{}  //启用状态伪类选择器
 E:disabled{}  //不可用状态伪类选择器
 <!-- 结构伪类选择器 -->
 E:root{}  //匹配根元素即HTML元素
-E:first-child{}  //作为父元素的第一个子元素的元素E。ul>li:first-child{}
-E:last-child{}  //作为父元素的最后一个子元素的元素E
+F E:first-child{}  //作为父元素的第一个子元素的元素E。ul>li:first-child{}
+F E:last-child{}  //作为父元素的最后一个子元素的元素E
 F E:nth-child(n)  //选择父元素F的第n个子元素E。1、ul>li:nth-child{3}{}；2、ul>li:nth-child{2n}{}：这里直接使用n作为参数，表示选中偶数项，并且这个参数可以用各种算数表达式如2n-1选中奇数项
 F E:nth-last-child(n)  //选择父元素F的倒数第n个子元素E
 E:nth-of-type(n)  //选择父元素内第n个E元素。ul>li:nth-of-type{3}{}：这里和nth-child{3}{}类似，区别在于，子元素中有多种不同类型的元素时，nth-child{3}{}的索引是所有子元素中的第三个，如果第三个不是li，则无法选中元素；而nth-of-type{3}{}则会过滤掉无用元素，只选择第三个li

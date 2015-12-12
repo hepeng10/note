@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>购物车demo</title>
+</head>
+<body>
+    <input type="checkbox" name="" value="香蕉">香蕉<br>
+    <input type="checkbox" name="" value="苹果">苹果<br>
+    <input type="checkbox" name="" value="西瓜">西瓜<br>
+    <input type="checkbox" name="" value="哈密瓜">哈密瓜<br>
+    <!-- 打开两个此页面，在一个页面中修改选中的元素，另一个页面中也同步更新 -->
+    <script type="text/javascript">
+    var aInput=document.getElementsByTagName('input');
+    for (var i = 0; i < aInput.length; i++) {
+        aInput[i].onclick=function(){
+            if(this.checked){  //当选中时
+                window.localStorage.setItem('sel',this.value);
+            }else{  //当取消选中时
+                window.localStorage.setItem('unSel',this.value);
+            }
+        }
+    }
+    // 当修改本地存储时触发
+    window.addEventListener('storage',function(e){
+        if(e.key=='sel'){  //如果触发本地存储为sel
+            for(var i=0;i<aInput.length;i++){
+                // 如果本地存储中sel的值和input框的value值相等，则说明此input框被修改
+                if(e.newValue==aInput[i].value){
+                    aInput[i].checked=true;  //将此input框勾上（其它页面中执行）
+                }
+            }
+        }else if(e.key='unSel'){  //如果触发本地存储为unSel
+            for(var i=0;i<aInput.length;i++){
+                // 如果本地存储中sel的值和input框的value值相等，则说明此input框被修改
+                if(e.newValue==aInput[i].value){
+                    aInput[i].checked=false;  //将此input框取消（其它页面中执行）
+                }
+            }
+        }
+    });
+    </script>
+</body>
+</html>

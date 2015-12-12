@@ -42,6 +42,16 @@ box({...})  就是服务器返回的数据内容，而这个内容的语句正�
     createJs('jsonp.php?callback=fn');  //也可以多传入一个参数用来指定函数名，增加灵活性，这里就会返回fn({name:'miaov'})，我们定义的函数也应该名为fn
 </script>
 
+JSONP实例：
+<!-- 定义一个服务器将返回的函数myCallback，函数内就是自己的操作 -->
+<script type="text/javascript">
+  function myCallback(json) {
+    alert(new Date(json.dateString));
+  }
+</script>
+<!-- 返回myCallback({"dateString":"November 11, 2015 03:19:11 GMT+0000"}); -->
+<script type="text/javascript" src="http://www.timeapi.org/utc/now.json?callback=myCallback"></script>
+
 4、location.hash跨域：iframe，通过一个主域的代理文件
 5、windows.name跨域：类似location.hash
 6、flash

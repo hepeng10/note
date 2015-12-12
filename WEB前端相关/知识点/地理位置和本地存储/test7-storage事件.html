@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>本地存储</title>
+</head>
+<body>
+    <input type="button" name="" value="设置">
+    <input type="button" name="" value="获取">
+    <input type="button" name="" value="删除">
+    <input type="text" name="" value="" placeholder="">
+
+    <script type="text/javascript">
+    var aInput=document.getElementsByTagName('input');
+    // 设置
+    aInput[0].onclick=function(){
+        window.localStorage.setItem('name',aInput[3].value);
+    }
+    aInput[1].onclick=function(){
+        alert(window.localStorage.getItem('name'));
+    }
+    aInput[2].onclick=function(){
+        window.localStorage.removeItem('name');
+        window.localStorage.clear();
+    }
+    // storage事件，当本地存储修改或删除时触发，但在当前页面进行修改或删除不会触发
+    // 可以打开两个此页面，在一个页面中设置，另一个页面中修改，设置的这个页面就会弹出123
+    window.addEventListener('storage',function(e){
+        alert(123);
+        console.log(e.key);  //修改或删除的key
+        console.log(e.newValue);  //新设置的值
+        console.log(e.oldValue);  //以前的值
+        console.log(e.storageArea);  //storage对象
+        console.log(e.url);  //触发事件页面的url
+    });
+    </script>
+</body>
+</html>

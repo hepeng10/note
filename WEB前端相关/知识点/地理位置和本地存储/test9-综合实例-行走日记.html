@@ -1,0 +1,145 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<title>无标题文档</title>
+<style>
+*{ margin:0; padding:0;}
+li{ list-style:none;}
+#div1,#div2{ float:left; width:400px; height:400px; border:1px #000000 solid; margin:10px; position:relative; overflow:hidden;}
+#div2 ul{ position:absolute; left:0; width:2000px;}
+#div2 ul .box{ width:400px; height:400px; float:left; overflow:hidden;}
+#div2 #childUl{ width:400px;}
+#childUl li{ width:400px; border-bottom:1px #666666 dashed;}
+#map{ width:100%; height:380px;}
+</style>
+<script src="move.js"></script>
+<script src="http://api.map.baidu.com/api?v=1.3"></script>
+</head>
+
+<body>
+<div id="div1">
+标题:<input type="text" /><br />
+内容:<textarea id="t1" style="height:300px; width:300px;"></textarea><br />
+<input type="button" value="保存本地" />
+<input type="button" value="删除所有数据" />
+<input type="checkbox" />记录地图位置
+</div>
+<div id="div2">
+    <ul id="ul1">
+        <!-- 内容列表 -->
+        <li class="box">
+            <ul id="childUl">
+            </ul>
+        </li>
+        <!-- 点击列表进入详细内容 -->
+        <li class="box">
+            <input type="button" value="后退" />
+            <input style="float:right" type="button" value="前进" />
+            <div></div>
+            <div></div>
+        </li>
+        <!-- 地理位置 -->
+        <li class="box">
+            <input type="button" value="后退" />
+            <div id="map"></div>
+        </li>
+    </ul>
+</div>
+
+<script type="text/javascript">
+    var oDiv=document.getElementById('div1');
+    var aInput=oDiv.getElementsByTagName('input');
+    var oT=document.getElementById('t1');
+    var iNow=window.localStorage.getItem('num')||0;  //本地存储计数
+    var oChildUl=document.getElementById('childUl');
+    var aChildLi=oChildUl.getElementsByTagName('li');
+    var oUl=document.getElementById('ul1');
+    var aBox=oUl.getElementsByClassName('box');
+    var aBox1_input=aBox[1].getElementsByTagName('input');
+    var aBox1_div=aBox[1].getElementsByTagName('div');
+    var oBox2_input=aBox[2].getElementsByTagName('input');
+    var index;
+    // 由于刷新后右边插入的li元素会消失，但是本地存储数据依然存在。所以需要调出本地存储的数据，创建li插入到右边窗口中
+    if(window.localStorage.getItem('num')){
+        for(var i=0;i<iNow;i++){
+            var oLi=document.createElement('li');
+            oLi.innerHTML=window.localStorage.getItem('title'+i);
+            oChildUl.appendChild((oLi));
+        }
+        changeLi();
+    }
+    // 保存本地
+    aInput[1].onclick=function(){
+        window.localStorage.setItem('title'+iNow,aInput[0].value);
+        window.localStorage.setItem('ta'+iNow,oT.value);
+        createLi();
+        iNow++;
+        window.localStorage.setItem('num',iNow);
+    }
+    // 点击保存本地的时候，将数据作为一个列表添加到右侧窗口中
+    function createLi(){
+        var oLi=document.createElement('li');
+        oLi.innerHTML=window.localStorage.getItem('title'+iNow);
+        oChildUl.appendChild(oLi);
+        // 每次添加了一个数据，就需要调用一次changeLi()来给它绑定事件
+        changeLi();
+    }
+    // 点击右窗口列表里的元素，切换窗口
+    function changeLi(){
+        for (var i = 0; i < aChildLi.length; i++) {
+            // 这里index的值和iNow一样，一个个增加的，所以每个li的index的值能对应上它的iNow的值
+            aChildLi[i].index=i;
+            // 点击列表，转到第二个li的位置
+            aChildLi[i].onclick=function(){
+                startMove(oUl,{"left":-aBox[0].offsetWidth});
+                aBox1_div[0].innerHTML=window.localStorage.getItem('title'+this.index);
+                aBox1_div[1].innerHTML=window.localStorage.getItem('ta'+this.index);
+                // 当精度纬度存在的时候，才能点击前进
+                if(window.localStorage.getItem('y'+this.index)){
+                    aBox1_input[1].disabled=false;
+                }else{
+                    aBox1_input[1].disabled=true;
+                }
+                index=this.index;
+            }
+        }
+    }
+    // 点击后退按钮，回到第一个li的位置
+    aBox1_input[0].onclick=function(){
+        startMove(oUl,{"left":0});
+    }
+    // 点击前进按钮，转到第三个li的位置
+    aBox1_input[1].onclick=function(){
+        startMove(oUl,{"left":-2*aBox[0].offsetWidth});
+        // 显示地图，略...
+    }
+    // 第三页的后退按钮
+    oBox2_input[0].onclick=function(){
+        startMove(oUl,{"left":-aBox[0].offsetWidth});
+    }
+    // 删除所有本地数据
+    aInput[2].onclick=function(){
+        window.localStorage.clear();
+    }
+    // 记录地图位置
+    aInput[3].onclick=function(){
+        var _this=this;
+        navigator.geolocation.getCurrentPosition(function(position){
+            // 获取精度和纬度
+            var y=position.coords.longitude;
+            var x=position.coords.latitude;
+            // 判断此按钮是否勾上
+            if(_this.checked){
+                // 记录精度和纬度，也是通过iNow给每个列表添加不同的数据
+                window.localStorage.setItem('y'+iNow,y);
+                window.localStorage.setItem('x'+iNow,x);
+            }else{
+                window.localStorage.removeItem('y'+iNow);
+                window.localStorage.removeItem('x'+iNow);
+            }
+        });
+    }
+</script>
+</body>
+</html>

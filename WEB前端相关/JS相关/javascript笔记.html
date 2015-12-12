@@ -1,3 +1,6 @@
+<!-- 解释器 -->
+javascript解释器也叫引擎，比如google就把它的解释器叫做V8，又叫V8引擎
+
 <!-- 文档模式 -->
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">  //目前最好使用此文档模式，可让IE8兼容position:fixed
 
@@ -27,6 +30,16 @@ Infinity,-Infinity;  //正无穷和负无穷；可使用isFinite()函数来判�
 NaN;  //not a number；可使用isNaN()来判断一个变量是否为数字，会尝试将其它类型转为数字类型；使用typeof(NaN)结果为number
 Number(x);  //试图将任意类型转换为数字类型，转换失败则为NaN。不会试图一个个的字符转，比如'1a'转换结果是NaN
 parseInt("AF",16) parseFloat()  //将字符串转换为数字类型；parseInt()可设置进制。会试图一个个字符的转，比如'1a'会转换成1
+//将数字格式化为字符串（会四舍五入）
+var n=123456.789;
+n.toFixed(0);  //'123457' 将数字转换为指定小数位数的字符串
+n.toFixed(2);  //'123456.79'
+n.toFixed(5);  //'123456.78900'
+n.toExponential(1);  //'1.2e+5' 将数字转换为指数表示的字符串
+n.toExponential(3);  //1.235e+5'
+n.toPrecision(4);  //'1.235e+5'  根据指定的位数，转换成相应的字符串
+n.toPrecision(7);  //'123456.8'
+n.toPrecision(10);  //'123456.7890'
 
 //字符串
 var str="javascript";  //声明字符串；字符串是不可变的，只会产生新的字符串
@@ -165,6 +178,9 @@ colors.forEach(func);  //对数组中的每一项运行给定函数，这个方�
 colors.filter(func);  //对数组中的每一项运行给定函数，返回该函数会返回true的项组成的数组
 colors.map(func);  //对数组中的每一项运行给定函数，返回每次函数调用的结果组成的数组
 colors.some(func);  //对数组中的每一项运行给定函数，如果该函数对任一项返回true，则返回true
+// 数组转换成字符串或数组
+数组转换成字符串，会得到这个数组每个元素之间以逗号分隔的字符串，空数组就是空字符串
+数组转换成数字，空数组会转换为0，只有一个元素且这个元素为数字转换为这个数组，其它转换为NaN
 
 
 
@@ -237,6 +253,11 @@ var json4={'people':[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}],'d
 for(var attr in json){  //使用for in遍历JSON
     alert(json[attr]);
 }
+
+var str = '{"name":"huangxiaojian","age":"23"}';  //格式要正确，键值都需要双引号
+var json=JSON.parse(str);  //将一个JSON格式的字符串解析为JSON对象
+var a = {a:1,b:2};
+var str=JSON.stringify(a);  //将一个JSON对象转为JSON格式的字符串。'{"a":1,"b":2}'
 
 // JSON的命名空间，通过特殊的数据结构模拟
 var miaov={};
@@ -497,6 +518,10 @@ TabSwitch.prototype.show=function(){
     alert(this.a);
 }
 一般JS的面向对象是高手使用的，主要用在游戏公司，或公司的高级程序员来写给下面的程序员使用
+
+*注：
+作用域链和原型链都是链表，下一级有个指针指向上一级，所以可以通过“链”逐一的往上查找
+对象的继承也是链表的关系，子对象中有个_proto_指针指向父级对象，顶级对象是Object，它的_protp_为空
 
 
 
@@ -1013,6 +1038,32 @@ header("Cache-Control: no-cache");
 var obj={'name':'tirion','age':'26'} //最基本的json格式，通过obj.name访问
 var obj=[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}] //并列的多组json数据，通过obj[0].name或obj[1].name访问
 var obj={'people':[{'name':'tirion','age':'26'},{'name':'soul','age':'20'}],'dog':{'name':'wangcai','age':'5'}} //混合的json格式；通过obj.people[0].name访问tirion，通过obj.dog.name访问wangcai
+
+
+
+//WebSocket的使用
+var ws = new WebSocket(“ws://echo.websocket.org”);  //连接webSocketServer服务器，参数是需要连接的服务器端的地址，使用ws://协议
+ws.onopen = function(){ws.send(“Test!”); }  //当Browser WebSocketServer连接成功后，会触发onopen消息
+ws.onmessage = function(evt){console.log(evt.data);ws.close();}  //当Browser接收到WebSocketServer发送过来的数据时，就会触发onmessage消息，参数evt中包含Server传输过来的数据
+ws.onclose = function(evt){console.log(“WebSocketClosed!”);}  //当Browser接收到WebSocketServer端发送的关闭连接请求时，就会触发onclose消息
+ws.onerror = function(evt){console.log(“WebSocketError!”);}  //如果连接失败，发送、接收数据失败或者处理数据出现错误，browser会触发onerror消息
+// 创建一个Socket实例
+var socket = new WebSocket('ws://localhost:8080'); 
+// 打开Socket 
+socket.onopen = function(event) { 
+  // 发送一个初始化消息
+  socket.send('I am the client and I\'m listening!'); 
+  // 监听消息
+  socket.onmessage = function(event) { 
+    console.log('Client received a message',event); 
+  }; 
+  // 监听Socket的关闭
+  socket.onclose = function(event) { 
+    console.log('Client notified socket has closed',event); 
+  }; 
+  // 关闭Socket.... 
+  //socket.close() 
+};
 
 
 

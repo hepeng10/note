@@ -1,0 +1,56 @@
+var webpack = require('webpack');
+
+// 使用插件
+// 使用CommonsChunkPlugin插件来提取多个页面之间的公共模块，并将该模块打包为 common.js；然后HTML文件应该引入common.js
+var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');
+// 压缩JS插件
+var uglifyJS=new webpack.optimize.MinChunkSizePlugin(minSize);
+
+module.exports = {
+    //插件项：定义要使用的插件
+    plugins: [commonsPlugin,uglifyJS],
+    //页面入口文件配置：要进行操作的文件
+    entry: {
+        // key是打包后的文件名，value是要打包的文件路径
+        index : './src/js/page/index.js',
+        // 没写后缀，webpack会自动去匹配（貌似是nodeJS模块机制的自动匹配）：page1，page1.webpack.js，page1.web.js，page1.js，page1.json的顺序（最好写上后缀）
+        page1: "./page1",
+        //支持数组形式，将加载数组中的所有模块，打包成一个文件page2.bundle.js
+        page2: ["./entry1.js", "./entry2.js"]
+    },
+    //入口文件输出配置：将entry中指定的文件输出到哪个目录，怎么命名
+    output: {
+        path: 'dist/js/page',
+        filename: '[name].bundle.js'  //[name]会替换为entry里的文件名，可以通过这里改为index.min.js这样的文件名等
+    },
+    module: {
+        //加载器配置：是最关键的一块配置。它告知 webpack 每一种文件都需要使用什么加载器来处理
+        //这些加载器一般都需要先进行安装，如npm install url-loader -save-dev
+        loaders: [
+            //.css 文件使用 style-loader 和 css-loader 来处理
+            { test: /\.css$/, loader: 'style-loader!css-loader' },
+            //.js 文件使用 jsx-loader 来编译处理
+            { test: /\.js$/, loader: 'jsx-loader?harmony' },
+            //.scss 文件使用 style-loader、css-loader 和 sass-loader 来编译处理
+            { test: /\.scss$/, loader: 'style!css!sass?sourceMap'},
+            //图片文件使用 url-loader 来处理，小于8kb的直接转为base64
+            //配置信息的参数“?limit=8192”表示将所有小于8kb的图片都转为base64形式（其实应该说超过8kb的才使用 url-loader 来映射到文件，否则转为data url形式）。
+            // 比如index.js中，require()的css中有图片，或者JS中创建了图片，就会被loader
+            { test: /\.(png|jpg)$/, loader: 'url-loader?limit=8192'}
+        ]
+        //如上，"-loader"其实是可以省略不写的，多个loader之间用“!”连接起来。
+    },
+    //其它解决方案配置
+    resolve: {
+        //查找module的话从这里开始查找
+        root: 'E:/github/flux-example/src', //绝对路径
+        //自动扩展文件后缀名，意味着我们require()模块时可以省略后缀名
+        extensions: ['', '.js', '.json', '.scss'],
+        //模块别名定义，方便后续直接引用别名，无须多写长长的地址
+        alias: {
+            AppStore : 'js/stores/AppStores.js',  //后续直接 require('AppStore') 即可
+            ActionType : 'js/actions/ActionType.js',
+            AppAction : 'js/actions/AppAction.js'
+        }
+    }
+};

@@ -19,7 +19,7 @@ NPM可选工具：
 安装n：npm install -g n。n模块用来管理node.js的版本，升级node使用命令 n stable 即可。n v0.12.2安装指定版本。Windows不可用，重新下载需要版本覆盖安装
 安装grunt：npm install -g grunt-cli(还需安装grunt的相关插件，gruntjs.net网站中查看教程，其中uglify,concat,watch需要安装，例：npm install grunt-contrib-uglify)。自动化工具。可以用来压缩代码，混淆代码等。
 安装gulp:npm install -g gulp。类似grunt，但是更简单好用。
-安装bower：npm install bower。包管理器，可以用来管理依赖组件，维护依赖组件等。如下载jquery等，例：bower install jquery。在使用bower命令的时候需要进入cd node_modules/.bin目录中，安装的组件也在.bin目录中的bower_components里。另，如果安装提示没git，需要环境变量中添加git的bin目录进行支持
+安装bower：npm install bower -g。包管理器，可以用来管理依赖组件，维护依赖组件等。如下载jquery等，例：bower install jquery。在使用bower命令的时候需要进入cd node_modules/.bin目录中，安装的组件也在.bin目录中的bower_components里。另，如果安装提示没git，需要环境变量中添加git的bin目录进行支持
 安装http-server：npm install -g http-server。可以将计算机上的任何一个目录作为http服务器，就能通过浏览器直接访问。cd进入需要的目录，使用http-server命令即可。也可通过参数设置ip和端口号：http-server -a 127.0.0.1 -p 8080
 安装yeoman：npm install yo。在web立项阶段，使用yeoman来生成项目的文件和代码结构。yeoman自动将最佳实践和工具整合进来，方便开发。包含了多种项目情况的生成器（类似模版），我们选择适合自己项目的生成器。
 安装jasmine：npm install jasmine。用来做单元测试的。
@@ -47,23 +47,30 @@ vim .bowerrc  使用vim命令可以编辑文件，如果文件不存在则是创
 
 -gulp的使用："教程：https://github.com/nimojs/gulp-book/"
     通常在全局安装gulp后，还需要cd到项目目录使用--save-dev再安装一次（防止全局 gulp 升级后与此项目 gulpfile.js 代码不兼容）
+	cnpm init  初始化package.json文件
+	cnpm install gulp --save-dev  使用的组件需要使用--save-dev才会加入package.json中
 常用组件：
-    压缩JS：cnpm install gulp-uglify
-    合并JS：cnpm install gulp-concat
-    压缩CSS：cnpm install gulp-minify-css
-    压缩图片：cnpm install gulp-imagemin，可以去除图片的exif信息
-    编译less：cnpm install gulp-less
-    同步更新/移动端调试：npm install browser-sync gulp --save-dev，详情：http://www.ibtool.com/browsersync.html
+    压缩JS：cnpm install gulp-uglify --save-dev
+    重命名：cnpm install gulp-rename --save-dev
+    合并JS：cnpm install gulp-concat --save-dev
+    压缩CSS：cnpm install gulp-minify-css --save-dev
+    添加浏览器前缀：cnpm install gulp-autoprefixer --save-dev
+    压缩图片：cnpm install gulp-imagemin --save-dev，可以去除图片的exif信息
+    编译less：cnpm install gulp-less --save-dev
+	阻止gulp错误退出：cnpm install gulp-plumber --save-dev
+    同步更新/移动端调试：cnpm install browser-sync gulp --save-dev，需要安装python2.7。详情：http://www.ibtool.com/browsersync.html 
 
 // 压缩JS：
 1、在需要压缩的js目录中新建gulpfile.js，并配置
 var gulp = require('gulp')  // 获取 gulp
 var uglify = require('gulp-uglify')  // 获取 uglify 模块（用于压缩 JS）
+var rename = require('gulp-rename')
 // gulp.task(name, fn) - 定义任务，第一个参数是任务名，第二个参数是任务内容。任务名是自定义的，到时候通过 gulp 任务名 来执行此任务
 gulp.task('script', function() {  // 压缩 js 文件；在命令行使用 gulp script 启动此任务
     gulp.src('js/*.js')  // 1. 配置源文件，这里就是压缩js目录下的所有.js文件
     // gulp.src('js/**/*.js')  目录中还有子目录就这样写
         .pipe(uglify())  // 2. 使用uglify压缩文件；gulp.pipe() - 管道，你可以暂时将 pipe 理解为将操作加入执行队列
+        .pipe(rename({suffix:'.min'}))  //添加.min后缀a.js变为a.min.js
         .pipe(gulp.dest('dist/js'))  // 3. 配置目标目录，另存压缩后的文件
 })
 2、使用 cd 命令跳转至 gulpfile.js 文件所在目录
@@ -78,11 +85,13 @@ gulp.task('concat', function () {
         .pipe(gulp.dest('dist/js'));
 });
 
-// 压缩CSS
+// 压缩CSS并添加浏览器前缀
 var minifyCSS = require('gulp-minify-css')  //获取css压缩组件
+var autoprefixer = require('gulp-autoprefixer')  //获取css压缩组件
 gulp.task('css', function () {
     gulp.src('css/*.css')
         .pipe(minifyCSS())  //使用pipe()执行minifyCSS()模块即可
+        .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))  //添加浏览器前缀，指定版本号
         .pipe(gulp.dest('dist/css'))
 })
 
@@ -111,6 +120,24 @@ gulp.task('less', function () {  //执行多个任务流，编译并压缩，不
         .pipe(minifyCSS())
         .pipe(gulp.dest("dist/css"))
 });
+gulp.task('less', function () {  //这样编译并压缩，不会生成中间的未压缩的css文件
+    gulp.src('./*/*.less')
+        .pipe(plumber())
+        .pipe(less())
+        .pipe(minifyCSS())
+        .pipe(gulp.dest('./'))
+});
+
+// 阻止gulp错误退出
+当使用gulp监控less、js这些文件变动的时候，当编写的文件出现语法错误，gulp会提示错误，并退出监控。这样就得每次去重启gulp
+var plumber = require('gulp-plumber');
+gulp.task('less', function () {
+    gulp.src('less/*.less')
+        .pipe(plumber())  //在pipe中调用一次plumber()就能避免gulp自动退出了
+        .pipe(less())
+        .pipe(gulp.dest('css'))
+});
+
 // 检测代码修改自动执行任务：
 1、在gulpfile.js中添加一个新任务auto
 gulp.task('auto', function () {  // 在命令行使用 gulp auto 启动此任务
@@ -128,6 +155,7 @@ gulp.task('browser-sync', function () {  // Static server
             baseDir: "./"  //指定服务器启动根目录
         }
     });
+	// 注：两个*表示dist目录下的所有目录，而不仅是根目录，只需要根目录则用一个*号
     gulp.watch("./**/*.*").on('change', browserSync.reload);  //监听任何文件变化，实时刷新页面
 });
 启动browser-sync：gulp browser-sync
