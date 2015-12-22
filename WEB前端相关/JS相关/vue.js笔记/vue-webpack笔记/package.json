@@ -1,0 +1,25 @@
+{
+  "name": "vuebase",
+  "version": "0.1.0",
+  "description": "vue.js base config",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Tirion",
+  "license": "MIT",
+  "dependencies": {
+    "vue": "^1.0.12"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.10.1",
+    "css-loader": "^0.23.0",
+    "gulp": "^3.9.0",
+    "less-loader": "^2.2.2",
+    "style-loader": "^0.13.0",
+    "vue-hot-reload-api": "^1.2.2",
+    "vue-html-loader": "^1.0.0",
+    "vue-loader": "^7.2.0",
+    "webpack": "^1.12.9"
+  }
+}

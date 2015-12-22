@@ -58,7 +58,7 @@ vim .bowerrc  使用vim命令可以编辑文件，如果文件不存在则是创
     压缩图片：cnpm install gulp-imagemin --save-dev，可以去除图片的exif信息
     编译less：cnpm install gulp-less --save-dev
 	阻止gulp错误退出：cnpm install gulp-plumber --save-dev
-    同步更新/移动端调试：cnpm install browser-sync gulp --save-dev，需要安装python2.7。详情：http://www.ibtool.com/browsersync.html 
+    同步更新/移动端调试：cnpm install browser-sync gulp --save-dev，需要安装python2.7（貌似也不是必须）。详情：http://www.ibtool.com/browsersync.html 
 
 // 压缩JS：
 1、在需要压缩的js目录中新建gulpfile.js，并配置
@@ -149,7 +149,7 @@ gulp.task('default', ['script', 'auto'])  // 在命令行使用 gulp default 启
 
 // 同步更新：会创建一个服务器
 var browserSync = require('browser-sync');
-gulp.task('browser-sync', function () {  // Static server
+gulp.task('f5', function () {  // Static server
     browserSync({
         server: {
             baseDir: "./"  //指定服务器启动根目录

@@ -5,10 +5,12 @@ var webpack = require('webpack');
 var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');
 // 压缩JS插件
 var uglifyJS=new webpack.optimize.MinChunkSizePlugin(minSize);
+// 单独打包CSS文件，开发环境可以直接打包在JS中，但生产环境一般都会把CSS单独打包出来
+var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
     //插件项：定义要使用的插件
-    plugins: [commonsPlugin,uglifyJS],
+    plugins: [commonsPlugin,uglifyJS,new ExtractTextPlugin("styles.css")],
     //页面入口文件配置：要进行操作的文件
     entry: {
         // key是打包后的文件名，value是要打包的文件路径
@@ -29,7 +31,7 @@ module.exports = {
         loaders: [
             //.css 文件使用 style-loader 和 css-loader 来处理
             { test: /\.css$/, loader: 'style-loader!css-loader' },
-            //.js 文件使用 jsx-loader 来编译处理
+            //js内嵌HTML的写法叫jsx，是react创造的。所以在写js的时候，如果有内嵌HTML的写法，必须用jsx-loader来编译，HTML中也必须引入react
             { test: /\.js$/, loader: 'jsx-loader?harmony' },
             //.scss 文件使用 style-loader、css-loader 和 sass-loader 来编译处理
             { test: /\.scss$/, loader: 'style!css!sass?sourceMap'},
