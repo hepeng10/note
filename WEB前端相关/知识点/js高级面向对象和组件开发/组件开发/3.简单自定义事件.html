@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Document</title>
+</head>
+<body>
+    <div id="div">div</div>
+    <span id="span">span</span>
+</body>
+
+<script>
+    var oDiv=document.getElementById('div');
+    var oSpan=document.getElementById('span');
+
+    // 封装绑定事件兼容
+    /*function bindEvent(obj,e,fn){
+        if(obj.addEventListener){
+            obj.addEventListener(e,fn,false);
+        }else{
+            obj.attachEbent('on'+e,fn);
+        }
+    }*/
+
+
+    // 改写普通事件绑定，让它支持自定义事件
+    function bindEvent(obj,e,fn){
+        // 创建一个listeners对象，用来保存事件
+        obj.listeners=obj.listeners||{};  //如果这个对象没有添加过事件，则创建一个listeners对象用来添加；如果添加过则不再次创建
+        // 不同的事件名会创建一个以这个事件名为名字的数组，这个数组用来保存这个事件名的所有方法
+        obj.listeners[e]=obj.listeners[e]||[];  //如果添加的事件类型是第一次添加的，则在listeners对象下添加这个事件名的数组；因为e是个变量名（绑定不同的事件名），所以不能用.语法
+        obj.listeners[e].push(fn);  //把要执行的函数push到这个事件名的数组中
+
+        // 保留原生事件绑定，从而这个函数也能绑定原生JS事件
+        if(obj.addEventListener){
+            obj.addEventListener(e,fn,false);
+        }else{
+            obj.attachEvent('on'+e,fn);
+        }
+    }
+
+    // 编写手动触发事件函数
+    function fireEvent(obj,e){
+        // 调用的时候通过遍历传入对象的事件名对应的数组，来依次执行每个参数（方法）
+        for(var i=0;i<obj.listeners[e].length;i++){
+            obj.listeners[e][i]();
+        }
+    }
+    
+    // 普通的事件绑定
+    bindEvent(oDiv,'click',function(){
+        console.log('click1');
+    });
+    bindEvent(oDiv,'click',function(){
+        console.log('click2');
+    });
+
+    // 自定义事件
+    // 这个就会存到oSpan.listeners.show[fn1]；fn1表示传入的函数体
+    bindEvent(oSpan,'show',function(){
+        console.log('show1');
+    })
+    // 这个就会存到oSpan.listeners.show[fn1,fn2]
+    bindEvent(oSpan,'show',function(){
+        console.log('show2');
+    })
+    // 这个就会存到oSpan.listeners.hide[fn1]
+    bindEvent(oSpan,'hide',function(){
+        console.log('hide');
+    })
+    // 调用事件
+    fireEvent(oSpan,'show');
+    fireEvent(oDiv,'click');  //本来div是通过点击执行的，现在也能手动执行
+
+</script>
+</html>

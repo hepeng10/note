@@ -10,12 +10,19 @@
         }
     }
 </style>
+<!-- 加了scoped属性的style标签，里面的样式只对此组件有效；没加scoped的可能会对其它页面或组件造成影响 -->
+<style lang="less" scoped>
+    a{
+        color:black;
+        text-decoration:none;
+    }
+</style>
 
 <!-- 组件中的模版 -->
 <template>
     <div class="test">
         {{msg}} Tirion
-        <p>这是个组件</p>
+        <p id="text">这是个组件<a>呵呵</a></p>
     </div>
 </template>
 

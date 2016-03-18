@@ -1,0 +1,31 @@
+// scripts里是配置的npm run命令，比如这里运行npm run dev实际就是运行webpack-dev-server --inline
+{
+  "name": "vuebase",
+  "version": "0.1.0",
+  "description": "vue.js base config",
+  "main": "index.js",
+  "scripts": {
+    "dev": "webpack-dev-server --inline",
+    "build" : "webpack --watch"
+  },
+  "author": "Tirion",
+  "license": "MIT",
+  "dependencies": {
+    "vue": "^1.0.12"
+  },
+  "devDependencies": {
+    "browser-sync": "^2.10.1",
+    "css-loader": "^0.23.0",
+    "extract-text-webpack-plugin": "^0.9.1",
+    "gulp": "^3.9.0",
+    "less": "^2.5.3",
+    "less-loader": "^2.2.2",
+    "style-loader": "^0.13.0",
+    "vue-hot-reload-api": "^1.2.2",
+    "vue-html-loader": "^1.0.0",
+    "vue-loader": "^7.2.0",
+    "vue-resource": "^0.5.1",
+    "webpack": "^1.12.9",
+    "webpack-dev-server": "^1.14.0"
+  }
+}

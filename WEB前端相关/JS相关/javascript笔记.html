@@ -167,7 +167,7 @@ function compare(v1,v2){  //通过这个函数排序就会是：1 5 8 10
     //return v1-v2;  //如果v1,v2为数字，这里可以直接返回v1-v2就能进行排序了
 }
 colors.concat(arr);  //合并数组，接收字符串或数组，可以有多个参数，将会添加到数组的末尾
-colors.slice(1,4);  //取出数组部分项，返回一个新数组；如果参数中有负数，则用数组长度加上该数来确定相应的位置。如果结束位置小于起始位置，则返回空数组
+colors.slice(1,4);  //拷贝出数组部分项，返回一个新数组；如果参数中有负数，则用数组长度加上该数来确定相应的位置。如果结束位置小于起始位置，则返回空数组
 colors.splice(0,2);  //删除数组前两项；返回删除项组成的数组
 colors.splice(2,0,"red","green");  //参数：起始位置，要删除的项数，插入的项（可以多个）；这里就会从位置2插入项
 colors.indexOf("red");  //取得red在数组中的位置索引
@@ -214,8 +214,9 @@ for (var propName in window) {
 }
 
 // Date对象
-var now=new Date();  //获得当前的日期和时间；可以传入Unix时间戳，然后使用下面的getXxx来获取需要的日期格式
-Date.parse("6/13/2014");  //获取指定日期的时间戳
+*Date对象里都是方法，没有属性
+var now=new Date();  //获得当前的日期和时间对象；可以传入各种日期时间参数（如Unix时间戳；2016,1,10等），然后使用下面的getXxx来获取需要的日期格式
+Date.parse("6/13/2014")|Date.parse("2016,1,10");  //获取指定日期的时间戳
 var time=new Date("6/13/2014");  //效果和parse()相同，会隐式调用parse()方法
 Date.now();  //ES5新增方法：获取当前的Unix时间戳
 // 常用日期方法，get都有对应的set
@@ -451,6 +452,7 @@ function Person(name, age, job){
 }
 
 // 继承：利用原型让一个引用类型继承另一个引用类型的属性和方法（无法接收参数）
+// 最简单的继承：通常不使用，有很多缺陷
 function Super(){...}
 function Sub(){...}
 Sub.prototype=new Super();  //将父类Super的实例赋值给子类Sub的原型prototype完成继承（创建对象实例可以是对象字面量方式，即JSON格式，重写原型的时候也可以用JSON格式来重写，所以将父类的对象实例赋值给子类的原型就能实现继承。因为Super实例的constructor是指向Super的，所以Sub的constructor也是指向Super的）
@@ -458,13 +460,16 @@ Sub.prototype.selfFun=function(){...}  //子类中扩展自己的成员方法；
 instance instanceof Sub|Super|Object  //由于原型链的关系，三个都会返回true
 Sub|Super|Object.prototype.isPrototypeOf(instance);  //这样也都返回true
 
-// 借用构造函数
+// 借用构造函数继承：属性和方法都写在构造函数里，由于方法通常比较庞大，不适合每个对象实例独占一份，所以也不推荐
 function Super(like){
-    this.name=['a','b','c'];  //当父类构造函数中定义的属性包含引用类型的时候，子类继承后，其中一个子类的实例修改了这个引用属性，所有子类实例的这个引用属性都会跟着变化，这就造成了问题（继承是将父类的所有东西都定义在了prototype上，而prototype上的都是共享的）
+    // 这里的属性和方法，每个实例对象都会创建一份属于自己的
+    this.name=['a','b','c'];  //这样的引用数据类型，需要写在构造函数里，因为通常都是每个对象实例独占一份。写在prototype上会造成通过一个对象实例修改数据后，所有对象实例的都变化
     this.like=like;
+    // this.fn=function(){...};  在借用构造函数实现的继承中，方法也写在这里。但由于方法通常都是所有实例对象共享的，所以一般写在prototype上，也就是组合继承的方式。（每个对象实例都独占一份方法，会消耗很多资源）
 }
+// Super.prototype.fn=function(){...}  prototype上的东西是所有对象实例共享的，所以将需要共享的东西挂在在这上面，比如方法
 function Sub(like){
-    Super.call(this,like);  //所以需要在子类中将this指向父类；这样在子类实例化的时候，每个实例的this就直接指向父类，从而避免了上述问题；而且通过这个方法还解决了父类需要传参的问题
+    Super.call(this,like);  //将父类的this改为子类的this，所以父类中的this.name就变成了子类的this.name，从而实现了继承。在调用call()的时候还可以传参，所以也解决了传参的问题
     this.age=20;  //子类中扩展自己的成员属性；只有通过子类实例化才生效，所以不会影响到父类
 }
 var s1=new Sub();
@@ -473,8 +478,8 @@ var s2=new Sub();
 alert(s2.name);
 
 // 组合继承：最常用的继承（可以接收参数）
-Sub.prototype=new Super();  //在借用构造函数的基础上，将原型也继承父类（重写原型链）；扩展原型，避免将方法写在构造函数中
-Sub.prototype.constructor=Sub;  //将constructor修改为自己（非必须）
+Sub.prototype=new Super();  //在借用构造函数的基础上，将原型也继承父类（重写原型链）；扩展原型，避免将方法写在构造函数中。prototype上也会带有父类的属性（name,like），但是由于子类构造函数中使用call()进行了继承，所以不会在prototype中找到（构造函数中找到了就停止查找，不会继续去原型找）。Sub.prototype.xxx（对象实例.成员）就能调用到Super类的xxx，由此可见继承实现了
+Sub.prototype.constructor=Sub;  //将constructor修改为自己
 Sub.prototype.self=function(){...}  //扩展子类的方法
 // 例：
 function Super(name){
@@ -494,6 +499,72 @@ Sub.prototype.self=function(){
 }
 var o=new Sub('Tirion',28);
 o.self();
+
+// 关于prototype的共享分析
+function Super(){
+}
+Super.prototype.aaa=[1,2,3];
+Super.prototype.bbb=1;
+
+function Sub(){
+    Super.call(this);
+}
+Sub.prototype=new Super();
+Sub.prototype.constructor=Sub;
+
+var a=new Sub();
+var b=new Sub();
+
+a.bbb=5;  //当这句话执行的时候，并不是操作prototype上的bbb，而是给a对象添加了一个bbb属性
+alert(a.bbb);  //这里弹出的是刚才添加的bbb属性，因为已经找到刚才添加的了，所以不会在prototype上找了
+delete a.bbb;  //删除了刚才添加的bbb属性
+alert(a.bbb);  //这下就能弹出prototype上的bbb了
+
+a.aaa[0]=5;  //而这句话就不一样了，并不是创建aaa属性，而是修改prototype上的aaa[0]。通过语法可以看出
+alert(b.aaa[0]);  //那么b对象也会受影响，会弹出5
+a.aaa=[];  //而这里也是创建了一个aaa属性，并不会修改prototype的aaa
+alert(b.aaa[1]);  //不会受到上一句的影响，会弹出prototype上的aaa[0]即数字2
+a.aaa[0]=9;  //这里也不一样了，因为上面在a对象上直接创建了个aaa数组，所以是修改的上面刚创建的aaa，而不是prototype上的
+alert(a.aaa[0]);  //这里会弹出9
+alert(b.aaa[0]);  //这里会弹出5
+
+//构造函数分析
+//使自己的对象多次复制，同时实例根据设置的访问等级可以访问其内部的属性和方法
+//当对象被实例化后，构造函数会立即执行它所包含的任何代码
+function myObject(msg) {
+    //特权属性(公有属性)
+    this.myMsg = msg; //只在被实例化后的实例中可调用
+    this.address = 'Chengdu';
+    //私有属性：无法通过对象直接访问
+    var name = 'Tirion';
+    var that = this;
+    //私有方法
+    function sayName() {
+        alert(that.name);
+    }
+    //特权方法(公有方法)
+    //能被外部公开访问
+    //这个方法每次实例化都要重新构造而prototype是原型共享，所有实例化后，都共同引用同一个
+    this.sayAge = function() {
+            alert(name); //在公有方法中可以访问私有成员
+        }
+    //私有和特权成员在函数的内部，在构造函数创建的每个实例中都会包含同样的私有和特权成员的副本，因而实例越多占用的内存越多
+}
+//公有方法
+//适用于通过new关键字实例化的该对象的每个实例
+//向prototype中添加成员将会把新方法添加到构造函数的底层中去
+myObject.prototype.sayHello = function() {
+        alert('hello everyone!');
+    }
+//静态属性
+//适用于对象的特殊实例，就是作为Function对象实例的构造函数本身
+myObject.name = 'china';  //函数也是特殊的对象，所以可以给函数添加属性和方法。而要通过对象来访问，就要先得到这个构造函数，再访问构造函数的属性即可：m1.constructor.name
+//静态方法
+myObject.alertname = function() {  //访问方式同静态属性
+        alert(this.name);  //当通过对象实例的constructor访问这个静态方法的时候，执行上下文也是constructor即myObject，所以会得到myObject的name即china
+    }
+//实例化
+var m1 = new myObject('111');
 
 
 // 面向对象改写注意事项：this
@@ -522,6 +593,7 @@ TabSwitch.prototype.show=function(){
 *注：
 作用域链和原型链都是链表，下一级有个指针指向上一级，所以可以通过“链”逐一的往上查找
 对象的继承也是链表的关系，子对象中有个_proto_指针指向父级对象，顶级对象是Object，它的_protp_为空
+每个对象实例都有__proto__属性，指向构造这个对象的类的prototype。prototype也是个对象，也有个__proto__属性，指向父类的prototype。这就构成了原型链。
 
 
 

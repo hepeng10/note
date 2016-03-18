@@ -1,0 +1,11 @@
+{
+    "stage": 2,
+    "env": {
+        "NODE_ENV": {
+            "development": {
+                "plugins": [],
+                "extra": {}
+            }
+        }
+    }
+}

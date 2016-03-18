@@ -1,3 +1,5 @@
+注：安装nodejs.msi程序的时候，可能出现 A DLL required... 的错误，这个时候就需要进入 C:\Users\MyPC\AppData\Local 将Temp目录右键->属性->安全->编辑，将允许全部勾上再安装
+
 Windows使用git bash shell或powershell替代cmd，因为cmd不支持bash脚本；安装git后就有git bash这个shell程序了
 
 NPM-Node Package Manager:node包管理和分发工具

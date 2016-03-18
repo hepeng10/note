@@ -3,14 +3,14 @@ var webpack = require('webpack');
 // 使用插件
 // 使用CommonsChunkPlugin插件来提取多个页面之间的公共模块，并将该模块打包为 common.js；然后HTML文件应该引入common.js
 var commonsPlugin = new webpack.optimize.CommonsChunkPlugin('common.js');
-// 压缩JS插件
-var uglifyJS=new webpack.optimize.MinChunkSizePlugin(minSize);
+// 压缩JS插件，使用后在使用webpack命令打包的时候，不用加上-p也能压缩了，而且压缩率更高
+var uglifyJS=new webpack.optimize.UglifyJsPlugin({compress:{warnings:false}});
 // 单独打包CSS文件，开发环境可以直接打包在JS中，但生产环境一般都会把CSS单独打包出来
 var ExtractTextPlugin = require("extract-text-webpack-plugin");
 
 module.exports = {
     //插件项：定义要使用的插件
-    plugins: [commonsPlugin,uglifyJS,new ExtractTextPlugin("styles.css")],
+    plugins: [commonsPlugin,uglifyJS,new ExtractTextPlugin("[name].css")],
     //页面入口文件配置：要进行操作的文件
     entry: {
         // key是打包后的文件名，value是要打包的文件路径
@@ -41,6 +41,10 @@ module.exports = {
             { test: /\.(png|jpg)$/, loader: 'url-loader?limit=8192'}
         ]
         //如上，"-loader"其实是可以省略不写的，多个loader之间用“!”连接起来。
+    },
+    // 定义全局变量
+    externals:{
+        'url':'"http://192.168.2.95:8080"'  //在模块中import url from 'url'，就可以在这个模块中使用url变量了，值就是这里的值。比如这里就是用来定义一个变量作为ajax跨域请求服务器的地址。生产环境将地址修改为空（需要的地址），上传服务器就行了
     },
     //其它解决方案配置
     resolve: {

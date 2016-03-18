@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Vue Webpack Example</title>
+    <link rel="stylesheet" type="text/css" href="./dist/styles.css">
+  </head>
+  <body>
+    <app></app>
+
+    <script src="dist/common.js"></script>
+    <script src="dist/build.js"></script>
+
+    <!-- 开发环境的单独js。在开发环境中没必要将js,css分开打包。上面引入的是生产环境的css和js文件，开发环境也可以先写上，并不会造成不良影响。生产后把下面的js删掉就行了 -->
+    <script src="devdist/main.bundle.js"></script>
+  </body>
+</html>

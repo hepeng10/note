@@ -1,5 +1,5 @@
 npm安装react：
-npm install react react-dom --save
+npm install --save react react-dom babel-preset-react
 
 在使用的时候通常这两个都需要引入，由于通过npm安装的，所以在require的时候不用指定相对路径也能找到
 var React=require('react')
