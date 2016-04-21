@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>隐藏的iframe方案</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/jquery-1.11.3.js"></script>
+</head>
+<body>
+    <form action="/upload" enctype="multipart/form-data" method="post">
+        <p>标题： <input type="text" name="test" value="test" > </p>
+        <p>附件： <input type="file" name="myfile" style="display: inline"></p>
+        <p><input class="btn btn-primary btn-sm" style="padding-left:50px;padding-right: 50px;" type="submit" value="普通文件上传"></p>
+    </form>
+    <hr />
+    <h3>关键技术点：</h3>
+    <p>1、form指定target，提交结果定向到隐藏的iframe</p>
+    <p>2、提交完成后，iframe中页面与主页面通信，通知上传结果及服务端文件信息</p>
+    <iframe name="frm" style="display:none"></iframe>
+    <form action="/upload2" enctype="multipart/form-data" method="post" target="frm" onsubmit="loading(true);">
+        <p id="upfile">附件： <input type="file" name="myfile" style="display: inline"></p>
+        <p id="upbtn"><input class="btn btn-primary btn-sm" style="padding-left:50px;padding-right: 50px;" type="submit" value="异步上传">
+            <span id="uptxt" style="display: none">正在上传...</span></p>
+    </form>
+    <div id="flist" style="border:1px dotted darkgray;"></div>
+<script>
+    // 上传完成后的回调
+    function uploadFinished(fileName) {
+        addToFlist(fileName);
+        loading(false);
+    }
+    
+    function addToFlist(fname) {
+        var temp = ["<p id='" + fname + "'>",
+                    fname,
+            "<button onclick='delFile(\"" + fname + "\");'>删除</button>",
+                    "</p>"
+                    ];
+        $("#flist").append(temp.join(""));
+    }
+
+    function delFile(fname) {
+        console.log('to delete file: ' + fname);
+        // TODO: 请实现
+    }
+
+    function loading(showloading) {
+        if (showloading) {
+            $("#uptxt").show();
+        } else {
+            $("#uptxt").hide();
+        }
+    }
+</script>
+</body>
+</html>

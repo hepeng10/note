@@ -9,6 +9,8 @@ AJAX：使用XMLHttpRequest()，默认不能跨域
 2、不同域名之间的跨域：服务器代理：XMLHttpRequest代理文件，会增加服务器压力
 3、script标签：JSONP：json+padding(内填充)——较常用的方式
 
+*带src属性的元素都支持跨域，如script img iframe
+
 JSONP：把JSON放在一个盒子里
 <script>
 function box(json){
@@ -56,3 +58,10 @@ JSONP实例：
 5、windows.name跨域：类似location.hash
 6、flash
 7、html5 postMessage
+
+8、CORS跨域资源共享
+当发送跨域请求后，其实后端已经把数据返回给了浏览器，只是通常情况下，浏览器的安全策略阻止了数据的执行。没有Access-Control-Allow-Origin这个头信息。所以，要实现跨域，需要服务器返回的头信息中带有Access-Control-Allow-Origin
+后端设置，nodejs为例：
+res.setHeader('Access-Control-Allow-Origin','http://www.a.com');  允许www.a.com的跨域请求，*表示任意域都能访问。只能设置一个域名，所以要想允许多个域名，需要先获取到请求的域名，然后判断是否在允许列表中，最后再将域名动态作为第二个参数
+res.setHeader('Access-Control-Allow-Method','POST,PUT');  当前端提交的方式不是简单的get请求，服务器上也要进行设置，允许前端提交的方式才行。多个请求方式用,隔开。
+不同服务器头信息设置见此网站：http://enable-cors.org/server.html

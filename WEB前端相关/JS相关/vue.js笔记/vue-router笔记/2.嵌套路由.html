@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>嵌套路由</title>
+    <link rel="stylesheet" href="">
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/vue-router.min.js"></script>
+    <style>
+        .foo{color:red;}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Hello App!</h1>
+        <p>
+            <!-- 使用v-link进行导航 -->
+            <a v-link="{path:'/foo'}">Go to /foo（等同于/foo/def）</a>　
+            <a v-link="{path:'/bar'}">Go to /bar</a>　
+            <a v-link="{path:'/foo/bar'}">Go to /foo/bar</a>　
+            <a v-link="{path:'/foo/baz'}">Go to /foo/baz</a>　
+        </p>
+        <!-- 路由外链。路由内容会显示在这里 -->
+        <router-view></router-view>
+    </div>
+</body>
+
+<script type="text/javascript">
+    // 定义组件
+    var Foo=Vue.extend({
+        template:'<div class="foo">' +
+                      '<h2>This is Foo!</h2>' +
+                      '<router-view></router-view>' + // <- 嵌套的外链
+                 '</div>'
+    });
+    var Bar=Vue.extend({
+        template:'<p>This is Bar.</p>'
+    });
+    var Baz=Vue.extend({
+        template:'<p>This is Foo/Baz.</p>'
+    });
+    var Def=Vue.extend({
+        template:'<p>This is Default.</p>'
+    });
+    // 创建一个路由器实例
+    var router=new VueRouter();
+    // 定义路由规则
+    router.map({
+        '/foo':{
+            component:Foo,  //设置路由映射的组件
+            subRoutes:{  //设置子路由
+                '/bar':{  //url匹配到/foo/bar时，渲染在Foo的<router-view>内
+                    component:Bar  //当匹配到/foo/bar时，会在Foo的<router-view></router-view>内渲染
+                },
+                '/baz':{  //设置多个子路由。url匹配到/foo/baz时，渲染在Foo的<router-view>内
+                    component:Baz
+                },
+                '/':{  //设置默认。当url匹配到/foo时，没有子路由的路径，会渲染
+                    component:Def
+                }
+            }
+        },
+        '/bar':{
+            component:Bar
+        }
+    });
+    // 路由需要一个根组件
+    var App=Vue.extend({});
+    // 启动路由。通过根组件和选择器来启动
+    router.start(App,'#app');
+</script>
+</html>

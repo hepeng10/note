@@ -23,6 +23,7 @@ NPM可选工具：
 安装gulp:npm install -g gulp。类似grunt，但是更简单好用。
 安装bower：npm install bower -g。包管理器，可以用来管理依赖组件，维护依赖组件等。如下载jquery等，例：bower install jquery。在使用bower命令的时候需要进入cd node_modules/.bin目录中，安装的组件也在.bin目录中的bower_components里。另，如果安装提示没git，需要环境变量中添加git的bin目录进行支持
 安装http-server：npm install -g http-server。可以将计算机上的任何一个目录作为http服务器，就能通过浏览器直接访问。cd进入需要的目录，使用http-server命令即可。也可通过参数设置ip和端口号：http-server -a 127.0.0.1 -p 8080
+    *修改/usr/local/lib/node_modules/.http-server_npminstall/http-server/0.9.0/http-server/lib/http-server.js文件，将cache的默认值3600改为1后，就能避免服务器缓存导致的刷新页面不更新的问题。（比通过运行 http-server -c-1 来得直接）
 安装yeoman：npm install yo。在web立项阶段，使用yeoman来生成项目的文件和代码结构。yeoman自动将最佳实践和工具整合进来，方便开发。包含了多种项目情况的生成器（类似模版），我们选择适合自己项目的生成器。
 安装jasmine：npm install jasmine。用来做单元测试的。
 安装karma：npm install karma。配合jasmine用来自动化做单元测试的。
@@ -96,6 +97,16 @@ gulp.task('css', function () {
         .pipe(autoprefixer('last 2 version', 'safari 5', 'ie 8', 'ie 9', 'opera 12.1', 'ios 6', 'android 4'))  //添加浏览器前缀，指定版本号
         .pipe(gulp.dest('dist/css'))
 })
+// postcss添加浏览器前缀（postcss是autoprefixer的升级版）
+var postcss    = require('gulp-postcss');
+var sourcemaps = require('gulp-sourcemaps');
+gulp.task('css', function () {
+    return gulp.src('src/**/*.css')
+        .pipe( sourcemaps.init() )
+        .pipe( postcss([ require('autoprefixer'), require('precss') ]) )
+        .pipe( sourcemaps.write('.') )
+        .pipe( gulp.dest('build/') );
+});
 
 // 压缩图片：感觉不适合用于自动执行
 var imagemin = require('gulp-imagemin')

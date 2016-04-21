@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>上传方案介绍</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/bootstrap-theme.min.css">
+    <link rel="stylesheet" href="css/main.css">
+    <script src="js/jquery-1.11.3.js"></script>
+</head>
+<body>
+    <h3>常见异步上传方案</h3>
+    <hr/>
+    <h3>使用第三方控件（Flash，ActiveX, 浏览器插件等）</h3>
+    <p style="font-weight: bold;">优点：</p>
+    <p>1、交互与可控性好（多文件、进度展示、续传、暂停）</p>
+    <p>2、性能好（可使用底层协议通信）</p>
+    <p style="font-weight: bold;">缺点：</p>
+    <p>1、需要浏览器安装插件</p>
+    <hr/>
+    <h3>使用隐藏的iframe模拟异步上传</h3>
+    <p style="font-weight: bold;">优点：</p>
+    <p>1、浏览器原生支持，不需要插件</p>
+    <p>2、广泛的浏览器兼容性</p>
+    <p style="font-weight: bold;">缺点：</p>
+    <p>1、交互差，体验差，上传过程基本不可控</p>
+    <p>2、性能差</p>
+    <hr />
+    <h3>使用xhr level 2 纯ajax异步上传</h3>
+    <p style="font-weight: bold;">优点：</p>
+    <p>1、支持H5的浏览器原生支持，不需要插件</p>
+    <p>2、交互性较好</p>
+    <p style="font-weight: bold;">缺点：</p>
+    <p>1、受浏览器支持限制</p>
+
+
+</body>
+</html>

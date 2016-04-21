@@ -2,6 +2,8 @@ nodeJS：以ECMAscript为基础，扩展出的可以操作文件、网络、数�
 由于是以ECMAscript为基础，所以大部分语法都一样，比如创建变量、函数、对象等，还有内置的Date对象、Math对象这些，都是JS一样。
 主要一点区别在于，nodeJS中没有window对象，那是浏览器的顶层对象，在nodeJS中顶层对象是global
 
+nodejs常用框架有express，koa等
+
 
 
 // 模块（commonjs规范）：

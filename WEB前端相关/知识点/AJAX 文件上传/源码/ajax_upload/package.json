@@ -1,0 +1,11 @@
+{
+  "name": "ajax_upload",
+  "description": "ajaxs upload",
+  "version": "0.0.1",
+  "main": "./app.js",
+  "dependencies": {
+    "express": "4.x",
+    "body-parser": "*",
+    "connect-multiparty": "*"
+  }
+}

@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>全匹配片段</title>
+    <link rel="stylesheet" href="">
+    <script src="./js/vue.min.js"></script>
+    <script src="./js/vue-router.min.js"></script>
+    <style>
+        .foo{color:red;}
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Hello App!</h1>
+        <p>
+            <!-- 使用v-link进行导航 -->
+            <a v-link="{path:'/foo/bar/123'}">Go to /foo/bar/123</a>　
+            <a v-link="{path:'/bar/baz/abc/post/123'}">Go to /bar/baz/abc/post/123</a>　
+        </p>
+        <!-- 路由外链。路由内容会显示在这里 -->
+        <router-view></router-view>
+    </div>
+</body>
+
+<script type="text/javascript">
+    // 定义组件
+    var Foo=Vue.extend({
+        template:'<p>这是 /foo/*name 全匹配片段，片段名：{{$route.params.name}}</p>'  //动态片段信息可从$toute.params获取
+    });
+    var Bar=Vue.extend({
+        template:'<p>这是 /bar/*src/post/:id 动态片段，片段名：src={{$route.params.src}}和id={{$route.params.id}}</p>'
+    });
+    // 创建一个路由器实例
+    var router=new VueRouter();
+    // 定义路由规则
+    router.map({
+        '/foo/*name':{  //全匹配片段使用以星号开头的路径片段定义。是动态片段的贪心版
+            component:Foo,
+        },
+        '/bar/*src/post/:id':{
+            component:Bar
+        }
+    });
+    // 路由需要一个根组件
+    var App=Vue.extend({});
+    // 启动路由。通过根组件和选择器来启动
+    router.start(App,'#app');
+</script>
+</html>
