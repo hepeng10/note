@@ -1,0 +1,134 @@
+常见异步上传方案：
+1、使用第三方控件：Flash，ActiveX等
+2、隐藏的iframe模拟异步上传
+3、XHR纯AJAX异步上传（H5）
+
+普通form表单上传：
+<!-- form元素设置enctype="multipart/form-data" -->
+<form action="/upload" enctype="multipart/form-data" method="post">
+    <p>标题： <input type="text" name="test" value="test" > </p>
+    <!-- type="file"的input元素，后端通过name获取上传的数据 -->
+    <p>附件： <input type="file" name="myfile" style="display: inline"></p>
+    <p><input class="btn btn-primary btn-sm" style="padding-left:50px;padding-right: 50px;" type="submit" value="普通文件上传"></p>
+</form>
+*上传完成后页面会刷新
+
+隐藏iframe模拟异步上传：
+<!-- 使用了一个隐藏的iframe -->
+<iframe name="frm" style="display:none"></iframe>
+<!-- form设置了target属性，值为iframe的name。这样，文件上传后，刷新的页面就是iframe而不是自己了。 -->
+<form action="/upload2" enctype="multipart/form-data" method="post" target="frm" onsubmit="loading(true);">
+    <p id="upfile">附件： <input type="file" name="myfile" style="display: inline"></p>
+    <p id="upbtn"><input class="btn btn-primary btn-sm" style="padding-left:50px;padding-right: 50px;" type="submit" value="异步上传">
+        <span id="uptxt" style="display: none">正在上传...</span></p>
+</form>
+*然而，服务器的返回结果也是返回到iframe，而我们要在主页面显示上传信息。那么我们可以要求服务器返回一个script标签字符串，如"<script>window.parent.uploadFinished('" + fname + "');</script>"，服务器返回的内容会直接插入到页面中，所以会执行script标签中的代码。而我们在主页面中事先定义好要执行的 uploadFinished() 函数即可
+
+XHR纯AJAX异步上传
+关键过程：
+1、创建FormData，放入待上传文件
+2、通过xhr操作将FormData发送到服务器，实现文件上传
+3、绑定progress、load、error等事件监听传输过程并在页面显示动态交互信息
+<div>
+    <!-- 使用了一个type="file"的input元素，不需要form表单 -->
+    <p id="upfile">附件： <input type="file" id="myfile" style="display: inline"></p>
+    <p id="upbtn">
+        <!-- 上传按钮 -->
+        <input class="btn btn-primary btn-sm" style="padding-left:50px;padding-right: 50px;" type="button" value="异步上传" onclick="upload();">
+        <span id="uptxt" style="display: none">正在上传...</span>
+        <span id="upprog"></span>
+        <button id="stopbtn" style="display:none;">停止上传</button>
+    </p>
+</div>
+<div id="flist" style="border:1px dotted darkgray;"></div>
+
+<script>
+    function upload() {
+        // 1.准备FormData
+        var fd = new FormData();
+        // 2.往FormData里添加文件
+        // 第一个参数是设置提交给后端的字段名，等同于input的name属性
+        // 第二个参数是通过DOM获取到文件对象的引用，files里可以包含多个文件，这里只有一个，所以取出0
+        fd.append("myfile", document.getElementById('myfile').files[0]);
+        // 创建xhr对象
+        var xhr = new XMLHttpRequest();
+        // 监听状态，实时响应
+        // xhr 和 xhr.upload 都有progress事件，xhr.progress是下载进度，xhr.upload.progress是上传进度。上传过程中每隔一段时间就会触发一次（貌似不需要后端返回数据，是浏览器自动通过二进制传输数据情况进行调用的）
+        xhr.upload.onprogress = function(event) {
+            // lengthComputable表示长度是否可计算。上传文件很小或者计算失败会返回false
+            if (event.lengthComputable) {
+                // loaded是已传输完成的数量，total是总数量
+                var percent = Math.round(event.loaded * 100 / event.total);
+                console.log('%d%', percent);
+                $("#upprog").text(percent);
+            }
+        };
+        // 传输开始事件
+        xhr.onloadstart = function(event) {
+            console.log('load start');
+            $("#upprog").text('开始上传');
+            // 给元素绑定点击事件，让用户可以终止上传
+            $("#stopbtn").one('click', function() {
+                // 调用abort()终止xhr的网络请求，从而终止上传
+                xhr.abort();
+                $(this).hide();
+            });
+            loading(true);
+        };
+        // ajax过程成功完成事件
+        xhr.onload = function(event) {
+            console.log('load success');
+            $("#upprog").text('上传成功');
+            // 获取服务器响应信息，通常是个JSON字符串
+            console.log(xhr.responseText);
+            var ret = JSON.parse(xhr.responseText);
+            addToFlist(ret.fname);
+        };
+        // ajax过程发生错误事件
+        xhr.onerror = function(event) {
+            console.log('error');
+            $("#upprog").text('发生错误');
+        };
+        // ajax被取消
+        xhr.onabort = function(event) {
+            console.log('abort');
+            $("#upprog").text('操作被取消');
+        };
+        // loadend传输结束，不管成功失败都会被触发
+        xhr.onloadend = function (event) {
+            console.log('load end');
+            loading(false);
+        };
+
+        // 发起ajax请求传送数据
+        // 初始化AJAX相关信息。参数1：提交类型，一般为POST。参数2：后台地址。参数3：是否异步提交
+        xhr.open('POST', '/upload.php', true);
+        // 开始发送
+        xhr.send(fd);
+    }
+
+    
+    function addToFlist(fname) {
+        var temp = ["<p id='" + fname + "'>",
+                    fname,
+            "<button onclick='delFile(\"" + fname + "\");'>删除</button>",
+                    "</p>"
+                    ];
+        $("#flist").append(temp.join(""));
+    }
+
+    function delFile(fname) {
+        console.log('to delete file: ' + fname);
+        // TODO: 请实现
+    }
+
+    function loading(showloading) {
+        if (showloading) {
+            $("#uptxt").show();
+            $("#stopbtn").show();
+        } else {
+            $("#uptxt").hide();
+            $("#stopbtn").hide();
+        }
+    }
+</script>

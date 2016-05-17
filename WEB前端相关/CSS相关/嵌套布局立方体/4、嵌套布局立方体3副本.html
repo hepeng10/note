@@ -1,0 +1,39 @@
+ <!DOCTYPE html>
+<html>
+<head>
+    <title>嵌套布局立方体3</title>
+    <style>
+        .box{width:100px;margin:100px auto;padding:100px;border:1px solid black;perspective:200px;}
+        /*容器div使用相对定位*/
+        /*给容器设置变换原点，将z轴方向设置为立方体的一半*/
+        .div{width:100px;height:100px;transform-style:preserve-3d;position:relative;transition:1s;transform-origin:center center -50px;}
+        /*每个面使用绝对定位，由于是嵌套关系，里面的div会根据父级div的位置定位，右移100px，形成横向排列布局*/
+        /*给每个div加上transform-style:preserve-3d;让它的子级可以应用3d变换效果；transform-origin:left;让变换原点都为左边*/
+        /*每个面都旋转90度，即可成为正方体*/
+        .div div{width:100px;height:100px;position:absolute;left:100px;top:0px;background-color:yellow;transform-style:preserve-3d;transform-origin:left;transform:rotateY(90deg);}
+        /*将第一个div的位置重置到原点0的位置；第一个面也不用旋转*/
+        .div>div{left:0;transform:rotateY(0deg);}
+        /*.box hover的时候，让容器旋转*/
+        .box:hover>div{transform:rotateY(360deg);}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="div">
+            <!-- 这里，我们给第一个div（面）设置旋转的时候，由于其他div（面）包裹在里面，也会应用这属性 -->
+            <div>
+                1
+                <div>
+                    2
+                    <div>
+                        3
+                        <div>
+                            4
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

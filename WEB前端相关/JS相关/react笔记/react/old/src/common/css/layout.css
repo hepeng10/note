@@ -1,0 +1,219 @@
+body {
+    margin: 0;
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+* {
+    font-family: "Helvetica Neue", Helvetica, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", "微软雅黑", Arial, sans-serif;
+}
+BFDInput {
+    margin-right: 10px;
+}
+
+/**
+ * 超链接样式
+ */
+
+.active {
+    color: #FFF !important;
+    text-shadow: -3px 2px 10px #D83B8A;
+}
+.app {
+    /*min-width: 1080px;*/
+}
+
+/**
+ * Header样式 START
+ */
+
+.wrapper {
+    height: 50px;
+    line-height: 50px;
+    overflow: hidden;
+    background: hsl(200, 20%, 20%);
+    color: #fff;
+}
+.link {
+    padding: 11px;
+    color: #fff;
+}
+
+/**
+ * Header样式 END
+ */
+
+
+/**
+ * 整体布局样式【左右结构】 START
+ */
+
+.ant-menu-item-selected {
+    background: #CEE0EA;
+}
+.ant-layout-topaside {
+    height: 100%;
+}
+.ant-layout-topaside .ant-layout-wrapper {
+    /*padding: 0 50px;*/
+}
+.ant-layout-topaside .ant-layout-header {
+    background: #404040;
+    height: 50px;
+}
+.ant-layout-topaside .ant-layout-logo {
+    width: 120px;
+    height: 32px;
+    background: #333;
+    border-radius: 6px;
+    margin: 8px 30px;
+    float: left;
+}
+.ant-layout-topaside .ant-layout-subheader {
+    height: 48px;
+    border-bottom: 1px solid #e9e9e9;
+    background: #fff;
+}
+.ant-layout-topaside .ant-layout-breadcrumb {
+    margin: 7px 0 -17px 24px;
+}
+.ant-layout-topaside .ant-layout-container {
+    background: #fff;
+    position: relative;
+    overflow: hidden;
+}
+.ant-layout-topaside .ant-layout-sider {
+    width: 224px;
+    float: left;
+}
+.ant-layout-topaside .ant-layout-content {
+    border-left: 1px solid #e9e9e9;
+    padding: 0 10px;
+    overflow: auto;
+    position: relative;
+    left: -1px;
+}
+.ant-layout-topaside .ant-layout-footer {
+    height: 64px;
+    line-height: 64px;
+    text-align: center;
+    font-size: 12px;
+    color: #999;
+}
+.ant-form-item {
+    margin-bottom: 10px;
+}
+.ant-select-dropdown {
+    z-index: 2000 !important;
+}
+
+/*整体布局样式【左右结构】 END*/
+
+
+/* 主容器 样式 START*/
+
+.container {
+    padding: 0;
+}
+
+/* 主容器 样式 END*/
+
+
+/**用户管理样式 START**/
+
+.common-margin-right {
+    margin-right: 10px;
+}
+.common-fl {
+    float: left;
+}
+.common-fr {
+    float: right;
+}
+.add-userconfigrole-container {
+    width: 254px;
+    height: 252px;
+    border: 1px solid #cccccc;
+    padding: 2px 3px;
+}
+.add-userconfigrole-container ul {
+    list-style-type: none;
+}
+.add-userconfigrole-center {
+    width: 65px;
+    float: left;
+    margin: auto 5px;
+}
+.add-userconfigrole-center span {
+    display: block;
+    margin: 0 10px;
+}
+.add-userconfigrole-margin {
+    margin: 10px auto;
+}
+.usermanage-input-width {
+    width: 200px;
+}
+
+/**用户管理样式 END**/
+
+
+/*权限管理  START*/
+
+.authority-datapolicy .hive-btn {
+    margin-bottom: 10px;
+}
+.authority-datapolicy .ant-switch {
+    width: 55px;
+}
+.authority-datapolicy .ant-switch-checked:after {
+    left: 33px;
+}
+.authority-datapolicy-selectuser {
+    border: 1px solid #DDE7EF;
+}
+
+/* 权限管理--权限审批 */
+
+.authority-sp {}
+.authority-sp-top {
+    margin: 10px 0;
+}
+.authority-sp-top .ant-select {
+    width: 200px;
+    margin-right: 10px;
+}
+.authority-sp-form {
+    margin-top: 20px;
+}
+.authority-sp-form .ant-table th {
+    /*text-align: center;*/
+}
+.authority-sp-table {}
+
+/*权限管理--查看权限*/
+
+.list-function-span {
+    background: #F2F2F2;
+    margin-right: 10px;
+    padding: 5px;
+    border-radius: 5px
+}
+
+/*权限管理  END*/
+
+
+/**用户审计样式 START**/
+
+.ua-main {
+    /* padding:10px; */
+}
+.ua-search {
+    width: 100%;
+    border: 1px solid #DDE7EF;
+    padding: 5px;
+    margin: 5px 0;
+}
+.ua-search input, .ua-search button {
+    margin-left: 10px;
+}
+
+/**用户审计样式 END**/

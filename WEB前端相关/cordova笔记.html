@@ -1,0 +1,65 @@
+文档地址：http://cordova.apache.org/docs/en/latest/guide/cli/index.html
+
+安装cordova：
+cordova：npm install cordova -g
+
+创建cordova应用：
+cordova create demo com.example.demo Demo
+进入要创建应用的目录，使用cordova create命令创建应用。
+demo是应用目录，会在当前目录下创建demo目录，整个应用就在demo目录中。cordova会生成项目的基本架构，项目主页为www/index.html
+com.example.demo是包名（可选的）
+Demo是应用的名称，会在config.xml中注册（可选的，默认为HelloCordova，最好在创建的时候就自定义）
+
+添加平台支持：
+cd demo  先进入项目目录
+cordova platform add ios --save
+cordova platform add android --save
+使用 flatform add 命令添加将部署的平台，有ios和android等，可以只选其中一个
+cordova platform ls  可以查看部署的平台安装情况
+--Android SDK安装--
+下载Android SDK，将android-sdk-macosx放到合适的目录中，运行tools/android，开始运行Android SDK Manager，配置代理服务器为mirrors.neusoft.edu.cn，端口号为80，勾选others里的第一项，就能下载SDK了。需要安装以下工具：
+    1、Android Platform SDK for your targeted version of Android  （从合适版本的API中选择SDK Platform安装，API中的其他东西应该可以不用安装）
+    2、Android SDK build-tools version 19.1.0 or higher
+    3、Android Support Repository (found under "Extras") 这个需要自己勾选
+安装完成后，修改~/.bash_profile文件，添加环境变量，如
+    export ANDROID_HOME=/Users/Tirion/Library/android-sdk-macosx
+    export PATH=${PATH}:/Users/Tirion/Library/android-sdk-macosx/platform-tools:/Users/Tirion/Library/android-sdk-macosx/tools
+    *由于iterm2安装了zsh，而zsh读取的是自己配置文件的环境变量，所以导致不能读取.bash_profile中的PATH。因此，应该将PATH的值添加到~/.zshrc文件中的PATH里，多个环境变量地址是使用:隔开的，所以只需在.zshrc的PATH中的末尾添加:和上面的路径即可
+然后source ~/.bash_profile
+*在Android ADK Manager中，将Extras里的Android相关的都安装上更好。HAXM是一个提高虚拟机速度的东东，在SDK下载后，还需要手动安装，进入/Users/Tirion/Library/android-sdk-macosx/extras/intel/Hardware_Accelerated_Execution_Manager/IntelHAXM_6.0.1.dmg打开进行安装
+--Android SDK安装结束--
+--iOS SDK安装--
+首先需要安装Xcode，然后命令行运行xcode-select --install安装Xcode的命令行工具
+cnpm install -g ios-sim
+cnpm install -g ios-deploy
+这两个命令可以将iOS APP安装到iOS模拟器或iOS设备上
+然后就能使用cordova build ios和cordova emulate ios了。不过要真机调试，需要将cordova/demo/platforms/ios/Jong.xcodeproj用Xcode打开，然后在Xcode中用真机调试
+--iOS SDK安装结束--
+
+最后，通过cordova requirements命令查看各个平台install的情况
+
+编译项目（模拟器中运行，每次修改后都需要编译才能生效）：
+cordova build
+cordova build ios
+使用cordova build编译项目，可以指定编译某个平台的
+
+运行项目（模拟器中运行）：
+cordova emulate android
+使用此命令，就能启动模拟器并运行（可能在启动那次会运行失败，再执行一次命令即可）
+cordova run android
+插入手机的时候，使用此命令，可以直接在手机上运行
+
+提升性能：
+在Android上，系统自带浏览器内核可能性能很渣，那么可以配合Crosswalk来安装APK，从而提升性能
+运行 cordova plugin add cordova-plugin-crosswalk-webview 就会自动下载安装Crosswalk内核，然后运行 cordova build android 就会自动将Crosswalk内核打包到APK中，APK也会增加20MB。
+运行cordova run android安装带有Crosswalk内核的APK。
+注：如果安装Crosswalk插件之前编译过，则需要进入/platforms/android/build/outputs/apk目录，删除所有APK重新编译，不然会安装之前的没有Crosswalk内核的APK。或者使用adb install android-armv7-debug.apk来手动安装加载了Crosswalk内核的APK
+
+
+
+引入cordova.js：在index.html中，要使用cordova的事件和插件，必须引入cordova.js（在www目录中找不到这个文件，应该是在编译后添加到和index.html同目录的）
+<script type="text/javascript" src="cordova.js"></script>
+
+deviceready事件：
+document.addEventListener('deviceready', fn, false);
+deviceready事件是用来保证cordova的其它事件或插件正常运行的，当cordova.js成功载入后才会触发此事件，从而保证cordova相关内容的运行

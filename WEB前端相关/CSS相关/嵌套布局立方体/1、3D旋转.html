@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>3D旋转</title>
+    <style>
+        /*perspective设置透视关系，才会产生3d变换效果*/
+        .box{width:100px;margin:100px auto;padding:100px;border:1px solid black;perspective:200px;}
+        /*transform-style:preserve-3d;让所有子元素在3d空间中呈现。transition:1s;必须设置过渡时间才能产生过渡动画。*/
+        .div{width:100px;height:100px;background:red;transition:1s;!transform-origin:left center 0;transform-style:preserve-3d;}
+        .div span{width:100px;height:100px;display:inline-block;background-color:yellow;transform:rotateX(60deg);}
+        .box:hover .div{transform:rotateY(360deg);}
+    </style>
+</head>
+<body>
+    <div class="box">
+        <div class="div">
+            <span></span>
+        </div>
+    </div>
+</body>
+</html>

@@ -209,7 +209,8 @@ var cb=$.Callbacks('unique');  通常情况下add()可以多次添加同一个�
 var cb=$.Callbacks('stopOnFalse');  通常情况下add()添加的函数，有 return false 的，并不会阻止fire()继续调用。有了stopOnFalse参数后，当fire()调用的函数 return false 了，则停止继续调用函数
 注：参数可以多个组合一起使用$.Callbacks('once unique');
 
-31、32讲Callbacks的实现细节
+31、32讲
+Callbacks的实现细节。主要就是通过特别的结构设计，函数间的调用实现
 --jQuery.Callbacks结束--
 
 
@@ -242,3 +243,16 @@ cb.add(function(){
     alert(222);
 });
 可以看出，Callbacks和Deferred的结构很相似，并且得到的结果也相同。其实Deferred就是Callbacks抽象出来的更具意义的一套东西
+
+
+34讲：
+resolve——done
+reject——fail
+notify——progress
+以上三组，对应add——fire，是一种映射关系
+通过循环将add赋值给promise[resolve|reject|notify]，将fireWith赋值给deferred[done|fail|progress]
+resolve-done和reject-fail通过jQuery.Callbacks('once memory')实现；notify-progress通过jQuery.Callbacks('memory')实现 
+
+
+35讲：
+promise拥有state,always,then,promise,pipe,done,fail,progress这些成员，deferred拥有resolve,reject,notify这些成员；然后将promise继承给了deferred

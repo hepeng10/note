@@ -38,7 +38,11 @@ module.exports = {
             //图片文件使用 url-loader 来处理，小于8kb的直接转为base64
             //配置信息的参数“?limit=8192”表示将所有小于8kb的图片都转为base64形式（其实应该说超过8kb的才使用 url-loader 来映射到文件，否则转为data url形式）。
             // 比如index.js中，require()的css中有图片，或者JS中创建了图片，就会被loader
-            { test: /\.(png|jpg)$/, loader: 'url-loader?limit=8192'}
+            { test: /\.(png|jpg)$/, loader: 'url-loader?limit=8192'},
+            // 使用expose-loader将模块暴露给全局。好像可以通过 loader: 'expose?$!jQuery' 这样的配置设置别名
+            {test: require.resolve('jquery'), loader: 'expose?jQuery'},
+            // 这个pen模块是依赖jquery的，上一句我们把jquery暴露给全局了，所以这里也能将pen模块暴露
+            {test: require.resolve('pen'), loader: 'exports?window.Pen'},
         ]
         //如上，"-loader"其实是可以省略不写的，多个loader之间用“!”连接起来。
     },
@@ -54,7 +58,8 @@ module.exports = {
         extensions: ['', '.js', '.json', '.scss'],
         //模块别名定义，方便后续直接引用别名，无须多写长长的地址
         alias: {
-            AppStore : 'js/stores/AppStores.js',  //后续直接 require('AppStore') 即可
+            jquery:'js/jquery.min.js',  //后续直接 require('jquery') 即可，而不需要require(js/jquery.min.js)
+            AppStore : 'js/stores/AppStores.js',
             ActionType : 'js/actions/ActionType.js',
             AppAction : 'js/actions/AppAction.js'
         }
