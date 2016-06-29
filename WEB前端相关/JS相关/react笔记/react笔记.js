@@ -12,12 +12,13 @@ var ReactDom=require('react-dom')
 2、style属性的值是一个对象，而不是字符串
 3、非DOM属性：dangerouslySetInnerHTML、ref、key。http://www.jikexueyuan.com/course/969_3.html?ss=1
    dangerouslySetInnerHTML:在JS中直接插入HTML代码。var rawHTML={__html:'<h1>hello</h1>'}，需要是一个对象，并且属性名为__html
-   ref:reference，父组件引用子组件。子组件中设置ref属性，父组件可以通过this.refs.xxx来获取到这个子组件
+   ref:reference，可以加载JSX元素上或组件上，通过this.refs.xxx来获取到这个元素。比如：React.findDOMNode(this.refs.input1).value 获取ref="input1"的元素的value值
    key:提高渲染性能（React diff算法：节点名是否相同->是否为自定义节点->比较属性），key用在节点上，React会根据key属性是否相同，来判断这个节点是否需要重新渲染。组件内部的元素不应该出现相同的key
 
 
 
 组件生命周期：
+我们把组件比作是一个函数，state/props 作为函数的参数，当它们发生变化时会触发函数执行，进而帮助我们重新绘制 UI。
 组件本质上是状态机，输入确定，输出一定确定。状态发生转换时会触发不同的钩子函数，从而让开发者有机会做出响应。
 
 挂载： 组件被插入到DOM中。
@@ -47,7 +48,7 @@ componentWillUnmount()在组件移除和销毁之前被调用。清理工作应�
 <HelloWorld name=属性值 />
 属性值可以是："字符串"，{123}，{[1,2,3]}，{var}，{fn()}。{}里面的内容会当做JS来执行
 var props={name:'Tirion',age:25};
-<HelloWorld {...props} />  /使用解构的方法一次性设置多个属性。这种方式，修改了props中的属性值，传给组件的属性也会跟着改变
+<HelloWorld {...props} />  使用解构的方法一次性设置多个属性。这种方式，修改了props中的属性值，传给组件的属性也会跟着改变
 
 状态：通过this.state使用，是组件自身的私有属性，可通过自身进行修改、变化
 getInitialState：初始化每个实例的状态。类似vue的data
@@ -64,6 +65,52 @@ handleChange:function(e){  //react中的自定义方法和生命周期放在在�
   var domT=e.target;  //得到触发事件的DOM对象
   其它事件属性和原生事件对象相同
 }
+
+
+组件嵌套：
+通信：父组件->子组件，通过props传入即可。子组件->父组件，需要父组件定义一个修改自身state的方法，将这个方法通过props传给子组件，然后子组件中调用这个方法，从而修改父组件的state
+*<input type="text" onChange={this.handleChange.bind(this,'name')}/> /react在JSX里绑定函数的时候不能通过{this.handleChange('name')}这样来绑定，因为这样是直接执行，而onChange的值应该是个函数名。而要调用自定义方法并传参，那就只能使用bind()来实现了（另外也可以调用handleChange，而handleChange中返回一个函数）。handleChange:function(name,e){}事件对象e在最后一个
+  <input type="text" onclick="handleChange(event,'name')"/>  原生DOM中添加事件是这样的，event事件对象显示传入，必须使用关键字even，顺序无所谓
+<GenderSelect handleSelect={this.handleSelect} /> 父组件中嵌套的子组件，传入了一个handleSlect属性，值是父组件中的handleSelect函数，这个函数会修改父组件的state
+<select onChange={this.props.handleSelect}>  子组件中通过this.proprs来触发父组件传入的函数，从而修改父组件的state
+
+Mixin：对象中的一组方法，目的是横向抽离出组件的相似代码（相似概念：面向切面编程，插件），提高代码复用
+var SetIntervalMixin={  //定义mixin
+  componentWillMount:function(){},
+  setInterval:function(){},
+  componentWillUnmount:function(){}
+}
+var TickTock=React.createClass({
+  mixins:[SetIntervalMixin],  //使用mixin，等于在这个组件中添加了上面定义的mixin中的3个方法
+  getInitialState:function(){}
+});
+
+
+
+表单详解：
+不可控组件：
+<input type="text" value="Hello World" />  这里数据被写死在input中，和state没有关系，state的改变并不会触发input的value值的改变。input的数据和state的数据不对应，要获取input的值只能通过DOM来获取，所以是不可控组件
+可控组件：
+<input type="text" value={this.state.value1} /> 这种方式设置的，就将input的默认值和state进行了关联，所以叫可控组件。一般情况下都使用可控组件
+
+不同表单元素的使用：
+<label htmlFor="">xxx</label> JSX中由于for是关键字，所以label标签的for改为htmlFor
+
+
+
+动画：
+通过ReactCSSTransitionGroup插件实现
+<style>
+// 定义动画的四种状态
+.example-enter{opacity:0.01;transition:opacity .5s ease-in;}
+.example-enter.example-enter-active{opacity:1;}
+.example-leave{opacity:1;transition:opacity .5s ease-in;}
+.example-leave.example-leave-active{opacity:0.01;}
+</style> /
+var ReactCSSTransitionGroup=React.addons.CSSTransitonGroup;  //引入react插件中的CSSTransitonGroup动画元素
+<ReactCSSTransitionGroup transitionName="example">  //在JSX中使用CSSTransitonGroup，通过transitionName指定动画CSS
+  <button key="1">这里面的内容会执行动画</button>  //在CSSTransitonGroup动画元素里的所有元素都会执行动画。注意着里面的元素必须要有key属性
+</ReactCSSTransitionGroup>
 
 
 实例：
@@ -136,7 +183,7 @@ var ComponentWithDefaultProps = React.createClass({
 spread语法，简化props的书写
 var CheckLink = React.createClass({
   render: function() {
-    // 这样会把 CheckList 所有的 props 复制到 <a>
+    // {...this.props}这样会把 CheckList 所有的 props 复制到 <a>。this.props.children是组件标签中的部分，这里就是Click here!
     return <a {...this.props}>{'√ '}{this.props.children}</a>;
   }
 });
@@ -148,7 +195,7 @@ React.render(
 );
 
 
-refs：React的JSX是虚拟DOM，所以，我们想要获取真实DOM，那么需要使用到refs。只能用在已被挂在的组件上，组件尚未被挂在，去获取，会报错。
+refs：React的JSX是虚拟DOM，所以，我们想要获取真实DOM，那么需要使用到refs。只能用在已被挂载的组件上，组件尚未被挂载，去获取，会报错。
 通过 this.refs.myInput 获取支撑实例（ backing instance ）
 通过 this.refs.myInput.getDOMNode() 直接获取到组件的 DOM 节点
 ref属性不仅能加在“HTML元素”上，还能加在组件上，如<Typeahead ref="myTypeahead" />

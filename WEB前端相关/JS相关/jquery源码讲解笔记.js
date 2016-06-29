@@ -255,4 +255,11 @@ resolve-done和reject-fail通过jQuery.Callbacks('once memory')实现；notify-p
 
 
 35讲：
-promise拥有state,always,then,promise,pipe,done,fail,progress这些成员，deferred拥有resolve,reject,notify这些成员；然后将promise继承给了deferred
+promise拥有state,always,then,promise,pipe,done,fail,progress这些成员，deferred拥有resolve,reject,notify这些成员；然后将promise继承给了deferred，所以deferred比promise多了3个方法
+
+
+36讲：
+0^1=>1, 1^1=>0。那么可以用一个变量i，i的值在运算后可能是0或1，i^1来得到1或0，这是个技巧，主要用在数组下标中arr[i^1]取第0个或第1个
+always,then的使用
+dfd.reject('hi')可以进行传参，dfd.fail(function(){alert(arguments[0])})可以接收参数
+dfd.pipe(fn,fn,fn)的使用
