@@ -1,5 +1,10 @@
 nodeJS：以ECMAscript为基础，扩展出的可以操作文件、网络、数据库、操作系统等的编程语言。类似javascript是以ECMAscript为基础，扩展了DOM和BOM的操作
+
+nodeJS 是异步的，非 I/O 阻塞的，也就是说，在进行读写文件的过程中并不会阻塞代码的运行，类似 AJAX 的异步形式，这就相对于 I/O 阻塞的语言来说性能大大提升。
+nodeJS 同 JS 一样，也是基于事件机制的，因此，nodeJS 中也有大量的事件。
+
 由于是以ECMAscript为基础，所以大部分语法都一样，比如创建变量、函数、对象等，还有内置的Date对象、Math对象这些，都是JS一样。
+
 主要一点区别在于，nodeJS中没有window对象，那是浏览器的顶层对象，在nodeJS中顶层对象是global
 
 nodejs常用框架有express，koa等
@@ -67,3 +72,28 @@ process.stdin.resume();  //调用resume()开启输入流：输入流默认是关
 process.stdin.on('data',function(chunk){  //使用data事件用于监听用户的输入数据。当用户输入数据后，敲回车，会调用它
     console.log('用户输入了'+chunk);  //打印出用户输入的数据
 })
+
+
+
+Buffer 类：全局的，一个用于更好的操作二进制数据流的类。
+var bf = new Buffer(5);  // 创建一个 Buffer 对象，并为这个对象分配一个空间大小（字节，通常一个英文字符为1字节，一个中文字符为3字节），分配后长度便不能改变
+var bf = new Buffer([1, 2, 3]);  // 使用数组初始化 Buffer 对象，将数组的每个元素转换成了二进制
+var bf = new Buffer('miaov', 'utf-8');  // 使用字符串初始化。将字符串转换为了二进制，第二个参数设置编码，默认为 utf-8
+for(var i = 0, j = bf.length; i < j; i++) {  // 遍历转换成二进制的 miaov
+    console.log(String.fromCharCode(bf[i]));  // 使用 String.fromCharCode 将二进制转换为字符
+}
+var bf = new Buffer(10);
+var str = 'miaov';
+bf.write(str);  // 使用 write 方法，将字符串转换成二进制
+bf.write(str, 1, 3);  // 写入3个字符到 buffer 对象中，但是是从 buffer 对象的第二位开始写（第二个参数为1，表示第二位）。也就是 buffer 对象中第一位为空，第二位开始写入 m i a 3个字符
+bf.toString();  // 将 buffer 对象中的二进制转换为字符串输出。当 buffer 对象和字符串进行拼接的时候，buffer 对象会隐式调用 toString 方法
+bf.toString('utf-8', 1, 3);  // 只写光标在1-3位之间的字符
+bf.toJSON();  // 转换为 JSON，类似 { type: 'Buffer'. data: [109, 105, 97, 111, 118] }
+bf2 = bf.slice(0, 3);  // 截取出需要的字符，并且 bf2 的内容和 bf 中对应的内容是引用关系，修改了 bf2 则 bf 也会改变
+var bf3 = new Buffer(10);
+bf.copy(bf3, 0, 1, 4);  // 复制出需要的字符，不会形成引用关系。第一个参数是写入的 buffer 对象；第二个参数是从写入的 buffer 对象的第几位开始写入；最后两个参数是复制源 buffer 对象的哪些位置
+静态方法：
+Buffer.isEncoding('utf-8');  // 判断是否支持此字符编码
+Buffer.isBuffer(bf);  // 判断是否是 buffer 对象
+Buffer.byteLength('妙味');  // 输出字节长度，这里是6
+Buffer.concat([bf1, bf2, bf3], 10);  // 合并多个 buffer 对象。第二个参数是限制合并后的长度

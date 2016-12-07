@@ -1,0 +1,64 @@
+VPS 搭建 SS
+
+1、连接 VPS
+运行命令 ssh root@xx.xx.xx.xx -p 22  // vultr 的端口为 22
+然后根据提示输入密码，成功连接
+
+2、安装 SS , ubuntu 是 apt-get，centos 是 yum 。ubuntu 不支持破解版锐速，推荐 centos 6；7也不支持...
+yum update
+yum install python-gevent python-pip
+pip install shadowsocks  
+    // 这里可能会有错误提示，locale.Error：unsupported locale setting
+    解决错误：
+    echo "export LC_ALL=en_US.UTF-8"  >>  /etc/profile
+    exit
+    重新连接 VPS
+    再次运行 pip install shadowsocks
+    // 可能还有错误提示，安装 tools 什么的
+    pip install -U setuptools
+    // 其它还有什么错误提示的话，根据提示百度解决，这里比较烦
+yum install python-m2crypto
+
+3、配置 SS
+vi /etc/shadowsocks.json  // 使用 vi 命令修改 SS 配置文件
+{
+    "server":"xx.xx.xx.xx",  // 服务器地址，同 VPS 地址
+    "server_port":8888,  // 端口号，自定义
+    "local_port":1080,  // 一般使用1080
+    "password":"hepeng10",  // SS 连接密码
+    "timeout":300,
+    "method":"aes-256-cfb",
+    "fast_open":false
+}
+
+4、运行/退出 SS
+ssserver -c /etc/shadowsocks.json -d start
+ssserver -c /etc/shadowsocks.json -d stop
+
+注：centos 需要关闭防火墙才能访问
+service iptables stop  // 停止
+chkconfig iptables off  // 禁用
+
+锐速破解版安装：目前测试只有 centos6 支持
+参考：https://www.233.wiki/2016/02/21/124.html
+wget -q -O- http://file.idc.wiki/get.php?serverSpeeder | bash -
+bash serverSpeeder_setup.sh  // 根据提示按 y 自动完成安装
+service serverSpeeder status  // 查看锐速的状态
+service serverSpeeder start | stop | restart  // 停止暂停重启锐速
+
+
+
+快速访问 SSH 及修改 SSH 连接密码
+vi ~/.ssh/config  // 配置快速访问 SSH
+输入内容：
+Host Tirion  // Tirion 是别名，今后就可以通过 ssh Tirion 连接这个远程服务器了
+    HostName xx.xx.xx.xx  // 主机地址
+    Port 22  // 端口
+    User root  // 用户名
+就可以通过：
+ssh Tirion 命令访问上面配置的服务器地址了。当然，还是需要输入密码的
+
+修改密码：
+连接上服务器后，输入命令
+passwd
+然后就会提示你输入新密码，按照提示进行即可
