@@ -1,0 +1,80 @@
+软件包分类：
+1、源码包。一般为 C 语言编写。需要自己编译，安装很慢
+    脚本安装包。由源码包修改而来，简化了安装步骤
+2、二进制包。已经编译后的，通常安装这种。（也叫RPM包、系统默认包）
+    二进制包有依赖性，很多安装包都依赖别的软件，需要先安装别的安装包。
+
+
+
+--RPM 包管理：rpm 命令管理，安装本地 rpm 包。
+命名规则：
+httpd-2.2.15-15.e16.centos.1.i686.rpm
+httpd：软件包名
+2.2.15：软件版本
+15：软件发布的次数
+e16.centos：适合的 Linux 平台
+i686：适合的硬件平台
+rpm：rpm 包扩展名
+
+RPM 包依赖性：
+树形依赖：a -> b -> c
+环形依赖：a -> b -> c -> a
+模块依赖：www.rpmfind.net。模块都以 .so.2 结尾
+注：依赖性是 RPM 包中的一个重要问题。比如上面那样，要装 c 就必须先装 a 和 b，卸载需要先卸载 c，再是 b，a。
+
+RPM 包查询：
+rpm -q 包名  查询包是否安装
+rpm -q httpd  // 查询 hpptd 包是否安装
+
+rpm -qa  查询所有已安装的 rpm 包
+rpm -qa | grep httpd  // 通过在所有包中查询需要的方式
+
+rpm -qi 包名  查询包的信息
+rpm -qi httpd
+
+rpm -qip 包名  查询本地未安装包的信息
+-p 查询本地包，其它很多 rpm 命令也支持 -p 选项
+rpm -qip zip-3.0-1.el16.i686.rpm  // 包名需要是全名，路径要正确，这里就是当前目录的
+
+rpm -ql 包名  查询包的安装位置
+rpm -ql httpd
+
+rpm -qf 系统文件名  查询某个系统文件属于哪个软件包。自己创建的文件，以及系统自动生成的一些日志文件等是查不到的。
+rpm -qf /var/www/icons/up.gif  // 这样就能查出这个文件所属的包名
+
+rpm -qR 包名  查询软件包的依赖性
+rpm -qR httpd
+
+
+
+--RPM 包管理：yum 在线管理
+通过 yum 自动进行在线安装，可以很好的解决依赖问题。
+IP 地址配置和网络 yum 源：
+vi /etc/sysconfig/network-scripts/ifcfg-eth0  // 编辑网卡配置文件
+service network restart  // 重启网络生效
+vi /etc/yum.repos.d/CentOS-Base.repo  // yum 源 配置文件
+
+yum 命令：
+yum list  // 获取服务器上可用的软件包
+
+yum search 包名  搜索服务器上所有与包名相关的包
+yum search httpd
+
+yum -y install 包名  安装软件包，-y 是安装过程中所有询问都自动回答 yes
+yum -y install gcc
+
+yum -y update [包名]  升级软件包，不加包名则是升级所有软件包以及内核（远程升级内核可能出现服务器无法启动）
+yum -y update gcc
+
+yum -y remove 包名  卸载软件包（卸载的时候会卸载所有依赖包，如果别的软件包依赖这个软件包所依赖的包，那会导致那个软件包无法使用）
+
+
+
+--源码包管理：
+与 RPM 包的区别：
+安装位置不同：RPM 包自动安装到默认位置，源码包自定义位置，一般安装到 /usr/local/软件名
+
+
+
+--脚本安装：
+是人为把安装过程写成自动安装的脚本，只要执行脚本，定义简单的参数，就可以完成安装。运行安装包提供的 .sh 文件即可。

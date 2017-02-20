@@ -1,0 +1,309 @@
+命令格式：
+命令 -选项 参数
+ls -la /etc  l和a是两个选项，可以用空格分开，不过通常连写；选项和参数不是必须的
+
+命令位置：
+root:  /sbin  /usr/sbin
+all users:  /bin  /usr/bin
+bin-binary简写  usr-user简写
+
+注：命令执行过程中可使用ctrl+c来终止命令，比如查找文件过程中等
+
+
+--文件处理命令：
+ls [选项] [目录名]  // list 简写  查看目录中有哪些文件
+ls -a  // 显示所有文件，包括隐藏文件  a-all 简写
+ls -l  // 详细信息显示 l-long  如：
+	drwxr-xr-x  3  root  root  4096  12-01  21:26  boot
+	drwxr-xr-x 可以分为三部分：d rwx r-x r-x
+	第一个字符表示文件类型：d 表示 directory 目录；- 表示二进制(普通)文件；l 表示软链接文件 link
+	rwx 三个字符表示权限，read 可读，write 可写，execute 可执行
+	rwx 表示所有者 u-user；r-x 表示所属组 g-group；r-x 表示其他 o-others
+	3 硬链接数（不重要）
+	root 所有者 root 所属组
+	4096 文件大小（不准确）单位：数据块 block 512字节（是Linux默认最小存储单位，可自行调整）
+	12-01 21:26 文件创建时间或最后修改时间
+	boot 文件名
+ls -lh  // h选项表示 humanize，能更人性化的显示信息，比如上面的文件大小会显示成 4k，是个比较通用的选项，多个命令可用
+ls -d  // 查看目录属性
+ls -ld /root  // 查看目录的详细信息，/root 是参数；如果不带 d 是查看根目录里的各个文件目录的详细信息
+
+cd [路径]  change directory  切换目录
+cd /home  // 切换到 home 目录
+
+pwd  print  working directory  显示当前所在的目录
+pwd  // 显示当前目录路径，直接输入这三个字母即可
+
+mkdir [目录名]  make directory  创建空目录
+mkdir test  在当前目录下创建 test 目录
+mkdir /test  在根目录下创建 test 目录
+mkdir -p /tmp/book/linux  使用 -p 命令递归创建目录，会先创建 book 目录，然后创建 linux 目录
+mkdir -p /tmp/book/linux /tmp/music/jay  创建多个目录，用空格隔开
+
+rmdir /tmp/book/linux  // 删除空目录，由于只能删除空目录，所以这个命令不常用，通常直接使用 rm 命令删除目录
+
+touch [文件名]  创建空文件
+touch newfile  // newfile 是文件名
+
+cp [源文件] [目标目录]  copy  复制文件或目录
+cp /etc/inittab /etc/services /test  // 将inittab和services复制到test目录中，复制多个文件之间用空格隔开，最后一个参数是目录即可
+cp -r /etc /test  // 将etc目录复制到test目录中，复制目录必须使用 -r
+cp -rp /tmp/book/linux /tmp/music/jay  // 使用 -p 命令可以保留文件的属性（权限、所有者、时间戳等）
+
+mv [源文件] [目标文件]  move  移动文件、改名
+mv /test/inittab /tmp/  // 将inittab移动到tmp目录
+mv /test/inittab /tmp/ini.test  // 移动并改名
+mv services service  // 将当前目录下的 services 改为 service
+
+rm [选项] [文件名]  remove  删除文件
+rm /test/service  // 删除 service 文件；会询问是否删除，输入 y 确认
+rm -f service  // force 删除文件，不会进行询问
+rm -rf test  // 删除test目录，需要使用 r；另外 f 也是必须的，如果不加 f 则会对目录里的每个文件进行询问是否确认删除
+
+cat [文件名]  concatenate and display files  查看文件内容
+cat /etc/issue  // 一次性显示完，只适合查看比较短的内容
+
+more [文件名]  分页显示文件内容
+more /etc/services  // 分页显示；之后可以使用以下命令进行操作
+空格或f 显示下一页；enter 显示下一行；q 退出
+
+less [文件名]  分页显示文件内容，可向上翻页
+less /etc/services
+
+head [-数字] [文件名]  查看文件的前几行
+head -20 /etc/services  // 默认是10行，这里指定20行
+
+tail [-数字] [文件名]  查看文件后几行
+tail -30 /etc/services  // 显示文件后30行
+tail -30f /etc/logs  // 使用f可以实时查看，比如实时更新的日志文件
+
+ln [-s] [源文件] [目标文件]  link  产生链接文件
+ln /etc/issue /issue.hard  // 将issue在根目录下创建 issue.hard 硬链接文件（类似cp，但是会和源文件同步更新，不过删除其中一个另一个不会被删除；硬链接和源文件拥有相同的 i 节点，所以可以同步更新；每个文件必须有个 i 节点，是内核调用的数字标识；硬链接不能跨分区创建，不能对目录使用）
+ln -s /etc/issue /issue.soft  // 使用 -s 创建软链接文件（软链接类似Windows的快捷方式）。软连接的权限都为 lrwxrwxrwx
+
+
+
+--权限管理命令：
+chmod [权限] [文件或目录]  change the permissions mode of a file  改变文件权限
+chmod u + r  // 对 user 使用 + 增加权限 r
+chmod g - w  // 对 group 使用 - 取消权限 w
+chmod o = x  // 对 other 使用 = 赋予权限（清除之前的权限）x
+使用数字来表示权限：r-4 w-2 x-1
+rwxr-xr--  可以用754表示
+chmod 641 test  // 将 test 改为 641(rwxr----x) 的权限（通常使用这种方法来修改权限，而不使用上面那种）
+chmod -R 777 testdir  // 使用 -R 递归修改目录及内部所有文件的权限
+
+关于文件拥有的权限可以执行的命令(文件和目录是不一样的)：
+文件
+	r-cat,more,less,head,tail
+	w-echo,vi
+	x-命令,脚本
+目录
+	r-ls
+	w-touch,mkdir,rm
+	x-cd
+
+chown [用户名] [文件或目录]  change owner  改变所有者
+chown tirion file1  // 改变 file1 的所有者为 tirion
+
+chgrp [组名] [文件或目录]  change group  改变所属组
+chgrp adm file1  // 改变 file1 的所属组为 adm
+
+umask  // 查看创建文件的默认权限，会输出类似 0022 这样的数，第一位 0 代表特殊权限位，022 表示权限，但是需要用 777 - 022 = 755；目录默认是 755，文件默认为 644
+umask -S // 以 rwx 形式显示新建文件的缺省权限
+
+
+
+--文件搜索命令：
+which [命令名称] 显示系统命令所在路径，还会提供别名信息
+which chmod  // 会输出/bin/chmod
+
+whereis [命令名称] 显示系统命令所在路径，还会提供这个命令的帮助文件所在路径
+whereis ls  // 会输出ls: /bin/ls /usr/share/man/...省略
+
+find [搜索路径] [搜索关键字] 查找文件或目录，类似Windows的查找；应尽量缩小范围查找；重点！
+find /etc -name init  // 在目录 /etc 中根据文件名(-name)查找文件init(完全匹配而不是包含)
+find /etc -name init*  // 使用 * 来匹配任意字符，这里就是查找 init 开头的所有文件；两边都加 * 也就是包含 init 了
+find /etc -name init???  // 使用 ? 来匹配一个字符，这就是 init 开头的并且是7个字符的文件
+find /etc -iname *init*  // 使用 -iname 来查找文件，不区分大小写
+find / -size +204800  // 在根目录下查找大于 100MB 的文件；-size 是根据大小查找；+204800 是 100MB，因为一个块是512字节；也可以使用 -201800 来表示查找小于这个大小的
+find /home -user tirion  // 在 home 目录下查找所有者(-user)为 tirion 的文件
+find /home -group work  // 在 home 目录下查找所属组(-user)为 work 的文件
+find /etc -ctime -3  // 在 etc 下查找3天内属性被修改过的文件或目录；-ctime 是以天为单位；-cmin 单位就是分钟；c 是 change，文件属性被修改过，另外还有 -atime(access) 文件被访问过，-mtime(modify)文件内容被修改过；-3表示3天之内，+3表示超过3天
+连接符1：-a and -o or
+find /etc -size +163840 -a -size -204800  // 查找大于 80M 并且小于 100M 的文件
+find /etc -size -163840 -o -size +204800  // 查找小于 80M 或者大于 100M 的文件
+文件类型查找：-type f(二进制文件) l(软链接文件) d(目录)
+find /etc -name init* -a -type l  // 查找出类型为软链接的 init* 文件
+根据i节点查找：-inum
+find /etc -inum 1203  // 查找 i节点 为1203的文件
+连接符2：find ... -exec 命令 {} \;  使用 -exec 命令对查询结果执行操作。{}表示find查询的结果,\是转义符。{} \; 是固定格式；-exec 也可以使用 -ok，-ok 会询问是否执行
+find /etc -name inittab -exec ls -l {} \;  // 在 etc 下查找 inittab 文件并使用 ls 显示其详细信息
+find . -inum 12 -exec rm {} \;  // 这里 . 表示当前目录，-inum 表示根据i节点查找，12是i节点序号；从当前目录下删除i节点为12的文件
+
+locate [搜索关键字]  查找文件或目录；是从系统中的一个文件索引数据库中查找的
+locate file  // 查找出文件名包含file的文件
+updatedb  // 更新文件索引数据库，直接输入执行即可；系统会定期执行
+
+grep [指定字符串] [源文件]  在文件中搜索字符串匹配的行并输出
+grep ftp /etc/services  // 查找 /etc/services 目录中包含 ftp 字符串的行
+grep -i ftp /etc/services  // 使用 -i 命令不区分大小写查找
+grep ftp /etc/services | grep -v odette  // 使用管道命令，并使用 -v 在搜索结果中进行过滤，排除含有字符串 odette 的行
+
+
+
+--帮助命令：
+man [命令或配置文件]  manual  获得帮助信息
+man ls  // 查看 ls 命令的帮助信息
+man services  // 查看配置文件 services 的帮助信息
+
+info [任何命令]  information  获得帮助信息；与man相比主要是浏览方式不同
+info ls  // 查看ls命令的帮助信息
+
+whatis [任何命令]  获得索引的简短说明信息
+whatis ls  // 获得ls的简短说明
+
+[命令] --help  会列出这个命令的帮助信息
+help [命令]  获得shell内置命令的帮助，只能使用这个方法
+
+
+
+--用户管理命令：
+useradd 用户名  添加用户
+useradd tirion  // 添加 tirion 用户
+
+passwd [用户名]  修改用户的密码（管理员可以修改任何用户的密码，普通用户不行）
+passwd  // 修改自己的密码。系统会提示输入密码
+passwd tirion  // 系统会提示输入密码，普通用户不能设置过于简单的密码，有复杂度要求，root 随意
+
+who  查看用户登录信息
+root     tty1        2016-12-19 12:17 (222.209.152.234)  // tty 表示本地登录
+root     pts/0        2016-12-19 12:17 (222.209.152.234)  // pts 表示远程登录
+
+w  也是查看登录信息
+ 12:19:47 up 1 day, 20:00,  1 user,  load average: 0.00, 0.01, 0.05  // up 表示连续运行时间
+USER     TTY      FROM             LOGIN@   IDLE   JCPU   PCPU WHAT
+root     pts/0    222.209.152.234  12:17    3.00s  0.02s  0.00s w
+
+
+
+
+--压缩解压命令：
+gzip [文件]  压缩文件，压缩后格式 .gz （1、只能压缩文件，不能压缩目录  2、不保留源文件）
+gzip newfile  // 压缩newfile文件为newfile.gz
+
+gunzip [压缩文件]  解压文件
+gunzip newfile.gz  // 解压缩 .gz 文件
+
+bzip2 -k [文件名]  gzip 的升级版。压缩文件，会保留源文件，压缩比高，后缀.bz2
+bzip2 -k newfile1  // 压缩 newfile1 文件为 newfile1.bz2
+bunzip2 -k [压缩包名]  解压缩文件
+bunzip2 -k newfile1.bz2  // 加压缩到当前目录
+
+tar [选项] [目录]  打包目录，打包时可以使用-z压缩，压缩后格式.tar.gz
+选项：-c creat 产生 .tar 打包文件；-v 显示详细信息(打包过程)；-f 指定压缩后的文件名；-z 压缩成 gz 文件；-z 解包；-j 压缩成 bz2 文件
+tar -zcf newdir.tar.gz newdir  // 将newdir打包并压缩为newdir.tar.gz；注意newdir.tar.gz是自定义的压缩后的文件名，也可以和源目录名不同，并且可以不带.tar.gz的后缀，但是为了区分，通常使用这样的命名规范（某些Linux不支持-z，那么就只能先打包，再用gzip来压缩）
+tar -cjf newdir.tar.bz2 newdir  // 使用 -j 打包成 .bz2 压缩文件
+file [文件名]  查看这个文件的类型
+tar [选项] [压缩文件]  解包
+tar -zxvf dir1.tar.gz  // 使用 -x 来解包，-v 显示解压的详细信息
+tar -xjf newdir.tar.bz2  // 解压 .bz2 文件
+
+zip [-r] [文件名] 压缩文件或目录，会保留源文件，后缀为.zip 默认Windows和Linux通用格式(压缩比很小，gzip压缩比很大)
+zip services.zip /etc/services  // 将 services 压缩为 services.zip
+zip -r test.zip /test  // 压缩目录，需要使用 -r
+unzip [压缩包]  解压缩文件
+unzip test.zip  // 解压缩到当前目录
+
+
+
+--网络通信指令：
+write [用户名]  向另一个用户发送信息，输入命令后回车然后输入信息内容，结束按 ctrl+d 发送；对方必须在线
+wall [信息]  write all 向所有在线用户发送信息
+mail 用户名
+*以上这些通讯方式随着时代的发展已经不常用了
+
+ping [选项] [ip地址]  测试网络是否连通，ctrl+c 终止，注意查看时间和丢包率；ping 对方 ping 不通的时候应该先 ping 自己的 ip 看是否通，如果通则说明自己的网络设置没问题，如果不通再 ping 回环网卡 127.0.0.1 看是否通
+ping -c 4 192.168.2.2  // 使用 -c 设定 ping 的次数，没这个选项则是一直 ping 下去
+
+ifconfig [-a]  interface configure 查看网卡的信息，类似 Windows 的 ipconfig
+ifconfig eth0 192.168.1.111  // 配置 IP 地址，临时生效，只能配置 IP
+vi /etc/sysconfig/network-scripts/ifcfg-eth0  // 配置网卡，可以修改 IP，DNS，网关等信息，可以永久生效
+
+last  显示目前和过去所有用户登录，计算机重启的信息
+lastlog  显示所有用户最后一次登录的信息
+
+traceroute ip地址  显示数据包到主机间的路径
+traceroute www.baidu.com
+
+netstat [选项]  查询网络状态
+选项：-t TCP协议；-u UDP协议；-l 监听；-r 路由；-n 显示IP地址和端口号
+netstat -tlun  // 主要作用查询本机开启的监听端口
+netstat -an  // 查看所有监听信息
+netstat -rn  // 查看路由列表
+
+setup  设置网络，red hat 系列 Linux 专属命令
+
+mount [-t 文件系统]  挂载设备
+mount -t iso9660 /dev/sr0 /mnt/cdrom  // iso9660 表示光盘；/dev/sr0 设备文件名，等同于/dev/cdrom；/mnt/cdrom 挂载点。-t iso9660 可以省略
+mount /dev/sr0 /mnt/cdrom
+unmount /dev/sr0  // 卸载设备
+
+
+
+--关机重启命令：
+shutdown [选项] 时间  关机。关机或重启前应该先关闭各种服务，这样可以避免有过多人在访问服务器，硬盘还在高速运转，导致出问题
+选项：-h 关机；-r 重启；-c 取消前一个关机命令
+shutdown -h now  // 立刻关机
+shutdown -r now  // 立刻重启
+
+reboot  重启
+
+init n  进入某个运行级别。n 表示系统运行级别。cat /etc/inittab 查看说明及默认配置
+0、关机；1、单用户（类似 Windows 的安全模式，只启动核心程序，只允许 root 登录）；2、不完全多用户；3、完全多用户（系统默认）；4、未分配；5、图形界面；6、重启
+init 6  // 重启
+
+runlevel  查询当前运行级别
+
+logout  退出登录
+
+
+
+
+进程管理：
+ps -ef | grep node  使用 ps 命令查看运行的进程，使用 grep 过滤出 node 进程。
+kill -9 31895  通过进程 pid 杀掉进程
+
+
+
+--快捷键：
+tab键  命令补全，输入几个字符按tab键能自动补全这个命令，前提是只有以这几个字符开头的唯一的命令，有多个会在再次按tab键的时候列出来
+ctrl+l  清屏，也可以使用命令clear
+ctrl+u  清除输入的所有字符，不用按删除键慢慢删了
+上下键  翻过去执行过的命令
+
+
+输入/输出重定向：
+不使用标准的输入/输出（键盘输入/显示器输出），而使用别的方式输入输入，如从文件中输入，或输出到文件中
+ls -l /tmp > /tmp.msg  // 使用 > 来输出重定向，将内容写入 tmp.msg 中(会清空已有内容)
+ls -l /tmp >> /tmp.msg  // 使用 >> 追加到 tmp.msg 中(不会清空已有内容)
+wall < /etc/msg  // 使用 < 来输入重定向，将msg文件的内容输入
+cp -R /usr/backup/usr.bak 2> /bak.error  // 使用2>来保存错误信息
+
+
+管道：将一个命令的输出传送给另一个命令，作为另一个命令的输入
+命令1|命令2|命令3|命令n
+ls -l /etc | more
+
+
+; 用;间隔各个命令，按顺序依次执行
+pwd ; ls ; date
+
+&&  命令1 && 命令2  当命令1执行成功才会执行命令2
+
+||  命令1 || 命令2  命令1执行成功，命令2就不执行；命令1执行失败，命令2才执行
+
+命令替换符`，将一个命令的输出作为另一个命令的参数
+命令1 `命令2`  将命令2的输出作为命令1的参数
+ls -l `which touch`
+

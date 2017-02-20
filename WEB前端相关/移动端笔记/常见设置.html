@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <!-- 基本视图设置 -->
+    <meta name="viewport" content="width:device-width,user-scalabel=no">
+    <!-- x5 设置 -->
+    <meta name="x5-orientation" content="portrait">
+    <meta name="x5-fullscreen" content="true">
+    <!-- UC 设置 -->
+    <meta name="screen-orientation" content="portrait">
+    <meta name="full-screen" content="yes">
+    <!-- 禁止电话号码，邮箱识别 -->
+    <meta name="format-detection" content="telephone=no,email=no">
+    <title>移动端常见设置</title>
+
+    <style>
+    /* 设置默认字体，只有这个英文字体是所有手机自带的 */
+    body {
+        font-family: Helvetica;
+    }
+
+    * {
+        /* 禁止用户修改字体大小 */
+        -webkit-text-size-adjust: 100%;
+        /* 禁止用户长按选择文字（有部分兼容问题，可通过事件解决） */
+        -webkit-user-select: none;
+    }
+
+    /* 设置点击时的高亮颜色，默认为灰色 */
+    a, input, button {
+        -webkit-tap-highlight-color: rgba(0, 0, 0, 0);
+    }
+
+    /* 清除默认的按钮圆角样式 */
+    input, button {
+        -webkit-appearance: none;
+        boder-radius: 0;
+    }
+    </style>
+</head>
+<body>
+    <!-- 调用系统拨打电话 -->
+    <a href="tel:18888888888">请拨打18888888888</a>
+    <!-- 调用系统发送邮件 -->
+    <a href="mailto:hepeng10@qq.com">请发送邮件</a>
+</body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>viewport 适配</title>
+    <link rel="stylesheet" href="">
+    <script>
+    (function() {
+        var w = window.screen.width;  // 获得 device-width
+        var targetW = 640;  // 想要设置成的宽度
+        var scale = w / targetW;  // 缩放值
+        var meta = document.createElement('meta');
+        meta.name = 'viewport';
+        meta.content = 'user-scalable=no,initial-scale='+ scale +',minimum-scale='+ scale +',maximum-scale=' + scale;
+        document.head.appendChild(meta);
+    })();
+    </script>
+</head>
+<body>
+    
+</body>
+</html>

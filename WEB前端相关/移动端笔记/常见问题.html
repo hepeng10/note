@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>常见问题</title>
+    <link rel="stylesheet" href="">
+    <style>
+        /* font-boosting 问题：在一段文字，没有设置高度的时候，在 webkit 下，文字大小被浏览器放大（随机出现） */
+        /* 解决方法：1、设置高度；2、设置最大高度 max-height */
+        p#id1 {
+            font-size: 16px;
+            line-height: 16px;
+            /* 一下两个选择一种 */
+            height: 16px;
+            max-height: 50px;
+        }
+
+    </style>
+</head>
+<body>
+    <!-- font-boosting -->
+    <p id="id1">文字内容最好设置高度</p>
+
+
+</body>
+</html>

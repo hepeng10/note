@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>rem 适配</title>
+    <link rel="stylesheet" href="">
+    <script>
+    (function() {
+        var html = document.documentElement;
+        var hWidth = html.getBoundingClientRect().width;  // 获取页面宽度
+        html.style.fontSize = hWidth / 15 + 'px';  // 设置根节点的字体大小。由于 hWidth 是动态的，当手机分辨率变大，根节点的字体也就会变大，1rem 也会跟着变大，也就是 1rem 始终保持占屏幕固定的宽度比。这里 1rem 也就是屏幕宽度的 1/15。
+        // 注：rem = root em，表示根据根节点 html 元素的字体大小进行设置
+        // 根据设计图按需分成需要的份数，比如设计图是 750px 的，那么就分成15份即 hWidth / 15，一份 1rem 也就是 750/15 为 50px，就方便计算了
+    })();
+    </script>
+
+    <style>
+    /* 使用 less 进行开发，能方便的根据设计图设置的 px 得到需要的 rem */
+    /* 比如设计图是以 750px 进行设计的，我们就分成15份，一份就是 50px，1rem 就是设计图的 50px。当然，在手机上所占像素并不一定是 50px */
+    @r = 50rem;  /* 定义基准值，方便通过像素计算出需要的 rem 值。基准值就是每份所占的像素，这里单位设置为 rem 是为了方便下面计算后不用每次添加 rem 单位。 */
+    #box {
+        width: 300/@r;  /* 比如设计图的某个元素宽度为 300px，那除以基准值就能得到此元素所占的份数：300/x = 50/1 => x = 300/50 */
+        height: 35/@r;
+    }
+    .nav {
+        width: 25%;  /* 将 rem 和百分比组合使用更好的实现布局 */
+    }
+    </style>
+</head>
+<body>
+    
+</body>
+</html>
