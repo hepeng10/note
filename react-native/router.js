@@ -2,7 +2,7 @@ import { StackNavigator } from 'react-navigation';
 import App from './container/App';
 import OtherScreen from './container/OtherScreen';
 
-// 使用 react-navigation 路由
+// 使用 react-navigation 注册路由
 export default StackNavigator(
     // 指定路由名字和对应的组件
     {

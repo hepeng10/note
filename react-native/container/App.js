@@ -112,6 +112,7 @@ export default class App extends Component {
       // 会立即渲染所有元素，即使屏幕以外的。适合用来显示数量不多的滚动元素。如果你需要显示较长的滚动列表，那么应该使用功能差不多但性能更好的ListView组件。
       <ScrollView>
         <Text style={{fontSize:50}}>Scroll me plz</Text>
+        {/* require 必须是静态字符串，不能使用变量，因为 require 是在编译时执行，而非运行时执行 */}
         <Image source={require('../img/favicon.png')} />
         <Image source={require('../img/favicon.png')} />
         <Image source={require('../img/favicon.png')} />
