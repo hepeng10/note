@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <title>Document</title>
+    <style>
+    .container {
+        height: 100px;
+        clear: both;
+        margin: 100px 500px;
+    }
+    .container > div {
+        float: left;
+        width: 100px;
+        height: 100px;
+        border: 1px solid black;
+    }
+    #container {
+        position: relative;
+    }
+    #container > div {
+        position: absolute;
+    }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div id="source" draggable="true">a元素</div>
+        <div id="process" draggable="true">b元素</div>
+        <div id="target" draggable="true">c元素</div>
+    </div>
+
+    <div id="container" class="container">
+        <div id="a" draggable="true">a元素</div>
+        <div id="b" draggable="true">b元素</div>
+        <div id="c" draggable="true">c元素</div>
+    </div>
+
+    <script>
+    document.ondragover = function(e){e.preventDefault();}
+
+
+    // drag 基础
+    let source = document.querySelector('#source');
+    let process = document.querySelector('#process');
+    let target = document.querySelector('#target');
+
+    source.addEventListener('dragstart', (e) => {
+        console.log('a元素开始被拖动');
+    }, false);
+    process.addEventListener('dragenter', (e) => {
+        console.log('a元素开始进入b元素');
+    }, false);
+    process.addEventListener('dragleave', (e) => {
+        console.log('a元素离开b元素');
+    }, false);
+    target.addEventListener('drop', (e) => {
+        e.preventDefault();
+        console.log('a元素拖放到c元素了');
+    }, false);
+
+
+    // drag 实现拖拽换位
+    let divs = document.querySelectorAll('#container div');
+    divs.forEach((div, i) => {
+        div.style.left = `${i * 100}px`;
+    });
+
+    let container = document.querySelector('#container');
+    let startDom = endDom = null;
+
+    container.addEventListener('dragstart', (e) => {
+        startDom = e.target;
+        startDom.style.opacity = .5;
+    }, false);
+    container.addEventListener('dragenter', (e) => {
+        console.log(e.target);
+    }, false);
+    container.addEventListener('drop', (e) => {
+        endDom = e.target;
+        startDom.style.opacity = 1;
+        [endDom.style.left, startDom.style.left] = [startDom.style.left, endDom.style.left]
+    }, false);
+    </script>
+</body>
+</html>
