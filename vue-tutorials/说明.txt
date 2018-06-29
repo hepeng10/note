@@ -1,0 +1,5 @@
+1、安装 vue-cli
+    npm install vue-cli -g
+2、使用 vue-cli 初始化项目
+    vue init webpack your-project-name
+    之后会根据个人需要进行命令行的选择安装

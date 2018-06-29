@@ -222,13 +222,34 @@ export default class App extends Component {
   renderRouter() {
     const { navigate } = this.props.navigation;
     return (
-      <Button
-        title="Go to OtherScreen"
-        onPress={() =>
-          // 使用 navigate() 方法跳转到指定的路由组件中。传参在目标组件中通过 this.props.navigation.state.params 获取
-          navigate('OtherScreen', { name: 'Tirion' })
-        }
-      />
+      <View>
+        <Button
+          title="Go to OtherScreen"
+          onPress={() => {
+            // 使用 navigate() 方法跳转到指定的路由组件中。传参在目标组件中通过 this.props.navigation.state.params 获取
+            // 注意：如果没传参数，this.props.navigation.state.params 的值为 undefined，而不是空对象
+            navigate('OtherScreen', { name: 'Tirion' })
+          }}
+        />
+        <Button
+          title="可点击的组件"
+          onPress={() => {
+            navigate('Touchable');
+          }}
+        />
+        <Button
+          title="轮播组件"
+          onPress={() => {
+            navigate('ViewPager');
+          }}
+        />
+        <Button
+          title="动画"
+          onPress={() => {
+            navigate('Animated');
+          }}
+        />
+      </View>
     );
   }
 
