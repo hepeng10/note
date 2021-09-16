@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>LaTeX在线：数学公式编辑器</title>
+    <meta name="keywords" content="在线数学公式编辑器" />
+    <meta http-equiv="content-type" content="text/html; charset=utf-8" />
+    <meta http-equiv="content-language" content="ZH" />
+    <link rel="stylesheet" href="style.min.css" type="text/css" />
+</head>
+
+<body>
+    <div id="center">
+        <div id="centerTop">
+            <div id='panel'>
+                <div id="signPanel">
+                    <div class="toolbar_wrapper">
+                        <div class="toolbar" style="z-index:23">
+                            <div class="panel"><select title="公式颜色"
+                                    onchange="EqEditor.insert(this.value, this.value.length-1); this.selectedIndex=0">
+                                    <option value="" class="selectTitle">颜色&hellip;</option>
+                                    <option value="{\color{Red}}" style="color:Red">红</option>
+                                    <option value="{\color{Green}}" style="color:Green">绿</option>
+                                    <option value="{\color{Blue}}" style="color:Blue">蓝</option>
+                                    <option value="{\color{Yellow}}" style="color:Yellow">黄色</option>
+                                    <option value="{\color{Cyan}}" style="color:Cyan">青色</option>
+                                    <option value="{\color{Magenta}}" style="color:Magenta">品红色</option>
+                                    <option value="{\color{Teal}}" style="color:Teal">蓝绿色</option>
+                                    <option value="{\color{Purple}}" style="color:Purple">紫色</option>
+                                    <option value="{\color{DarkBlue}}" style="color:DarkBlue">深蓝色</option>
+                                    <option value="{\color{DarkRed}}" style="color:DarkRed">深红色</option>
+                                    <option value="{\color{Orange}}" style="color:Orange">橙色</option>
+                                    <option value="{\color{DarkOrange}}" style="color:DarkOrange">深橙色</option>
+                                    <option value="{\color{Golden}}" style="color:Golden">金色</option>
+                                    <option value="{\color{Pink}}" style="color:Pink">粉红色</option>
+                                    <option value="{\color{DarkGreen}}" style="color:DarkGreen">深绿色</option>
+                                    <option value="{\color{Orchid}}" style="color:Orchid">淡紫色</option>
+                                    <option value="{\color{Emerald}}" style="color:Emerald">翡翠绿</option>
+                                </select></div>
+                            <div class="panel"><select title="算子"
+                                    onchange="EqEditor.insert(this.value); this.selectedIndex=0;">
+                                    <option selected="selected" value="" class="selectTitle">算子&hellip;</option>
+                                    <option value="\displaystyle">display style</option>
+                                    <optgroup label="Operators">
+                                        <option value="\arg">arg</option>
+                                        <option value="\det">det</option>
+                                        <option value="\dim">dim</option>
+                                        <option value="\gcd">gcd</option>
+                                        <option value="\hom">hom</option>
+                                        <option value="\ker">ker</option>
+                                        <option value="\Pr">Pr</option>
+                                        <option value="\sup">sup</option>
+                                    </optgroup>
+                                </select></div>
+                            <div class="panel"><select title="三角函数"
+                                    onchange="EqEditor.insert(this.value); this.selectedIndex=0;">
+                                    <option selected="selected" value="" class="selectTitle">三角函数&hellip;</option>
+                                    <option value="\sin">sin</option>
+                                    <option value="\cos">cos</option>
+                                    <option value="\tan">tan</option>
+                                    <option value="\csc">csc</option>
+                                    <option value="\sec">sec</option>
+                                    <option value="\cot">cot</option>
+                                    <optgroup label="双曲函数">
+                                        <option value="\sinh">sinh</option>
+                                        <option value="\cosh">cosh</option>
+                                        <option value="\tanh">tanh</option>
+                                        <option value="\coth">coth</option>
+                                </select></div>
+                            <div class="panel"><select title="反三角函数"
+                                    onchange="EqEditor.insert(this.value); this.selectedIndex=0;">
+                                    <option selected="selected" value="" class="selectTitle">反三角函&hellip;</option>
+                                    <option value="\arcsin">arcsin</option>
+                                    <option value="\arccos">arccos</option>
+                                    <option value="\arctan">arctan</option>
+                                    <option value="\sin^{-1}">sin-1</option>
+                                    <option value="\cos^{-1}">cos-1</option>
+                                    <option value="\tan^{-1}">tan-1</option>
+                                    <optgroup label="反双曲函数">
+                                        <option value="\sinh^{-1}">sinh-1</option>
+                                        <option value="\cosh^{-1}">cosh-1</option>
+                                        <option value="\tanh^{-1}">tanh-1</option>
+                                </select></div>
+                            <div class="panel"><select title="对数函数"
+                                    onchange="EqEditor.insert(this.value); this.selectedIndex=0;">
+                                    <option selected="selected" value="" class="selectTitle">对数函数&hellip;</option>
+                                    <option value="\exp">exp</option>
+                                    <option value="\lg">lg</option>
+                                    <option value="\ln">ln</option>
+                                    <option value="\log">log</option>
+                                    <option value="\log_{e}">log e</option>
+                                    <option value="\log_{10}">log 10</option>
+                                </select></div>
+                            <div class="panel"><select title="极限表达"
+                                    onchange="EqEditor.insert(this.value); this.selectedIndex=0;">
+                                    <option selected="selected" value="" class="selectTitle">极限&hellip;</option>
+                                    <option value="\lim">limit</option>
+                                    <option value="\liminf">liminf</option>
+                                    <option value="\limsup">limsup</option>
+                                    <option value="\max">maximum</option>
+                                    <option value="\min">minimum</option>
+                                    <option value="\infty">infinite</option>
+                                </select></div>
+                        </div>
+                    </div>
+                    <div class="toolbar_wrapper">
+                        <div class="toolbar" style="z-index:22">
+                            <div class="panel" id="panel14" style="height:23px"><img
+                                    src="data:image/gif;base64,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"
+                                    width="106" height="184" border="0" title="公式风格" alt="Style Panel"
+                                    usemap="#style_map" /><map name="style_map" id="style_map"><area shape="rect"
+                                        alt="\boldsymbol{\alpha\beta\gamma}\\ \boldsymbol{123}" title="Math 加粗 Greek"
+                                        coords="0,0,50,20" onclick="EqEditor.insert('\\boldsymbol{}')" /><area
+                                        shape="rect" alt="\mathbf{Abc}\\ \mathbf{123}" title="Math 加粗"
+                                        coords="0,23,50,43" onclick="EqEditor.insert('\\mathbf{}')" /><area shape="rect"
+                                        alt="\mathit{Abc}\\ \mathit{123}" title="Math 斜体" coords="0,46,50,66"
+                                        onclick="EqEditor.insert('\\mathit{}')" /><area shape="rect"
+                                        alt="\mathrm{Abc}\\ \mathrm{123}" title="Math Roman" coords="0,69,50,89"
+                                        onclick="EqEditor.insert('\\mathrm{}')" /><area shape="rect"
+                                        alt="\mathfrak{Abc}\\ \mathfrak{123}" title="Math Fraktur" coords="0,92,50,112"
+                                        onclick="EqEditor.insert('\\mathfrak{}')" /><area shape="rect"
+                                        alt="\mathbb{Abc}\\ \mathbb{123}" title="Math Blackboard" coords="0,115,50,135"
+                                        onclick="EqEditor.insert('\\mathbb{}')" /><area shape="rect"
+                                        alt="\textup{Abc}\\ \textup{123}" title="Text Upright" coords="53,0,103,20"
+                                        onclick="EqEditor.insert('\\textup{}')" /><area shape="rect"
+                                        alt="\textbf{Abc}\\ \textbf{123}" title="Text 加粗" coords="53,23,103,43"
+                                        onclick="EqEditor.insert('\\textbf{}')" /><area shape="rect"
+                                        alt="\textit{Abc}\\ \textit{123}" title="Text 斜体" coords="53,46,103,66"
+                                        onclick="EqEditor.insert('\\textit{}')" /><area shape="rect"
+                                        alt="\textrm{Abc}\\ \textrm{123}" title="Text Roman" coords="53,69,103,89"
+                                        onclick="EqEditor.insert('\\textrm{}')" /><area shape="rect"
+                                        alt="\textsf{Abc}\\ \textsf{123}" title="Text Slanted" coords="53,92,103,112"
+                                        onclick="EqEditor.insert('\\textsf{}')" /><area shape="rect"
+                                        alt="\texttt{Abc}\\ \texttt{123}" title="Text Typewriter"
+                                        coords="53,115,103,135" onclick="EqEditor.insert('\\texttt{}')" /><area
+                                        shape="rect" alt="\mathscr{ABC}\\ \mathscr{123}" title="Text mathscr"
+                                        coords="53,138,103,158" onclick="EqEditor.insert('\\mathscr{}')" /><area
+                                        shape="rect" alt="\mathcal{Abc}\\ \mathcal{123}" title="Text 花体"
+                                        coords="53,161,103,181" onclick="EqEditor.insert('\\mathcal{}')" /></map>
+                            </div>
+                            <div class="panel" id="panel13" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhHwBEAJEAAFVVVdfX16Wlpf///yH5BAAHAP8ALAAAAAAfAEQAAAL/lI+pKzMCopy01vas3hJDGYRi+AmjOHTOF2WTEcFUoLotG5d4RMfrZMsJZzVcECCTTXrIn+SY3AGYHiAjFlBQnR0FxVvkgLLiqvgcRqM9jLYb44jL5/S6/Y63v/cKrppj9gfIdTKyVBiQ0mSj+LVk0RPY+PJYEck12VFJtMiSGbNZKWmBwyRKeAWycHkkeOG3QVIG6/pFW1vEpwuX1+v7m7ere4vbWUzqhCjboZxi1or0IjVlDPAJ2gVZfR2dbbmtgaP0+Bwurf3cJr1affxC/CIyC10c6O7zILwHzN/Pr7+PHi5798woQzHgYKJt03iYquDMicAQHCK6mPiQgsUPIhgrMoyVEchHDRQ3bLwB0qNBhQ5Ytrv3suAKgG782bxZpwAAOw=="
+                                    width="31" height="68" border="0" title="间隔" alt="Spaces Panel"
+                                    usemap="#spaces_map" /><map name="spaces_map" id="spaces_map"><area shape="rect"
+                                        alt="\square\underline{\,}\square" title="小间隔" coords="0,0,28,14"
+                                        onclick="EqEditor.insert('\\,')" /><area shape="rect"
+                                        alt="\square\underline{\:}\square" title="中等间隔" coords="0,17,28,31"
+                                        onclick="EqEditor.insert('\\:')" /><area shape="rect"
+                                        alt="\square\underline{\;}\square" title="大间隔" coords="0,34,28,48"
+                                        onclick="EqEditor.insert('\\;')" /><area shape="rect" alt="\square\!\square"
+                                        title="缩小间隔" coords="0,51,28,65" onclick="EqEditor.insert('\\!')" /></map>
+                            </div>
+                            <div class="panel" id="panel4" style="height:34px"><img
+                                    src="data:image/gif;base64,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"
+                                    width="68" height="238" border="0" title="Binary" alt="Binary Panel"
+                                    usemap="#binary_map" /><map name="binary_map" id="binary_map"><area shape="rect"
+                                        alt="\pm" coords="0,0,14,14" /><area shape="rect" alt="\mp"
+                                        coords="0,17,14,31" /><area shape="rect" alt="\times"
+                                        coords="0,34,14,48" /><area shape="rect" alt="\ast" coords="0,51,14,65" /><area
+                                        shape="rect" alt="\div" coords="0,68,14,82" /><area shape="rect" alt="\setminus"
+                                        coords="0,85,14,99" /><area shape="rect" alt="\dotplus"
+                                        coords="0,102,14,116" /><area shape="rect" alt="\amalg"
+                                        coords="0,119,14,133" /><area shape="rect" alt="\dagger"
+                                        coords="0,136,14,150" /><area shape="rect" alt="\ddagger"
+                                        coords="0,153,14,167" /><area shape="rect" alt="\wr"
+                                        coords="0,170,14,184" /><area shape="rect" alt="\diamond"
+                                        coords="0,187,14,201" /><area shape="rect" alt="\circledcirc"
+                                        coords="0,204,14,218" /><area shape="rect" alt="\circledast"
+                                        coords="0,221,14,235" /><area shape="rect" alt="\cap"
+                                        coords="17,0,31,14" /><area shape="rect" alt="\Cap" coords="17,17,31,31" /><area
+                                        shape="rect" alt="\sqcap" coords="17,34,31,48" /><area shape="rect" alt="\wedge"
+                                        coords="17,51,31,65" /><area shape="rect" alt="\barwedge"
+                                        coords="17,68,31,82" /><area shape="rect" alt="\triangleleft"
+                                        coords="17,85,31,99" /><area shape="rect" alt="\lozenge"
+                                        coords="17,102,31,116" /><area shape="rect" alt="\circ"
+                                        coords="17,119,31,133" /><area shape="rect" alt="\square"
+                                        coords="17,136,31,150" /><area shape="rect" alt="\triangle"
+                                        coords="17,153,31,167" /><area shape="rect" alt="\triangledown"
+                                        coords="17,170,31,184" /><area shape="rect" alt="\ominus"
+                                        coords="17,187,31,201" /><area shape="rect" alt="\oslash"
+                                        coords="17,204,31,218" /><area shape="rect" alt="\circleddash"
+                                        coords="17,221,31,235" /><area shape="rect" alt="\cup"
+                                        coords="34,0,48,14" /><area shape="rect" alt="\Cup" coords="34,17,48,31" /><area
+                                        shape="rect" alt="\sqcup" coords="34,34,48,48" /><area shape="rect" alt="\vee"
+                                        coords="34,51,48,65" /><area shape="rect" alt="\veebar"
+                                        coords="34,68,48,82" /><area shape="rect" alt="\triangleright"
+                                        coords="34,85,48,99" /><area shape="rect" alt="\blacklozenge"
+                                        coords="34,102,48,116" /><area shape="rect" alt="\bullet"
+                                        coords="34,119,48,133" /><area shape="rect" alt="\blacksquare"
+                                        coords="34,136,48,150" /><area shape="rect" alt="\blacktriangle"
+                                        coords="34,153,48,167" /><area shape="rect" alt="\blacktriangledown"
+                                        coords="34,170,48,184" /><area shape="rect" alt="\oplus"
+                                        coords="34,187,48,201" /><area shape="rect" alt="\otimes"
+                                        coords="34,204,48,218" /><area shape="rect" alt="\odot"
+                                        coords="34,221,48,235" /><area shape="rect" alt="\cdot"
+                                        coords="51,0,65,14" /><area shape="rect" alt="\uplus"
+                                        coords="51,17,65,31" /><area shape="rect" alt="\bigsqcup"
+                                        coords="51,34,65,48" /><area shape="rect" alt="\bigtriangleup"
+                                        coords="51,51,65,65" /><area shape="rect" alt="\bigtriangledown"
+                                        coords="51,68,65,82" /><area shape="rect" alt="\star"
+                                        coords="51,85,65,99" /><area shape="rect" alt="\bigstar"
+                                        coords="51,102,65,116" /><area shape="rect" alt="\bigcirc"
+                                        coords="51,119,65,133" /><area shape="rect" alt="\bigoplus"
+                                        coords="51,136,65,150" /><area shape="rect" alt="\bigotimes"
+                                        coords="51,153,65,167" /><area shape="rect" alt="\bigodot"
+                                        coords="51,170,65,184" /></map></div>
+                            <div class="panel" id="panel16" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhRACIAJEAAP///1VVVaqqqgAAACH5BAAHAP8ALAAAAABEAIgAAAL/lI8JkI3rIowNhoszFlb7wDGfFwqjVmoL2WELgFrvDG/tV6fZGovub/PVhjXQTRU0nZI74EU3vMByR6fRt7wqccxA1AvWcjO6bNlL635fz2qxa26931Apmnx8w5fQOV4opSdm9bfF1zFHh2jHgiXIxLNDBUhYF9aj9AgpyNMXiMn4mKK5d1I202hCIzi6yjYYh3Uoa1r1UUKhwJD7sMtrMPEb4kpcbHyMnKy8zNw8Iwzs+xs8Lc1rm5rVRjtyVisSKQkbqNf6iuqNJBbuAnO2Eu7pN65O331DVPh5OWnYVHrPUSVERb6ku7TNX8At+fShKRgmHStsoFSUI8ivXz2H/7H88SjiiV9Ccdm0eYM48k6olGDY0XP57kvKcFNmEno5URY8RUL0dJLxj+Msj+zMFWRj1JW9WxSFflPI1FouatekUqA61ZnWrVy7elUGDZcwrFetSuAWFWrJjtqWriU5kxjLoW0lMhoUySBFpE1LocQLBKStV24rjsGJ8GRNgGlPCKYlEy/NTe0+HVQ5LvI6TozfBs2MOe68wk73sYzsLs/iuU+dXKSUaGm8vqdN20yUGu3dy4YfljRWmK/u3q1N0tYCjezZsModfH0OPbp0YszNOrdeAbsutcQX1u0L4XhIwrBWCU2zohXdhjwNaT718Sc4UuvuRnp3t3Y7jcYBxf8GjZBklaWn2lo08beSQ0dZVqBh5u3x3iKh5cadPvDkB+BrmZAHBm934BcgiBpWth9pBIKTIIQY9hFfZ6CssZiILxIx23AK/ldeGkm41F1j/VXoYiHJaddLddVNh2SSSoI1pJFNNvmdjUFOyRpMcvAYE3ke+pVTJjfBRyJpVNYnDn+rxUjQUQiuh4OZImmUz0eIVURfHRDBGWaHDXIUn3xe3jkSjhRGCVWNf/6Apx1ybslamGCaxmKJYsZVT5aGEmrRWy1WGaJ4e3J5KRLtYfojqRY9BmRCT45F5AHNZbdkrLLG6iSrtVaT6qS6MjqnghslpSVGjuKzooRW2EkOJCr/oQLgb78uAmh5TawZoH6d+oeotYkR2+V+RUGbrE2VEnstQwP5x6y4Qcl4XrXIrraZB35m2hu8t7VkISfUFquTu+Diq64T7Prl45kRCQvpp5xmYx46+HDIa8SeSqmqraviOuSsGm/83K1VeZxVrhJTvKtqhMGnY2YQk6vphS6iGi5mp5ADM83bDlczZ+LOgzK8vMFs78Ho/pPlzdwBXa0aAe7r85Upj5I0peu6YbRjypIy89TcNI3z1cXVFOzWVY+Q8xjI+jhtaQJfqfWhaGcLh1JVhr2hJiOLPDHerUYDcllHcgx44Mv0fRatps5iuLejHnNF4ksDlFPijzDdiOFqPv5gVw+W22dH5n9sXu2gG20DOkqif0b6kl76JrRCkauOISOeB+E4jrOnrqR76drzeu6Hf0PrxVUJTnzxgRcAADs="
+                                    width="68" height="136" border="0" title="Symbols" alt="Symbols Panel"
+                                    usemap="#symbols_map" /><map name="symbols_map" id="symbols_map"><area shape="rect"
+                                        alt="\therefore" title="所以" coords="0,0,14,14" /><area shape="rect"
+                                        alt="\because" title="因为" coords="0,17,14,31" /><area shape="rect" alt="\cdots"
+                                        title="horizontal dots" coords="0,34,14,48" /><area shape="rect" alt="\ddots"
+                                        title="diagonal dots" coords="0,51,14,65" /><area shape="rect" alt="\vdots"
+                                        title="vertical dots" coords="0,68,14,82" /><area shape="rect" alt="\S"
+                                        title="section" coords="0,85,14,99" /><area shape="rect" alt="\P"
+                                        title="paragraph" coords="0,102,14,116" /><area shape="rect" alt="\copyright"
+                                        title="copyright" coords="0,119,14,133" /><area shape="rect" alt="\partial"
+                                        title="partial" coords="17,0,31,14" /><area shape="rect" alt="\imath"
+                                        coords="17,17,31,31" /><area shape="rect" alt="\jmath"
+                                        coords="17,34,31,48" /><area shape="rect" alt="\Re" title="real"
+                                        coords="17,51,31,65" /><area shape="rect" alt="\Im" title="imaginary"
+                                        coords="17,68,31,82" /><area shape="rect" alt="\forall"
+                                        coords="17,85,31,99" /><area shape="rect" alt="\exists"
+                                        coords="17,102,31,116" /><area shape="rect" alt="\top"
+                                        coords="17,119,31,133" /><area shape="rect" alt="\mathbb{P}" title="prime"
+                                        coords="34,0,48,14" /><area shape="rect" alt="\mathbb{N}" title="natural"
+                                        coords="34,17,48,31" /><area shape="rect" alt="\mathbb{Z}" title="integers"
+                                        coords="34,34,48,48" /><area shape="rect" alt="\mathbb{I}" title="irrational"
+                                        coords="34,51,48,65" /><area shape="rect" alt="\mathbb{Q}" title="rational"
+                                        coords="34,68,48,82" /><area shape="rect" alt="\mathbb{R}" title="real"
+                                        coords="34,85,48,99" /><area shape="rect" alt="\mathbb{C}" title="complex"
+                                        coords="34,102,48,116" /><area shape="rect" alt="\angle"
+                                        coords="51,0,65,14" /><area shape="rect" alt="\measuredangle"
+                                        coords="51,17,65,31" /><area shape="rect" alt="\sphericalangle"
+                                        coords="51,34,65,48" /><area shape="rect" alt="\varnothing"
+                                        coords="51,51,65,65" /><area shape="rect" alt="\infty"
+                                        coords="51,68,65,82" /><area shape="rect" alt="\mho"
+                                        coords="51,85,65,99" /><area shape="rect" alt="\wp"
+                                        coords="51,102,65,116" /></map></div>
+                            <div class="panel" id="panel6" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhIgCIAJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAAAiAIgAAAL/lI8ZkY0rgJx0ClizvCyHzEXUB2IjQFqm9KVqV7nbyqJVqJVwfNOoDMDxXMKajVI0ElcpWfK43JEWvd1vERVBdVpXdoT9/ibYlzY3s6KfObYm5HBA4o2w/Y7P6/f8Pb3O8Peg1uZTSPhmmIjIBRZmRjYlxuKVFkE1dhTEpInkU7kptQV5ZUdaimmptCgyZaTa1KQ6WtWKWTbrSjaLBiuJG3q2ptjYy9sLJ2gwp8zR9wwdDd28HNhMXGt8fJVNCRSs4UTzDe7R/Xq+m07OBpSU6knozsT+yXpyj7+u/9Syr14uUjFUqdwMRIYtnrBD1JIpkwYxosSGzB4ySjeM0SRv/xipbIx1ihYvLymKgDwl64jJGmJSquRkoyVAEit15UJHc5w/hQIBvoN3zGVAckO58dRmECNDbcGoVRQkMapUP06tWVyYz1jSo1oTorzzlePNVzlhSFKHAxRPkrjS4iuJQS0ktnDNUkIb921Yo+VclsU6EE/IjICVZkV4kStiilahTn0MmbFkplsHZ7J8WGTloD2H3sL0DmBflkZMthBn9iRndKF9juOXN+ar1rPjfv4oG3Ngm9uWIvXaOzPDqowhG59InDhl4AFFB7/cD6gbXaF39k5ZvVO7g5cHA7uOeuE8edrtHfS3sZN36fRcbu9W5vvm5oSXJzaT/Nrx/dIkK0T/fd913PFFn3rNpQKaIeN1YQ593xXlG2nZ6BGSdaQQ5SB7HeShGDoj1cfDOUD81aBiCJIIoHjwzMfiU3+4SAd/Mj5TAAA7"
+                                    width="34" height="136" border="0" title="Foreign" alt="Foreign Panel"
+                                    usemap="#foreign_map" /><map name="foreign_map" id="foreign_map"><area shape="rect"
+                                        alt="\text{\aa}" coords="0,0,14,14" /><area shape="rect" alt="\text{\ae}"
+                                        coords="0,17,14,31" /><area shape="rect" alt="\text{\l}"
+                                        coords="0,34,14,48" /><area shape="rect" alt="\text{\o}"
+                                        coords="0,51,14,65" /><area shape="rect" alt="\text{\oe}"
+                                        coords="0,68,14,82" /><area shape="rect" alt="\text{\ss}"
+                                        coords="0,85,14,99" /><area shape="rect" alt="\text{\$}" title="Dollar"
+                                        coords="0,102,14,116" /><area shape="rect" alt="\text{\cent}" title="Cent"
+                                        coords="0,119,14,133" /><area shape="rect" alt="\text{\AA}"
+                                        coords="17,0,31,14" /><area shape="rect" alt="\text{\AE}"
+                                        coords="17,17,31,31" /><area shape="rect" alt="\text{\L}"
+                                        coords="17,34,31,48" /><area shape="rect" alt="\text{\O}"
+                                        coords="17,51,31,65" /><area shape="rect" alt="\text{\OE}"
+                                        coords="17,68,31,82" /><area shape="rect" alt="\text{\SS}"
+                                        coords="17,85,31,99" /><area shape="rect" alt="\text{\pounds}" title="Pound"
+                                        coords="17,102,31,116" /><area shape="rect" alt="\text{\euro}" title="Euro"
+                                        coords="17,119,31,133" /></map></div>
+                            <div class="panel" id="panel15" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhIgCZAJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAAAiAJkAAAL/lI8ZkY0rgJx0ClizvAysDwYb5oUgwEWiZpGsh2Lrm76SWM9sbeOyHev0giog7+Xr6DRHVrJoa2qesKjLSSyZFiPh9pMFho1XWnkHcTjSasX3DY/L56Z2g203nJn7DO/dFaFlEnhjJYQVtlQhVbHydyiYCGmGOFVYhWaZ8UiySNFI0en1hQk4FimGWimZOhhiWrqq2cqad4CXR7fL2/t1i8sAHOrXx3i1FQvbgviJeWnqOvkjjZVDtsmZ5cxcq31dfUlJOzTGTZzZlKxI2K2KDmocn80nDJxr56u/PzecMizPnRh17f60e3bO2Ixx9byJisaqHMNi9CaMEsRt1kNz/xEToVpncNmzcOQGBlRW0JMseAKx+cPXhp/MmSBe2rt1UiNFh5l06pCSkpTIj4bmOeTScsaSUCIWulixqBHUpEWNakuH7BPQqquCYhzateHGnRZBqjyormTPYxXZ8nQL8KYumnT32bz7LifQZSHBWLWo1tHftYOvcgwsGGFHaETFMu7K96zfliQdv/Lb98TIxdJWStas021euflIx6yLmtfduG8Lcx7r0zVgyrNpe70BNu1aqT2PTBWd2GkzrpuVUkYKfPbPMrcvJyc80plvs0JF+l6csK3shqzjpv4eZ/U97bQRNz8YHXHtw5YNT3x+FdzrbzJOZYYlX73g99tnX0rXX5VuZD22l2b3wQcgXOPZBF6DWzCo2mi98LScL0exNaEjkVn4UFT6SPLbPBniFtSIMGj1IWwiRljWhiZmZ+IhMVYyoXcO3qhPAQA7"
+                                    width="34" height="153" border="0" title="Subsupset" alt="Subsupset Panel"
+                                    usemap="#subsupset_map" /><map name="subsupset_map" id="subsupset_map"><area
+                                        shape="rect" alt="\sqsubset" coords="0,0,14,14" /><area shape="rect"
+                                        alt="\sqsubseteq" coords="0,17,14,31" /><area shape="rect" alt="\subset"
+                                        coords="0,34,14,48" /><area shape="rect" alt="\subseteq"
+                                        coords="0,51,14,65" /><area shape="rect" alt="\nsubseteq"
+                                        coords="0,68,14,82" /><area shape="rect" alt="\subseteqq"
+                                        coords="0,85,14,99" /><area shape="rect" alt="\nsubseteq"
+                                        coords="0,102,14,116" /><area shape="rect" alt="\in"
+                                        coords="0,119,14,133" /><area shape="rect" alt="\notin"
+                                        coords="0,136,14,150" /><area shape="rect" alt="\sqsupset"
+                                        coords="17,0,31,14" /><area shape="rect" alt="\sqsupseteq"
+                                        coords="17,17,31,31" /><area shape="rect" alt="\supset"
+                                        coords="17,34,31,48" /><area shape="rect" alt="\supseteq"
+                                        coords="17,51,31,65" /><area shape="rect" alt="\nsupseteq"
+                                        coords="17,68,31,82" /><area shape="rect" alt="\supseteqq"
+                                        coords="17,85,31,99" /><area shape="rect" alt="\nsupseteqq"
+                                        coords="17,102,31,116" /><area shape="rect" alt="\ni"
+                                        coords="17,119,31,133" /></map></div>
+                            <div class="panel" id="panel1" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhIgB3AJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAAAiAHcAAAL/lI8ZkY0rgJx0ClizvEzPsGEeCHKRB4CAiZKrqKlvF6chXd9n5s57JfN9VD0hZZFh2ZYVpYTYxMiCFtg02iFSdZ8nlQXVOMMU5eKchKXOQSfK+Ia/TQ4HpN5g6/f8vv8P+IeXxzD4gDOnhuK2loaDhFSmGCn5SPKl6MGomSnW6fjTiBVKWYVIxtXFlMqE+ahquqM1qloKh8qKK6dX+cMbG8eaiLj4OWp4cIfMEdjs/Oy8bKCMbNwbLPcECutKurr7Da4NfORJzHluHipKPrRdvuqGKw97Wy9eOuZFW8u/tMXo1y4214JtUoftIChp1AxBewgxojQ6y6y1GyZri7B98AXHvYPX0WPIcNnQrUPo7iPHjrrofTNzz55II7P81SSnSyZAKwRDCiyJMo5CfxgZFqoYMalSPxMbDrK40SQQePrq0YN0cZ4VkNlsAVVZ7JytgDuJoXLZDWSbrTPRrn3FTphWuGVJ9RyI5mLYk2ClGnSKB3CdpYQLH6122GG6vkH3jLQKFW/ernVH+GybaSzbl5NEVtV8CjJdlTclv/WFeTHRNZOHPg6KMWFk17GMNjWMG+Lt3bJVv047QsVB4Dy0baqco0RmxhzJEo+r9yxb5B5PVye9kmb2XHNP5NQncMzdVBr1+hU6W7CdxE9zu3dWAAA7"
+                                    width="34" height="119" border="0" title="Accents" alt="Accents Panel"
+                                    usemap="#accents_map" /><map name="accents_map" id="accents_map"><area shape="rect"
+                                        alt="a'" coords="0,0,14,14" onclick="EqEditor.insert('{}\'')" /><area
+                                        shape="rect" alt="\dot{a}" coords="0,17,14,31"
+                                        onclick="EqEditor.insert('\\dot{}')" /><area shape="rect" alt="\hat{a}"
+                                        coords="0,34,14,48" onclick="EqEditor.insert('\\hat{}')" /><area shape="rect"
+                                        alt="\grave{a}" coords="0,51,14,65"
+                                        onclick="EqEditor.insert('\\grave{}')" /><area shape="rect" alt="\tilde{a}"
+                                        coords="0,68,14,82" onclick="EqEditor.insert('\\tilde{}')" /><area shape="rect"
+                                        alt="\bar{a}" coords="0,85,14,99" onclick="EqEditor.insert('\\bar{}')" /><area
+                                        shape="rect" alt="\not{a}" coords="0,102,14,116" /><area shape="rect" alt="a''"
+                                        coords="17,0,31,14" onclick="EqEditor.insert('{}\'\'')" /><area shape="rect"
+                                        alt="\ddot{a}" coords="17,17,31,31"
+                                        onclick="EqEditor.insert('\\ddot{}')" /><area shape="rect" alt="\check{a}"
+                                        coords="17,34,31,48" onclick="EqEditor.insert('\\check{}')" /><area shape="rect"
+                                        alt="\acute{a}" coords="17,51,31,65"
+                                        onclick="EqEditor.insert('\\acute{}')" /><area shape="rect" alt="\breve{a}"
+                                        coords="17,68,31,82" onclick="EqEditor.insert('\\breve{}')" /><area shape="rect"
+                                        alt="\vec{a}" coords="17,85,31,99" onclick="EqEditor.insert('\\vec{}')" /><area
+                                        shape="rect" alt="a^{\circ}" title="degrees" coords="17,102,31,116"
+                                        onclick="EqEditor.insert('^{\\circ}',0)" /></map></div>
+                            <div class="panel" id="panel2" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhGQCqAJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAAAZAKoAAAL/lI+pFiEAo5xUtDdbyPVyuIEUYDlSGGkj6a1uVGIrOsYv3ZkpSqtwCwgJG0HRT8cTbXAQW3ApLEaPMqKV+Jw4X67Y4rvQiMfksvmMBqsRQG6tnWFKtqfhip6N52Tu/e2F93HXhlW0Q7M1pTLV1JIkZajlCKVkiAh09WQ3B9dHtbaGJjpKSgYaquMpmZriiSc3yCrqd6Ia2NPVKUi703pIVWtpZcSS+rgUCQxCCclIl+lTWMyn2uhwClaqvV2Gnc1aPd0nFzjDq3m2Su3CVF5Lrhv8Bl7YU/hstEic6IvcjsnM3z5ClKJdAlfNizcF3BpyWxgGoa1J2qytmyjRVTxf//MuyjuXJ5kPcf2WIYvELx8kdb2wCERJMItBThn7uLN5AWIChzxJ6dxZ081NoRuJgaQAi2QvoyPxCTuJIqWllTSrBFwZNeaVTRbDVfWqjFtXsNN+HuiJ9ozZs0G53JR21GTSZyPRsTRqThm7XG3nwqlXJ6usfMNgGit58uuyPC8F84Hm8qBHnNfWpr08Zi2DoEmVjuhMl6MmxVNHMyJ5jKriTM2MJioY+S5YqXv12j2Ew50YvpPhyvaq0Czm4ZWFtwW00TdpDqCTKx87u2iy359562F6jxBhqHpTJ+5+lTt0mVC4eg4X/CdxzJqHupXut6/1OqKban9aWqn36frD5xgPvdVitqFX1HPnvTPfDM+5h1xx6q2XVgEAOw=="
+                                    width="25" height="170" border="0" title="Accents_ext" alt="Accents_ext Panel"
+                                    usemap="#accents_ext_map" /><map name="accents_ext_map" id="accents_ext_map"><area
+                                        shape="rect" alt="\widetilde{abc}" coords="0,0,22,14"
+                                        onclick="EqEditor.insert('\\widetilde{}',11)" /><area shape="rect"
+                                        alt="\widehat{abc}" coords="0,17,22,31"
+                                        onclick="EqEditor.insert('\\widehat{}',9)" /><area shape="rect"
+                                        alt="\overleftarrow{abc}" coords="0,34,22,48"
+                                        onclick="EqEditor.insert('\\overleftarrow{}',15)" /><area shape="rect"
+                                        alt="\overrightarrow{abc}" coords="0,51,22,65"
+                                        onclick="EqEditor.insert('\\overrightarrow{}',16)" /><area shape="rect"
+                                        alt="\overline{abc}" coords="0,68,22,82"
+                                        onclick="EqEditor.insert('\\overline{}',10)" /><area shape="rect"
+                                        alt="\underline{abc}" coords="0,85,22,99"
+                                        onclick="EqEditor.insert('\\underline{}',11)" /><area shape="rect"
+                                        alt="\overbrace{abc}" coords="0,102,22,116"
+                                        onclick="EqEditor.insert('\\overbrace{}',11)" /><area shape="rect"
+                                        alt="\underbrace{abc}" coords="0,119,22,133"
+                                        onclick="EqEditor.insert('\\underbrace{}',12)" /><area shape="rect"
+                                        alt="\overset{a}{abc}" coords="0,136,22,150"
+                                        onclick="EqEditor.insert('\\overset{}{}',9,11)" /><area shape="rect"
+                                        alt="\underset{a}{abc}" coords="0,153,22,167"
+                                        onclick="EqEditor.insert('\\underset{}{}',10,12)" /></map></div>
+                            <div class="panel" id="panel3" style="height:34px;margin-left:6px;"><img
+                                    src="data:image/gif;base64,R0lGODlhOACqAJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAAA4AKoAAAL/lI+pGbEPTROg2ouzFVP7zzlfFnghNabVqV5lxrZj/Kr11snuRes3QGs0WrWej5er/T6voPAJheJEACUmKjXKbtqlp5k8IqlW2xTl1Sy75rOuqom9YTmiqT4fo/J6PuYUEYgwIViIdYiYqLjI2OjoWGjoEBmI5yfnB2TJh3m5CafTOZImmgbyyRRnaXpKJdZnwdq697pS98h1+whbIXvnWqsJDPommrK26fuH+qU63FvMTPJL6/mcZzyXHT1JCUHo/YA7Tl5uTh7+3Z3OcK0tLbNNPAMPPZvaIr9D3RxfH8uPBCM3vQbSeaaM15aD1RIqXPhwXr5/+yJWMShsTyNn/9UA+nOnJmDIiSCv3MOXQp89kZlUqgDErl1MBedq2rxZbqZMnQco0iv5sSM2nydNTuM40ijDo0kjmvLSSRayYRgJrhy1DJiyH3Jw8XKYS6sdhVuzNjy21MWitBWZOkVp0QupT3JZWhP6DihJvNx49lynE6fgwYSf+JUAeCZRu5wWI81kS+9Lx2xbUjYLOTLfUMnybu5n9WpQPmFpObQ4NqPHoZL7ORmn+pzqzC5TXkbdN/NsyDB5gvNdOLjwnId/B2798/Ne3bWTM79N0Fxs6V3vZgIjlrVy0FG1k36bew5X6JqfIy9q+Txj77TJ706/3XbimMYVD7+PX9Hh3sfjO/9vr95jvHUWXjDvSbSceJjF4ghZDYZmHYD+oRfhgAFWtktoGZan4EOncWhgKZ6ZN+F6I0pY3Hzs5Mdii0LsVx99Fy5oIV4OGXNaNiU8cZGAO/A4hI9qFbSjkAURiSCIbVSG1Xo5EgVVMooweVEiVCZJIVpXnlgjXFjqqNSWVY5pJJJCZMlgj3O5M0SbaHIJX4owukjnfXPeSWKeEur5hS/bBCkfX0UGmoqf0vD4JpL/dblnU4SmduWTyK3Z0ZRUWkpjW5NNauKNFJnSXKKczYjbqHemWGeqhJ3ql3uhmoilmJpmOquotSrJIBZOHtKpqRCVKZqtwZY6WqOMHgsfn2ocAAormaIO+mysuArEij5nCrtpiRzJiaqq3tpUAAA7"
+                                    width="56" height="170" border="0" title="Arrows" alt="Arrows Panel"
+                                    usemap="#arrows_map" /><map name="arrows_map" id="arrows_map"><area shape="rect"
+                                        alt="x \mapsto x^2" title="\mapsto" coords="0,0,25,14" /><area shape="rect"
+                                        alt="\leftarrow" coords="0,17,25,31" /><area shape="rect" alt="\Leftarrow"
+                                        coords="0,34,25,48" /><area shape="rect" alt="\leftrightarrow"
+                                        coords="0,51,25,65" /><area shape="rect" alt="\leftharpoonup"
+                                        coords="0,68,25,82" /><area shape="rect" alt="\leftharpoondown"
+                                        coords="0,85,25,99" /><area shape="rect" alt="\leftrightharpoons"
+                                        coords="0,102,25,116" /><area shape="rect" alt="\xleftarrow[text]{long}"
+                                        coords="0,119,25,133" onclick="EqEditor.insert('\\xleftarrow[]{}',12)" /><area
+                                        shape="rect" alt="\overset{a}{\leftarrow}" coords="0,136,25,150"
+                                        onclick="EqEditor.insert('\\overset{}{\\leftarrow}',9)" /><area shape="rect"
+                                        alt="\underset{a}{\leftarrow}" coords="0,153,25,167"
+                                        onclick="EqEditor.insert('\\underset{}{\\leftarrow}',10)" /><area shape="rect"
+                                        alt="n \to" coords="28,0,53,14" /><area shape="rect" alt="\rightarrow"
+                                        coords="28,17,53,31" /><area shape="rect" alt="\Rightarrow"
+                                        coords="28,34,53,48" /><area shape="rect" alt="\Leftrightarrow"
+                                        coords="28,51,53,65" /><area shape="rect" alt="\rightharpoonup"
+                                        coords="28,68,53,82" /><area shape="rect" alt="\rightharpoondown"
+                                        coords="28,85,53,99" /><area shape="rect" alt="\rightleftharpoons"
+                                        coords="28,102,53,116" /><area shape="rect" alt="\xrightarrow[text]{long}"
+                                        coords="28,119,53,133" onclick="EqEditor.insert('\\xrightarrow[]{}',13)" /><area
+                                        shape="rect" alt="\overset{a}{\rightarrow}" coords="28,136,53,150"
+                                        onclick="EqEditor.insert('\\overset{}{\\rightarrow}',9)" /><area shape="rect"
+                                        alt="\underset{a}{\rightarrow}" coords="28,153,53,167"
+                                        onclick="EqEditor.insert('\\underset{}{\\rightarrow}',10)" /></map></div>
+                        </div>
+                    </div>
+                    <div class="toolbar_wrapper">
+                        <div class="toolbar" style="z-index:21">
+                            <div class="panel" id="panel11" style="height:28px"><img
+                                    src="data:image/gif;base64,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"
+                                    usemap="#operators_map" /><map name="operators_map" id="operators_map"><area
+                                        shape="rect" alt="x^a" title="superscript" coords="0,0,25,25"
+                                        onclick="EqEditor.insert('^{}',2,0)" /><area shape="rect" alt="x_a"
+                                        title="subscript" coords="0,28,25,53"
+                                        onclick="EqEditor.insert('_{}',2,0)" /><area shape="rect" alt="x_a^b"
+                                        coords="0,56,25,81" onclick="EqEditor.insert('_{}^{}',2,0)" /><area shape="rect"
+                                        alt="{x_a}^b" coords="0,84,25,109"
+                                        onclick="EqEditor.insert('{_{}}^{}',1)" /><area shape="rect"
+                                        alt="_a^{b}\textrm{C}" title="_{a}^{b}\textrm{C}" coords="0,112,25,137"
+                                        onclick="EqEditor.insert('_{}^{}\\textrm{}',2,14)" /><area shape="rect"
+                                        alt="\frac{a}{b}" title="fraction" coords="28,0,53,25"
+                                        onclick="EqEditor.insert('\\frac{}{}',6)" /><area shape="rect"
+                                        alt="x\tfrac{a}{b}" title="tiny fraction" coords="28,28,53,53"
+                                        onclick="EqEditor.insert('\\tfrac{}{}',7)" /><area shape="rect"
+                                        alt="\frac{\partial}{\partial x}" coords="28,56,53,81"
+                                        onclick="EqEditor.insert('\\frac{\\partial}{\\partial x}',15)" /><area
+                                        shape="rect" alt="\frac{\partial^2}{\partial x^2}" coords="28,84,53,109"
+                                        onclick="EqEditor.insert('\\frac{\\partial^2}{\\partial x^2}',17)" /><area
+                                        shape="rect" alt="\frac{\mathrm{d}}{\mathrm{d}x}" coords="28,112,53,137"
+                                        onclick="EqEditor.insert('\\frac{\\mathrm{d}}{\\mathrm{d}x}',17)" /><area
+                                        shape="rect" alt="\int" coords="56,0,81,25" /><area shape="rect" alt="\int_a^b"
+                                        title="\int_{}^{}" coords="56,28,81,53"
+                                        onclick="EqEditor.insert('\\int_{}^{}',6,1000)" /><area shape="rect" alt="\oint"
+                                        coords="56,56,81,81" onclick="EqEditor.insert('\\oint')" /><area shape="rect"
+                                        alt="\oint_a^b" title="\oint_{}^{}" coords="56,84,81,109"
+                                        onclick="EqEditor.insert('\\oint_{}^{}',7,1000)" /><area shape="rect"
+                                        alt="\iint_a^b" title="\iint_{}^{}" coords="56,112,81,137"
+                                        onclick="EqEditor.insert('\\iint_{}^{}',7,1000)" /><area shape="rect"
+                                        alt="\bigcap" coords="84,0,109,25" /><area shape="rect" alt="\bigcap_a^b"
+                                        title="\bigcap_{}^{}" coords="84,28,109,53"
+                                        onclick="EqEditor.insert('\\bigcap_{}^{}',9,1000)" /><area shape="rect"
+                                        alt="\bigcup" coords="84,56,109,81"
+                                        onclick="EqEditor.insert('\\bigcup')" /><area shape="rect" alt="\bigcup_a^b"
+                                        title="\bigcup_{}^{}" coords="84,84,109,109"
+                                        onclick="EqEditor.insert('\\bigcup_{}^{}',9,1000)" /><area shape="rect"
+                                        alt="\displaystyle \lim_{x \to 0}" title="\lim_{x \to 0}"
+                                        coords="84,112,109,137" onclick="EqEditor.insert('\\lim_{}')" /><area
+                                        shape="rect" alt="\sum" coords="112,0,137,25" /><area shape="rect"
+                                        alt="\sum_a^b" title="\sum_{}^{}" coords="112,28,137,53"
+                                        onclick="EqEditor.insert('\\sum_{}^{}',6)" /><area shape="rect" alt="\sqrt{x}"
+                                        title="\sqrt{}" coords="112,56,137,81"
+                                        onclick="EqEditor.insert('\\sqrt{}',6,6)" /><area shape="rect" alt="\sqrt[n]{x}"
+                                        title="\sqrt[]{}" coords="112,84,137,109"
+                                        onclick="EqEditor.insert('\\sqrt[]{}',6,8)" /><area shape="rect" alt="\prod"
+                                        coords="140,0,165,25" /><area shape="rect" alt="\prod_a^b" title="\prod_{}^{}"
+                                        coords="140,28,165,53" onclick="EqEditor.insert('\\prod_{}^{}',7,1000)" /><area
+                                        shape="rect" alt="\coprod" coords="140,56,165,81" /><area shape="rect"
+                                        alt="\coprod_a^b" title="\coprod_{}^{}" coords="140,84,165,109"
+                                        onclick="EqEditor.insert('\\coprod_{}^{}',9,1000)" /></map></div>
+                            <div class="panel" id="panel5" style="height:28px"><img
+                                    src="data:image/gif;base64,R0lGODlhOACMAJEAAFVVVaqqqv///1VVVSH5BAAHAP8ALAAAAAA4AIwAAAL/jI+pKbIPTQug2ouzDVP7zzmaMHohBZDpV6kqcGavrMXr/blbh819zdOxhDCexUfD2Igeoq3FOiqD0GG1KJJGcZXltXl9cnPTLLOEeyLJO/MX/VJvtV3qOBk3rsFt1BnfR7c143X3k6Y391W4p5WXZchX5xbpGPhmdfl3+IhSmTTph8l5OQoaWtWYWvopiCXa6mTU+sYYJQtp6vq6mtl5yHZh68uquzbM9nu6i3qj6lysWOYpnXESgY0wkc3d4P0NHi4+Tl5ufo6eXs7d7cCOPVstHC/fXD+fy7wn1uJ98W2NnqF99FQh4VfpWMFM+KgZA5Lv08F4zyZGNBgwX8WM/w4lcvw3xwdCjNNADioJDE1DZpJ4pVzmkpagkQw1yVNmsqW9ZzljssQkRxGhhcFY8RxDs6g9mSKJ6vQZ6+PLqfw2ouwJM6nKlVOxQk0IsSNJrl0JXqy5VJ+Jgv6OtCV7L+09hPWuvYOw7e4DdXz7+v0LmJxevO4GKxAoj25ixNWChoSr647jk8V4NoV0dNGszEMxS+tMjTPZzFzEiC5FGrTXlpNvwT298/NroaNlo66GMzXXBrhVtK75m2Fw1ptp3za+FHZM3UaRL7ed3PnwraalJ7KeS/n0U9UfH/ee1vJV5nLHfqcst64ecD3YR1MfEb7hBXnnHwiMP79+/fYZFP/ur1hjjElTlWvjuecWQJUZWBt2DlnVIHhQQXgegxNaGJuDXXm1XUoFovWchqtxeJ2EHyoVookUYZgieheC2GFPJz4V40wrwliiizNulaGKGrFYo2Y/4uiZiD8BlaOFO2aVJHA3ohhkaU/S2GRRS1JVJXFDQpkldQMqEiCB9fU3pn37nYlmmuMAeN9/ZMa3GJwCyikmnWB+OUeYd9qZJ55b6Nknn38WJ989qkXGAqCSRHnVTRXW2RFyjEIG3aSB8OZWpkkUommnKZAQA6b9eKoFp6P+MwNviqpkaXrgtfqVpF1GsSoosNYKzK1+ckdonJH6GhelhQbr6py/GktssZARJhsrsMnaBWCZ86lJbbX6FQAAOw=="
+                                    width="56" height="140" border="0" title="Brackets" alt="Brackets Panel"
+                                    usemap="#brackets_map" /><map name="brackets_map" id="brackets_map"><area
+                                        shape="rect" alt="\left (\: \right )" title="\left ( \right )"
+                                        coords="0,0,25,25" onclick="EqEditor.insert('\\left ( \\right )',8)" /><area
+                                        shape="rect" alt="\left [\: \right ]" title="\left ( \right )"
+                                        coords="0,28,25,53" onclick="EqEditor.insert('\\left [ \\right ]',8)" /><area
+                                        shape="rect" alt="\left\{\: \right\}" title="\left\{\right\}"
+                                        coords="0,56,25,81" onclick="EqEditor.insert('\\left \\{\\right \\}',9)" /><area
+                                        shape="rect" alt="\left |\: \right |" title="\left | \right |"
+                                        coords="0,84,25,109" onclick="EqEditor.insert('\\left | \\right |',8)" /><area
+                                        shape="rect" alt="\left \{\cdots \right." title="\left \{\right."
+                                        coords="0,112,25,137" onclick="EqEditor.insert('\\left \\{\\right.',9)" /><area
+                                        shape="rect" alt="\left \|\: \right \|" title="\left \| \right \|"
+                                        coords="28,0,53,25"
+                                        onclick="EqEditor.insert('\\left \\| \\right \\|',9)" /><area shape="rect"
+                                        alt="\left \langle \: \right \rangle" title="\left \langle \right \rangle"
+                                        coords="28,28,53,53"
+                                        onclick="EqEditor.insert('\\left \\langle \\right \\rangle',14)" /><area
+                                        shape="rect" alt="\left \lfloor \: \right \rfloor"
+                                        title="\left \lfloor \right \rfloor" coords="28,56,53,81"
+                                        onclick="EqEditor.insert('\\left \\lfloor \\right \\rfloor',14)" /><area
+                                        shape="rect" alt="\left \lceil \: \right \rceil"
+                                        title="\left \lceil \right \rceil" coords="28,84,53,109"
+                                        onclick="EqEditor.insert('\\left \\lceil \\right \\rceil',13)" /><area
+                                        shape="rect" alt="\left. \cdots \right \}" title="\left. \right \}"
+                                        coords="28,112,53,137"
+                                        onclick="EqEditor.insert('\\left. \\right \\}',7)" /></map></div>
+                            <div class="panel" id="panel8" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhRACIAJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAABEAIgAAAL/lI8ZkY3rIowNgoszFlZ7wDGfFwqjVp5Z6i3B1l0u9oIxvay3WwMvm6n1gL3X8Ob7EIMym4jZvLB6yeMTqnvmaE2gj5c1JbFOMVnaoVbR1yjVS4bPwl/Ntmznss15WFuIYqE2tkdmxRe3E+VnMvi2A8g48nhVFKgVRMlnpAa3WLjYmQZWh6dHgvRpOjboqRQzKGkn+ncnq7Kq4oradlJCocAA/CA8bDBhHMKzzNzs/AwdLT1NXW3NnHxcbIzMvT2c+to7snuJSB5uKzcHerY6w77Ou4nlyf5eepgpbhbbLtMqTSlCS9Bh8oUklhcq+gCSarfMnLt/DGXZkkiI38Rc/xVBXaSTcd7Ggp9IivR3K+StjhARHqyXMOC4kpAGmrqjLh3GFiDdLfy4jta5i+V66gonEleZbN3AfQPWFOq1qVSrWr1aNduvZFEpdJUwMymuoildDhX6IV4qmfQc/mNl1E1ZlSQjyaE5LlIuVfjoKsI7dNFdsfdSWloJqOGpnkLQ4rg3xY1ivn1t1sVohEuNwZj7tFS1cHHoU5Gh/IDF16QmLKtDZu7L9pTjUHQuzvmp8bHYL0SR7jwa9rdZpUu5PvV6HKxWrMybO38+bXlyB1+pT68QPK7Bc7nH+jbKcortt6ATds+o2BF5yGt3H/4MhbP22J9auy6rsP1OlpUzBv8VXl4lemyGmmjm7QbQfgPCN5tKb+l1E28DlebXH9uxBhJKEX60F1AFAkaZRSi54ph6HgHHHYIBpgjgecMptZU30s3IFHQ23ogjVTQat6OMxJFFnosXwvjdXA/ZM9szew25GIG9QCgeXCI602F8f/kniGYSvWalhaR9iOWTIV02xmiCgWmflBbJRhFMAhroZYkJRoFbmP0sxtGKTbyW3pxrFtaffUUI+qKGqmnX3YijcAjkkom+uA+iKgpJ6Tw19uiUdDluymmn1WGHqVQz/lhkkJOeKlxEEFFJhBo5/MRMno9WKAaESZC5UqF4RngfhSA6aKR7PPlqZ4jrCZtHCib9eqRoXsjqoaxnqzJJmUl0ZnmGPKnO2mWtu5K47bMELZrfTA36E1SakPo5V6Utoirpu+ZcSi+PNXqKb77NhYocv8qRml278LYrp27M8uRoTuZ2JlchEE6Gpz0nYShrsQjj15sI75Vp3rl7GraGJA9jTNgafUIp0MbygazXEihX8hBF5dLDJT41V6wgrZmwVwt9IRbk87cH5pwbf0sGjS6YW84C8cwAsxhv1IzUKyPVTumLddbWaKq1M1D70bXXAIfdzJ2zOEE2NiGelrbawLLdNg+NGIJ23NjSVrfdc9fHht13b2GF31oATongX/ft9+F5x624MonfK3jkkt9YAAA7"
+                                    width="68" height="136" border="0" title="Greeklower" alt="Greeklower Panel"
+                                    usemap="#greeklower_map" /><map name="greeklower_map" id="greeklower_map"><area
+                                        shape="rect" alt="\alpha" coords="0,0,14,14" /><area shape="rect" alt="\epsilon"
+                                        coords="0,17,14,31" /><area shape="rect" alt="\theta"
+                                        coords="0,34,14,48" /><area shape="rect" alt="\lambda"
+                                        coords="0,51,14,65" /><area shape="rect" alt="\pi" coords="0,68,14,82" /><area
+                                        shape="rect" alt="\sigma" coords="0,85,14,99" /><area shape="rect" alt="\phi"
+                                        coords="0,102,14,116" /><area shape="rect" alt="\omega"
+                                        coords="0,119,14,133" /><area shape="rect" alt="\beta"
+                                        coords="17,0,31,14" /><area shape="rect" alt="\varepsilon"
+                                        coords="17,17,31,31" /><area shape="rect" alt="\vartheta"
+                                        coords="17,34,31,48" /><area shape="rect" alt="\mu" coords="17,51,31,65" /><area
+                                        shape="rect" alt="\varpi" coords="17,68,31,82" /><area shape="rect"
+                                        alt="\varsigma" coords="17,85,31,99" /><area shape="rect" alt="\varphi"
+                                        coords="17,102,31,116" /><area shape="rect" alt="\gamma"
+                                        coords="34,0,48,14" /><area shape="rect" alt="\zeta"
+                                        coords="34,17,48,31" /><area shape="rect" alt="\iota"
+                                        coords="34,34,48,48" /><area shape="rect" alt="\nu" coords="34,51,48,65" /><area
+                                        shape="rect" alt="\rho" coords="34,68,48,82" /><area shape="rect" alt="\tau"
+                                        coords="34,85,48,99" /><area shape="rect" alt="\chi"
+                                        coords="34,102,48,116" /><area shape="rect" alt="\delta"
+                                        coords="51,0,65,14" /><area shape="rect" alt="\eta" coords="51,17,65,31" /><area
+                                        shape="rect" alt="\kappa" coords="51,34,65,48" /><area shape="rect" alt="\xi"
+                                        coords="51,51,65,65" /><area shape="rect" alt="\varrho"
+                                        coords="51,68,65,82" /><area shape="rect" alt="\upsilon"
+                                        coords="51,85,65,99" /><area shape="rect" alt="\psi"
+                                        coords="51,102,65,116" /></map></div>
+                            <div class="panel" id="panel9" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhIgBmAJEAAFVVVaqqqv///wAAACH5BAAHAP8ALAAAAAAiAGYAAAL/jI8pko0bgJx0BlizvEyu/1lYJWRcNJWeCpwZK3YpuY0z3NoAHqN35Zppgh5hTVYc6lgw4k6TQ+JYTt7RN+1RrFGUVVWFBr/XVQiIAakXXSga6e46HJB5Y43P6/f8Pt5+xwD4AOfmZLh0phVXluTYRvPm9bK4ZTLCQ6XzhONSAvPZ+EPhuaP2BLliSpqGWgS2ZASZWenahEkpmqVrWbmbasrGKqN4dii2iSw4aFDHzOEXLT2999y8zJysVKgcsVf23cYFK9ULDkWOZQ6MWC5LBDqs/m6zJi976/4Iv368Pb+vlYZ0+O6N40WvQzhPZ0CIiuPvErZBzrJRu4hRmrUT0da0SfQBMY0ehEbGDGwU6hVJIaVUFgnzL9e9dbUePVwlSWZNK8d4wPyoc2WSnkBd9SKac2EiRey6MbrScSKgjFSr/om60WPOp1WYsvN6SNhMmsBOaRHLpMSYT2x9JRHGUBVOfqg0KVQhDG69t4vw4nVb1y2bfCBDEd4CdlPiQmJrGn3ocKyZrYwiSsIa1apmqlkvgmxHrfDi0HJLQ5s2KVIU0o3lntaIE/ER0o9dvY6W2txtPwCN7u7T++9vPt74ohpebXIwcrQrY+y8Obp0PAUAADs="
+                                    width="34" height="102" border="0" title="Greekupper" alt="Greekupper Panel"
+                                    usemap="#greekupper_map" /><map name="greekupper_map" id="greekupper_map"><area
+                                        shape="rect" alt="\Gamma" coords="0,0,14,14" /><area shape="rect" alt="\Theta"
+                                        coords="0,17,14,31" /><area shape="rect" alt="\Xi" coords="0,34,14,48" /><area
+                                        shape="rect" alt="\Sigma" coords="0,51,14,65" /><area shape="rect" alt="\Phi"
+                                        coords="0,68,14,82" /><area shape="rect" alt="\Omega"
+                                        coords="0,85,14,99" /><area shape="rect" alt="\Delta"
+                                        coords="17,0,31,14" /><area shape="rect" alt="\Lambda"
+                                        coords="17,17,31,31" /><area shape="rect" alt="\Pi" coords="17,34,31,48" /><area
+                                        shape="rect" alt="\Upsilon" coords="17,51,31,65" /><area shape="rect" alt="\Psi"
+                                        coords="17,68,31,82" /></map></div>
+                            <div class="panel" id="panel12" style="height:34px"><img
+                                    src="data:image/gif;base64,R0lGODlhMwDdAJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAAAzAN0AAAL/lI8ZkY3rIgS02irm3SAzvnkCSC3dZJIiaa1cen5lALpsPF4wZc+hduvtMEDLbrVIKk2uYauoo+FuPI2TKHtJe6rilevDjpbkafTCdYI5awDMdjUHoWektEZn539ZVhu9B9jXNYjHENEAgahwuHhABhkpOUlZaXl56fjQqKmo+fdUqCfKlwOyZeUXGGp6VpUVl3YntjEkW+rKajRLWzsL2hsn5/vaStj6lXe02rsraKyGMjnsXFwRy2xNgirD+0xFbWgs7jbdFKktqT1H+k0FXPwpIu/ZiXmPn6+fLz//We8oW7hR4wiy4JbDm653e94AwdZuYbVmYXRRGpZM1LKI/8EUriM2ENc1hWs2jjGXquLHctdWkqvoENadmAVFjmxpZiYvO+pK/vJCUuCfFOeOgYMX0h27fgAXNUW0L6rUqfzocQp41SlHlwYZkvr5VaIOsUbI4uTqxmy5O0VLKC1r1hbQtGp3AvUGRm43SB3pvnVLs5ZNloPXukP3kYZeZEEHNTY1K7Dhrm4pe5RzWcjLy5iNVqasamtSVlaZZoVKNbXq1acltHbw1HXNvy+XvqANGi5Xk2c/twE7bvFEtsreJik8OR1f5X7VEg6Hdy5y4WuXBEtL3Ydiis2bwQCO83jHMusUR3d8HtnmiZgzQvZsW7fEzELri/Znz7Rp1vz7Y//SX1ppR9k3m3MtIRFfgrflFFqB3FXTVm61sSfEYzMsd454cSmBFm683YSchCBGKJI6oyH0mYghloVggwPeR+CLDnZoYI0PqvhMgP+8loh/Pv4ICYA76idjkV7NONqNK1bWhItHbuMdfE7mgpGFKi1kHW1ZNvlcWj6J5V5zKaB4SpTkeCNZmQxKyeaEbeJoI43jkZchnTE+iedSOuZnFZB+/igkn0MaqeCbS8Y50JhTzGSZR7cQ1hZ1UuxAAxyTggdiYLxMas2Y6YHkJQqgRmpXIZeW56h0aRIm2akH0uFpTq7SsimTDVnUG60LJilnr7z+ilSwd+o55J5Y/Yksf4H/YkVknlM6ydlQSh727Fi+cummbpauZ6hfXFK6ZrZntXgTmYjJSt6iu2KLI3EwdlOttndGG4i7J/WUkri+zRvvuMP2e6gYxmq1X7IGU7UswQI62y2iwsqkL24lXglsjJGViuTDY/iC4mWV3vVhfEMQZcWmZCqYZadQ8oSOxoQCLHHMDluM0rsZ/9vwtKQVy7M9B/8cVcKoNVtoxFjG+yme9JqKi8fhSpj0yOYiPVjK6KacV8DpUC3znBy6lPSFHy4dXIkmb93mp06zO53WTzdd8802v3zMwEP3CXTe9wgt28JFw/lg2IB1DXZh2813dtZ/HX4dXaumuBLjKreEqXyRjndHLuSKkyW5upZvzl3nmUsO+uUYVzZr6dSI/lDisBqOOc7drR773AwbLXDPzOKtd++U8A0bP3Qbgo/cchff5U0PI9/5diT64AHzn3HaZGShCq8To9+iHoP0IF6f0PcfYz+9W9h+1/3e2I01fviOm6/PSVowaP34yCuNpv3q3z7K/X/zUTy7ucZ3BFRNAQAAOw=="
+                                    width="51" height="221" border="0" title="Relations" alt="Relations Panel"
+                                    usemap="#relations_map" /><map name="relations_map" id="relations_map"><area
+                                        shape="rect" alt="&lt;" coords="0,0,14,14" /><area shape="rect" alt="\leq"
+                                        coords="0,17,14,31" /><area shape="rect" alt="\leqslant"
+                                        coords="0,34,14,48" /><area shape="rect" alt="\nless"
+                                        coords="0,51,14,65" /><area shape="rect" alt="\nleqslant"
+                                        coords="0,68,14,82" /><area shape="rect" alt="\prec" coords="0,85,14,99" /><area
+                                        shape="rect" alt="\preceq" coords="0,102,14,116" /><area shape="rect" alt="\ll"
+                                        coords="0,119,14,133" /><area shape="rect" alt="\vdash"
+                                        coords="0,136,14,150" /><area shape="rect" alt="\smile" title="smile"
+                                        coords="0,153,14,167" /><area shape="rect" alt="\models"
+                                        coords="0,170,14,184" /><area shape="rect" alt="\mid"
+                                        coords="0,187,14,201" /><area shape="rect" alt="\bowtie"
+                                        coords="0,204,14,218" /><area shape="rect" alt="&gt;"
+                                        coords="17,0,31,14" /><area shape="rect" alt="\geq" coords="17,17,31,31" /><area
+                                        shape="rect" alt="\geqslant" coords="17,34,31,48" /><area shape="rect"
+                                        alt="\ngtr" coords="17,51,31,65" /><area shape="rect" alt="\ngeqslant"
+                                        coords="17,68,31,82" /><area shape="rect" alt="\succ"
+                                        coords="17,85,31,99" /><area shape="rect" alt="\succeq"
+                                        coords="17,102,31,116" /><area shape="rect" alt="\gg"
+                                        coords="17,119,31,133" /><area shape="rect" alt="\dashv"
+                                        coords="17,136,31,150" /><area shape="rect" alt="\frown" title="frown"
+                                        coords="17,153,31,167" /><area shape="rect" alt="\perp"
+                                        coords="17,170,31,184" /><area shape="rect" alt="\parallel" title="parallel"
+                                        coords="17,187,31,201" /><area shape="rect" alt="\Join"
+                                        coords="17,204,31,218" /><area shape="rect" alt="=" coords="34,0,48,14" /><area
+                                        shape="rect" alt="\doteq" coords="34,17,48,31" /><area shape="rect" alt="\equiv"
+                                        title="equivalent" coords="34,34,48,48" /><area shape="rect" alt="\neq"
+                                        coords="34,51,48,65" /><area shape="rect" alt="\not\equiv"
+                                        title="not equivalent" coords="34,68,48,82" /><area shape="rect"
+                                        alt="\overset{\underset{\mathrm{def}}{}}{=}" title="define"
+                                        coords="34,85,48,99" /><area shape="rect" alt="\sim"
+                                        coords="34,102,48,116" /><area shape="rect" alt="\approx"
+                                        coords="34,119,48,133" /><area shape="rect" alt="\simeq"
+                                        coords="34,136,48,150" /><area shape="rect" alt="\cong"
+                                        coords="34,153,48,167" /><area shape="rect" alt="\asymp"
+                                        coords="34,170,48,184" /><area shape="rect" alt="\propto"
+                                        title="proportional to" coords="34,187,48,201" /></map></div>
+                            <div class="panel" id="panel10" style="height:34px;margin-left:2px;"><img
+                                    src="data:image/gif;base64,R0lGODlhZgCqAJEAAFVVVf///6qqqgAAACH5BAAHAP8ALAAAAABmAKoAAAL/lI+pixEMY3KyQgqy3rz7LGDfSIJiiXLhk7baKrguLLd0jd6bE6B8p/P0OsNREPc5Aooppok1cmqkG6WDc91RAVaZVDklbbmnqTNrTpYzYyFwHWYvmWMwsgpvE9/QfZhuBHeH1xeHlnXIF+P3h6VWOKiSx1aEWKnoZujoYRfZ5fIlCDi387gYibnZEgq5BMopiPq5mlpKW4tKeBp3q8voA9uaO9uEK9frmyvZqqf6Mon8LCwLHU3G/GqsTAy8vHtcrD1cHZ5sW26u/PTtmp0O3u2t/t5+OJQo/+uK1i5OjU2KkkB46zJRkrKl0yBuJVix60cwYsF5E8+hq+gMYaBp/57IxZP2EKJGU0TOmCTp7CPGlBa18QuYJhi7Zi2vhYTIkt44Zi+F9FRIRY/CO0ORFMVxtEZSGUtnxOrIceFTqQ8sWG1Q9epVClq38vgKNqzYsWTLmj2LNq3atWzbum3b1Wtcq1znSphKFK9RvUj5KvXLFLBTYTQTCrZxOAUYmjhXbkucw6MYmRQd7/zGmBfInFEoVz6SOSLoGg5r7i1Ep9K9UZs1u6sYmkSQ1DH5OdER2zVudbOR3D6B8N5Ai7uL1SmTG15xLcd6MikuvLFqNMtxPBeRXHN1nxJbN359I7ty4MB6rKZO/s51KOIhbte38ZT49Yva0+9+Wv6g+9/BY/+f955/7EXCX3999TFfMvaZw5h58bnmhYLBNTcSbO585Z1Iqg2H03uIcDgegs1F1EZvMQVkWz4GfhQgcw7OgR5qvqmY3W8iNqTYGrGVBuFFLfboGZCdqQiTNSb+M9NrGRaJoz9QzVQYFU0hFlVehF205GNV5leZTV1OmeOWB95EFZlWmsnlZ5CVAINdd2XlJgN1xbnAW3beiWeeeu7JJ1x0ygnnn1gJWqeYfxkaGKKDoTnml2vKJoo1XnJmkE5IVjqZMTs6WSamQxKZnI2MHvpQg0Gu+Klll8L3gZTIzShhP2HVZl4Ri8FkiURHorihbuQ1k2uMpeK6mq6v0npih7//moEhlcNiOSl+mWbYXpao9rirkuFdG+azKmEUKo28RQptttGAGdmV5aYHq6pPetqqZ9Xa+uiDrML7I4v1okRpTub6uO+pQvp7LGlEjqvut9Fyq89Qud1qz0Cuynhirr5WeRIp/EDc64e40CYxa+6ChezG5Cr8r0oON3ovqyk3aa1pbJ4MczrhWvpuywRTbDDOneps2mgRHqyltzVnmdnEoya69KKOKurs001HrSbU3UotNaETBKr1nFqv0GfYYo9Ndtl2fj0o2gaYHTCnVpo99dVVw+2IqaJOmyjdpdhN9MCQso0Zwy/GLB7YZQfOt6WFsw3J4DjeDS+VejfCq8TK/04DcuXLTC5HsZo7vrBFETN5Def70AI50H+bDnpnqfc7M+B1o943w8GwLvjlIS0u+96069Se4WQj/jvS/+CeuLXBM068cbXzjnzxqkJ/+OzOK05V9J8L97roHbOivcUfdq/Z6D8xb315z2dfve/XE87+8Ok/vv7b7VOuPvb2y+9+/jHbvrn7dU56oYPdI0xXtKch8DIKFCDC4pYuuKmtTWpjnAUviMEMapAsE6Qg2tBXNQjGboGroojwxibC41htRScUWwrtZZ2NkFBh7qJhC8P2Qn7F8HYOVJLPjiYNElpMYzCsmOe6c8M+7e6IV1AhlJAFpCTyKYcCGxofZgjE/5HZEIQ7rKIPn4BFvNUOWqXroaRqiDIu9syLVgyiGclYwDa6kX9ddJsY54hC9RRxjQGkIx/HuMXelWQ4TdwjsThkGEFigYmtQ9r3ZCbFPVHRjqkiRBgr+cM7gvGNNIzjGSOpp0kCMotl9KMcMxmvA3KSlJ5kZSnzGMIGmjKBc1vlmWSJwgl6rWsb7KUvfwlMtxQAADs="
+                                    width="102" height="170" border="0" title="Matrix" alt="Matrix Panel"
+                                    usemap="#matrix_map" /><map name="matrix_map" id="matrix_map"><area shape="rect"
+                                        alt="\begin{matrix}\cdots \\ \cdots \\ \end{matrix}"
+                                        title="\begin{matrix}... \end{matrix}" coords="0,0,31,31"
+                                        onclick="EqEditor.makeArrayMatrix('','','')" /><area shape="rect"
+                                        alt="\begin{pmatrix}\cdots \\ \cdots \end{pmatrix}"
+                                        title="\begin{pmatrix}... \end{pmatrix}" coords="0,34,31,65"
+                                        onclick="EqEditor.makeArrayMatrix('p','','')" /><area shape="rect"
+                                        alt="\begin{vmatrix}\cdots \\ \cdots \end{vmatrix}"
+                                        title="\begin{vmatrix}... \end{vmatrix}" coords="0,68,31,99"
+                                        onclick="EqEditor.makeArrayMatrix('v','','')" /><area shape="rect"
+                                        alt="\begin{Vmatrix}\cdots \\ \cdots \end{Vmatrix}"
+                                        title="\begin{Vmatrix}... \end{Vmatrix}" coords="0,102,31,133"
+                                        onclick="EqEditor.makeArrayMatrix('V','','')" /><area shape="rect"
+                                        alt="\left.\begin{matrix}\cdots \\ \cdots \end{matrix}\right|"
+                                        title="\left.\begin{matrix}... \end{matrix}\right|" coords="0,136,31,167"
+                                        onclick="EqEditor.makeArrayMatrix('','\\left.','\\right|')" /><area shape="rect"
+                                        alt="\begin{bmatrix}\cdots \\ \cdots \end{bmatrix}"
+                                        title="\being{bmatrix}... \end{bmatrix}" coords="34,0,65,31"
+                                        onclick="EqEditor.makeArrayMatrix('b','','')" /><area shape="rect"
+                                        alt="\bigl(\begin{smallmatrix}\cdots \\ \cdots \end{smallmatrix}\bigr)"
+                                        title="\bigl(\begin{smallmatrix}... \end{smallmatrix}\bigr)"
+                                        coords="34,34,65,65"
+                                        onclick="EqEditor.makeArrayMatrix('small','\\bigl(','\\bigr)')" /><area
+                                        shape="rect" alt="\begin{Bmatrix}\cdots \\ \cdots \end{Bmatrix}"
+                                        title="\begin{Bmatrix}... \end{Bmatrix}" coords="34,68,65,99"
+                                        onclick="EqEditor.makeArrayMatrix('B','','')" /><area shape="rect"
+                                        alt="\left\{\begin{matrix}\cdots \\ \cdots \end{matrix}\right."
+                                        title="\begin{Bmatrix}... \end{matrix}" coords="34,102,65,133"
+                                        onclick="EqEditor.makeArrayMatrix('','\\left\\{','\\right.')" /><area
+                                        shape="rect" alt="\left.\begin{matrix}\cdots \\ \cdots \end{matrix}\right\}"
+                                        title="\begin{matrix}... \end{Bmatrix}" coords="34,136,65,167"
+                                        onclick="EqEditor.makeArrayMatrix('','\\left.','\\right\\}')" /><area
+                                        shape="rect" alt=" \binom{n}{r}" coords="68,0,99,31"
+                                        onclick="EqEditor.insert('\\binom{}{}')" /><area shape="rect"
+                                        alt="\begin{cases}..,x= \\..,x=\end{cases}" title="\begin{cases}... \end{cases}"
+                                        coords="68,34,99,65"
+                                        onclick="EqEditor.makeEquationsMatrix('cases', true, true)" /><area shape="rect"
+                                        alt="\begin{align*}y&amp;=\cdots \\ &amp;+\cdots \end{align*}"
+                                        title="\begin{align}... \end{align}" coords="68,68,99,99"
+                                        onclick="EqEditor.makeEquationsMatrix('align', false)" /></map></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div id="input">
+            <textarea name="latex_formula" id="latex_formula" rows="8" spellcheck="false"
+                onchange="UpdateMath(this.value)" oninput="UpdateMath(this.value)"
+                onpropertychange="UpdateMath(this.value)" onkeydown="UpdateMath(this.value)"
+                placeholder="数学公式编辑器代码编辑区"></textarea>
+        </div>
+        <div style="padding-bottom: 1em;">
+        </div>
+        <div class="box" id="box" style="visibility:hidden">
+            <div id="MathOutput" class="output">$$ \color{#ddd}{公式预览}$$</div>
+                </div>
+            </div>
+        </div>
+        <script type="text/javascript" src="latex.min.js"></script>
+    </body>
+</html>

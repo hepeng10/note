@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="container"></div>
+    <div>有面积的图形，如矩形、圆形、多边形可以很简单的就添加上事件；但是给线条添加事件要复杂一些。</div>
+    <script src="./pixi.js"></script>
+    <script>
+        const { Application, Loader, Sprite, utils, Graphics } = PIXI;  // 从 PIXI 中提取出常用成员
+
+        let app = new Application({ width: 800, height: 800 });
+        const { stage, renderer, view, ticker } = app;  // 从 app 中提取出常用成员
+
+        renderer.backgroundColor = 0x565656;
+        const dom = document.getElementById('container')
+        dom.appendChild(view);  // view 即 canvas DOM 元素
+
+        
+        // 多边形添加事件。设置 interactive 为 true，再使用 addListener 即可。
+        let polygon = new Graphics();
+        polygon.beginFill(0xFFFF00);
+        let path = [
+            50, 100,
+            200, 200,
+            100, 300
+        ];
+        polygon.drawPolygon(path);  // 使用 drawPolygon 绘制多边形
+        polygon.endFill();
+        polygon.x = 180;
+        polygon.y = 130;
+        // 添加事件
+        polygon.interactive = true;  // 设置可交互为 ture
+        polygon.cursor = 'pointer'
+        polygon.addListener('click', () => { console.log('polygon click') })  // 添加事件
+        // console.log('polygon', polygon)
+        stage.addChild(polygon);
+
+
+
+        // 直线，getBounds 的方式添加事件
+        let line = new Graphics();
+        line.lineStyle(8, 0xFFFFFF, 1);
+        line.moveTo(0, 0);  // moveTo lineTo 绘制线段
+        line.lineTo(80, 50);
+        // 直接画的直线和曲线没有面积，所以支持不了鼠标事件，通过设置 hitArea 可以实现事件的支持
+        line.hitArea = line.getBounds()  // getBounds() 获取的是一个矩形区域而不是线的区域
+        line.x = 120;
+        line.y = 30;
+        line.interactive = true;
+        line.cursor = 'pointer'
+        line.addListener('click', () => { console.log('line click') })
+        // console.log('line', line)
+        stage.addChild(line);
+
+
+
+        
+        // 贝塞尔曲线，通过获取顶点坐标来绘制出和线条相同的形状赋值给 hitArea 并添加事件
+        let bezierLine = new Graphics();
+        bezierLine.lineStyle(10, 0x00FFFF, 1);
+        bezierLine.moveTo(0, 0);
+        bezierLine.bezierCurveTo(10, 20, 50, 60, 100, 40)
+        // bezierLine.bezierCurveTo(0, 10, 50, 10, 100, 10)
+        bezierLine.x = 250;
+        bezierLine.y = 30;
+        stage.addChild(bezierLine);
+
+        // 使用 renderer.render() 方法渲染一次页面，这样后面才能获取到 bezierLine.geometry.points。renderer.render() 是同步渲染
+        renderer.render(stage)
+
+        // 获取顶点坐标并赋值 hitArea
+        const points = bezierLine.geometry.points  // 获取几何图形的所有顶点坐标，需要渲染完成才能获取到
+        // 顶点坐标是左右交替的，需要通过算法将坐标进行转换。https://www.cnblogs.com/3body/p/14981937.html
+        let points1 = []  // 左侧的点
+        let points2 = []  // 右侧的点
+        let i = 0, count = 0;
+        while (points[i]) {
+            if (count % 2 === 0) {  // 左侧
+                points1.push(points[i])
+                points1.push(points[i + 1])
+            } else {  // 右侧，右侧的点需要倒序，所以用 unshift
+                points2.unshift(points[i + 1])
+                points2.unshift(points[i])
+            }
+            i += 2;  // 一个点的坐标由两个数组元素构成，所以每次+2
+            count++;  // 遍历计数器，偶数时为左侧的点，奇数时为右侧的点
+        }
+        const hitAreaPath = points1.concat(points2)
+        bezierLine.hitArea = new PIXI.Polygon(hitAreaPath)
+
+        bezierLine.interactive = true;
+        bezierLine.cursor = 'pointer'
+        bezierLine.addListener('click', () => { console.log('linePolygon click') })
+        
+        // 使用 hitAreaPath 创建多边形，用来验证图形是否符合要求
+        let bezierPolygon = new Graphics();
+        bezierPolygon.beginFill(0x00FF00);
+        bezierPolygon.x = 400
+        bezierPolygon.y = 30
+        bezierPolygon.drawPolygon(hitAreaPath);  // 使用 drawPolygon 绘制多边形
+        bezierPolygon.endFill();
+        bezierPolygon.interactive = true;  // 设置可交互为 ture
+        bezierPolygon.cursor = 'pointer'
+        bezierPolygon.addListener('click', () => { console.log('bezierPolygon click') })  // 添加事件
+        // console.log('bezierPolygon', bezierPolygon)
+        stage.addChild(bezierPolygon);
+
+
+
+
+    </script>
+</body>
+</html>

@@ -1,0 +1,87 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>JMEditor 国内首款开源在线公式编辑器|所见即所得|简单易用|兼容主流浏览器</title>
+<meta name="keywords" content="JMEditor,JavascriptMathEditor,开源,在线公式编辑器,所见即所得,兼容主流浏览器,数学公式,物理公式" />
+<meta name="description" content="JMEditor 基于jQuery、mathquill组件开发，是国内首款支持公式输入的，轻量级的在线编辑器，并能很好的支持主流浏览器。" />
+<link href="style/default.css" rel="stylesheet" media="screen" type="text/css" />
+<script type="text/javascript" src="jmeditor/jquery-1.8.3.min.js"></script>
+<script type="text/javascript" src="jmeditor/JMEditor.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="notice" id="chromeNotice">
+			<div>
+				提示：使用Chrome浏览器，此示例需要运行在http协议下才能正常工作。
+			</div>
+		</div>
+		<div class="body">
+			<div class="content">
+					<h1>JMEditor示例</h1>
+					<p>
+						请您在后面的输入框中输入<span class="mark">x^2</span>：<span class="mathquill-editable"></span><br>
+						再试试<span class="mark">3/4</span>，<span class="mark">\sqrt x</span>或<span class="mark">\sin\alpha</span>，简直太棒了。
+					</p>
+					<p>
+						下面是JMEditor在线公式编辑器，集成了公式编辑插件 ∑ ，赶紧体验一下吧。
+					</p>
+					<p>
+						<div id="content" contentEditable="true" class="editDemo">
+							编辑框一
+						</div>
+					</p>
+					<p>
+						<input type="button" onclick="alert(JMEditor.isEmpty('content'));" value="判断是否为空">
+						<input type="button" onclick="$('.contentArea').val(JMEditor.html('content'));" value="取值">
+						<input type="button" onclick="window.open('view.html');" value="在新窗口中预览">
+					</p>
+					<p>
+						<textarea class="contentArea"></textarea>
+					</p>
+					<p>
+						支持一个页面多个编辑框。
+					</p>
+					<p>
+						<div id="content2" contentEditable="true" class="editDemo">
+							编辑框二
+						</div>
+					</p>
+					<p>
+						<h1>JMEditor操作技巧</h1>
+					</p>
+					<p>
+						在编辑状态下，输入<span class="mark">^</span>，自动变为上标输入。
+					</p>
+					<p>
+						在编辑状态下，输入<span class="mark">_</span>，自动变为下标输入。
+					</p>
+					<p>
+						在编辑状态下，使用方向键可以在输入框内移动光标的位置，但不会移出编辑框，使用tab键跳出编辑框。
+					</p>
+			</div>
+			<div class="floatdown">
+				<a href="http://www.jmeditor.com/jme/down.html" target="_blank" class="btn">检查新版本</a>
+				<p>
+						<h1>JMEditor</h1>
+					</p>
+					<div class="notice">
+						<h2>免责声明</h2>
+						<div>
+							&nbsp;&nbsp;&nbsp;&nbsp;您下载本软件，即表示您完全接受本声明。<br/>
+							&nbsp;&nbsp;&nbsp;&nbsp;如您认为本软件某部分功能有侵权嫌疑，请立即通知我们，JMEditor将在第一时间更改或删除。<br/>
+							&nbsp;&nbsp;&nbsp;&nbsp;本软件为非盈利性质，您可以免费下载、学习、交流。在任何发布的版本中，本声明不能删除或更改。本软件严禁用于任何形式的商业用途。<br/>
+							&nbsp;&nbsp;&nbsp;&nbsp;对于使用本软件的结果，您需要自行承担风险。如果造成任何的不利后果，本站概不负责，也不承担任何法律责任。请慎重选择！<br/>
+							&nbsp;&nbsp;&nbsp;&nbsp;此声明最终解释权归本软件作者所有。
+							
+						</div>
+					</div>
+			</div>
+			<div class="footer topline bottomline">
+			<span>Copyright &copy; 2012-2015 JMEditor 版权所有 jmeditor@163.com</span>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

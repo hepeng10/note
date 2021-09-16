@@ -1,0 +1,39 @@
+﻿<!DOCTYPE HTML>
+<html>
+<head>
+<meta charset="UTF-8" />
+<meta http-equiv="X-UA-Compatible" content="chrome=1">
+<title>JMEditor 国内首款开源在线公式编辑器|所见即所得|简单易用|兼容主流浏览器</title>
+<meta name="keywords" content="JMEditor,JavascriptMathEditor,开源,在线公式编辑器,所见即所得,兼容主流浏览器,数学公式,物理公式" />
+<meta name="description" content="JMEditor 基于jQuery、mathquill组件开发，是国内首款支持公式输入的，轻量级的在线编辑器，并能很好的支持主流浏览器。" />
+<link href="style/default.css" rel="stylesheet" type="text/css" />
+<link href="jmeditor/mathquill-0.10.1/mathquill.css" rel="stylesheet" type="text/css" />
+<script type="text/javascript" src="jmeditor/jquery-1.8.3.min.js"></script>
+</head>
+<body>
+	<div class="container">
+		<div class="body">
+			<div class="content">
+					<h1>JMEditor内容预览</h1>
+					<p>
+						下面是您用JMEditor在线公式编辑器的成果。
+					</p>
+					<p>
+						<div class="editDemo">
+							
+						</div>
+					</p>
+					<script type="text/javascript" >
+						$(".editDemo").html($("#content",opener.document).html());
+					</script>
+			</div>
+			<div class="floatdown">
+				<a href="http://www.jmeditor.com/jme/down.html" target="_blank" class="btn">检查新版本</a>
+			</div>
+			<div class="footer topline bottomline">
+			<span>Copyright &copy; 2012-2015 JMEditor 版权所有 jmeditor@163.com</span>
+			</div>
+		</div>
+	</div>
+</body>
+</html>

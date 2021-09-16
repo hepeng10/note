@@ -1,0 +1,13 @@
+## 最短路径
+<img src="./img/tu34.jpg" width=700 />
+我们要查找图中$v_0到v_8$的最短路径应该怎么找呢？
+下面就介绍迪杰斯特拉（Dijkstra）算法来解决这个问题。
+
+### 迪杰斯特拉（Dijkstra）算法
+<img src="./img/tu35.jpg" width=700 />
+首先查找与起点$v_0$相邻的点的最短距离，这一步很简单，直接遍历相邻节点获取其权值就能得到，这里既是$v_0到v_1$，距离为1.
+<img src="./img/tu36.jpg" width=700 />
+<img src="./img/tu37.jpg" width=700 />
+<img src="./img/tu38.jpg" width=700 />
+<img src="./img/tu33.jpg" width=700 />
+我们要计算$v_0 到 v_8$的最短路径，首先也是要构建一个邻接矩阵结构。

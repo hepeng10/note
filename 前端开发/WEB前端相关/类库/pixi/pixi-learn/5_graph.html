@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="container"></div>
+    <script src="./pixi.js"></script>
+    <script>
+        const { Application, Loader, Sprite, utils, Graphics } = PIXI;  // 从 PIXI 中提取出常用成员
+
+        let app = new Application({ width: 800, height: 800 });
+        const { stage, renderer, view, ticker } = app;  // 从 app 中提取出常用成员
+
+        renderer.backgroundColor = 0x565656;
+        const dom = document.getElementById('container')
+        dom.appendChild(view);  // view 即 canvas DOM 元素
+
+
+
+        // 矩形
+        let rectangle = new Graphics();
+        rectangle.lineStyle(4, 0xFF3300, 1);
+        rectangle.beginFill(0x66CCFF);
+        rectangle.drawRect(0, 0, 64, 64);  // 使用 drawRect 绘制矩形
+        rectangle.endFill();
+        rectangle.x = 20;
+        rectangle.y = 20;
+        stage.addChild(rectangle);
+
+
+
+        // 圆形
+        let circle = new Graphics();
+        circle.beginFill(0x9966FF);
+        circle.drawCircle(0, 0, 32);  // 使用 drawCircle 绘制圆形
+        circle.endFill();
+        circle.x = 60;
+        circle.y = 130;
+        stage.addChild(circle);
+
+
+
+        // 椭圆
+        let ellipse = new Graphics();
+        ellipse.beginFill(0xFFFF00);
+        ellipse.drawEllipse(0, 0, 50, 20);  // 使用 drawEllipse 绘制椭圆
+        ellipse.endFill();
+        ellipse.x = 180;
+        ellipse.y = 130;
+        stage.addChild(ellipse);
+
+
+
+        // 直线
+        let line = new Graphics();
+        line.lineStyle(8, 0xFFFFFF, 1);
+        line.moveTo(0, 0);  // moveTo lineTo 绘制线段
+        line.lineTo(80, 50);
+        line.x = 120;
+        line.y = 30;
+        stage.addChild(line);
+
+
+        
+        // 贝塞尔曲线
+        let bezierLine = new Graphics();
+        bezierLine.lineStyle(10, 0x00FFFF, 1);
+        bezierLine.moveTo(0, 0);
+        bezierLine.bezierCurveTo(10, 20, 50, 60, 100, 40)
+        // bezierLine.bezierCurveTo(0, 10, 50, 10, 100, 10)
+        bezierLine.x = 250;
+        bezierLine.y = 30;
+        stage.addChild(bezierLine);
+
+
+
+        // 多边形
+        let polygon = new Graphics();
+        polygon.beginFill(0xFFFF00);
+        let path = [
+            50, 100,
+            200, 200,
+            100, 300
+        ];
+        polygon.drawPolygon(path);  // 使用 drawPolygon 绘制多边形
+        polygon.endFill();
+        polygon.x = 180;
+        polygon.y = 130;
+        stage.addChild(polygon);
+
+    </script>
+</body>
+</html>

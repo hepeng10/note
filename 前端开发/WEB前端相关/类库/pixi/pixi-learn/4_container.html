@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="container"></div>
+    <div>1、container 可以嵌套，但是一个精灵只能属于一个父级。如果你用 addChild 让一个精灵成为其他精灵的孩子。Pixi 会自动移除它当前的父级，这是一个不用你操心的有用的管理方式。</div>
+    <div>2、ParticleContainer 性能快很多，但是相对普通 container 缺少部分功能，并且只能使用一个纹理，所以如果要展示多张图片只能使用雪碧图。但是基本的 x, y, width, height, scale, pivot, alpha, visible 这些功能都有，所以尽量使用 ParticleContainer。</div>
+    <script src="./pixi.js"></script>
+    <script>
+        const { Application, Loader, Sprite, utils, Rectangle, Container, ParticleContainer } = PIXI;  // 从 PIXI 中提取出常用成员
+
+        let app = new Application({ width: 500, height: 500 });
+        const { stage, renderer, view, ticker } = app;  // 从 app 中提取出常用成员
+
+        renderer.backgroundColor = 0x565656;
+        const dom = document.getElementById('container')
+        dom.appendChild(view);  // view 即 canvas DOM 元素
+
+        // ticker 的使用
+        const loader = new Loader();
+        loader
+            .add([  // 添加多个资源并取别名
+                { name: 'logo', url: './images/logo.png' },
+                { name: 'wechat', url: './images/wechat.png' },
+                { name: 'dns', url: './images/dns.png' }
+            ])
+            .load(setupt)
+        function setupt(loader, resources) {
+            const logo = new Sprite(resources.logo.texture)
+            logo.position.set(10, 10)  // 位置是相对于 container 容器的
+            const wechat = new Sprite(resources.wechat.texture)
+            wechat.position.set(50, 20)
+            const dns = new Sprite(resources.dns.texture)
+            dns.position.set(10, 60)
+
+            const container = new Container()  // 创建一个 container，类似 zrender 的 group
+            container.addChild(logo)
+            container.addChild(wechat)
+            container.addChild(dns)
+
+            stage.addChild(container)
+
+            container.position.set(50, 50)  // 修改 container 的位置。container 拥有和普通精灵相同的各种属性
+            container.scale.set(.5)
+            console.log('children', container.children)  // 通过 children 获取 container 中的所有精灵
+
+
+
+            // ParticleContainer 性能更强，但是只能使用一个纹理，这里用不同的纹理也只会显示第一个，要显示多张图片只能使用雪碧图。
+            // const pContainer = new ParticleContainer();
+            // pContainer.addChild(logo)
+            // pContainer.addChild(wechat)
+            // pContainer.addChild(dns)
+            // pContainer.position.set(200, 0)
+            // pContainer.scale.set(.5)
+            // stage.addChild(pContainer)
+        }
+
+    </script>
+</body>
+</html>

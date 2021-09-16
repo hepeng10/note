@@ -1,0 +1,37 @@
+图作为一种数据结构，它的抽象数据类型带有自己特点，正因为它的复杂，运用广泛，使得不同的应用需要不同的运算集合，构成不同的抽象数据操作。我们这里就来看看图的基本操作。
+
+    ADT 图(Graph)
+    
+        Data
+    
+            顶点的有穷非空集合和边的集合。
+    
+        Operation
+        
+            CreateGraph(*G, V, VR): 按照顶点集V和边弧集VR的定义构造图G。
+        
+            DestroyGraph(*G):       图G存在则销毁。
+        
+            LocateVex(G, u):        若图G中存在顶点u，则返回图中的位置。
+        
+            GetVex(G, v):           返回图G中顶点v的值。
+        
+            PutVex(G, v, value):    将图G中顶点v赋值value。
+        
+            FirstAdjVex(G, *v):     返回顶点v的一个邻接顶点，若顶点在G中无邻接顶点返回空。
+        
+            NextAdjVex(G, v, *w):   返回顶点v相对于顶点w的下一个邻接顶点，若w是v的最后一个邻接点则返回“空”。
+        
+            InsertVex(*G, v):       在图G中增添新顶点v。
+        
+            DeleteVex(*G, v):       删除图G中顶点v及其相关的弧。
+        
+            InsertArc(*G, v, w):    在图G中增添弧<v,w>，若G是无向图，还需要增添对称弧<w,v>。
+        
+            DeleteArc(*G, v, w):    在图G中删除弧<v,w>，若G是无向图，则还删除对称弧<w,v>。
+        
+            DFSTraverse(G):         对图G中进行深度优先遍历，在遍历过程对每个顶点调用。
+        
+            HFSTraverse(G):         对图G中进行广度优先遍历，在遍历过程对每个顶点调用。
+        
+    endADT

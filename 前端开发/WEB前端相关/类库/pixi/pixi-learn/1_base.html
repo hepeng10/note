@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <style>
+        #container {
+            width: 200px;
+            height: 200px;
+        }
+    </style>
+</head>
+<body>
+    <div id="container"></div>
+    <script src="./pixi.js"></script>
+    <script>
+        const { Application, Loader, Sprite, utils, Rectangle } = PIXI;  // 从 PIXI 中提取出常用成员
+
+        let app = new Application({ width: 500, height: 500 });
+        const { stage, renderer, view, ticker } = app;  // 从 app 中提取出常用成员
+
+        renderer.backgroundColor = 0x565656;
+        const dom = document.getElementById('container')
+        dom.appendChild(view);  // view 即 canvas DOM 元素
+
+        // renderer.autoResize = true;
+        // renderer.resize(800, 800);
+
+        // view.style.position = "absolute";
+        // view.style.display = "block";
+        // renderer.resize(window.innerWidth, window.innerHeight);
+
+
+
+        // 通过 loader 加载资源
+        const loader = new Loader();
+        // loader.add('logo', './images/logo.png').load(setup);  // 添加一个资源并命名为 logo
+        loader
+            .add([  // 添加多个资源并取别名
+                { name: 'logo', url: './images/logo.png' },
+                { name: 'wechat', url: './images/wechat.png' },
+                { name: 'dns', url: './images/dns.png' }
+            ])
+            .load(setup)  // 全部资源加载完成后执行，只会执行一次
+
+        // loader 的监听事件，每个资源加载的时候都会触发。
+        // 包括 onStart onError onLoad onProgress onComplete 等
+        loader.onProgress.add(loadProgressHandler)  // 监听资源加载进度
+        loader.onError.add(() => {})
+        // loader.load(setup)  // load 可以不通过链式调用
+
+        function loadProgressHandler(loader, resources) {
+            console.log("progress: " + loader.progress + "%");  // 通过 loader.progress 获取到加载完成资源的个数的百分比
+        }
+
+        function setup(loader, resources) {
+            let logo = new Sprite(resources.logo.texture)  // 通过 resources.资源名 获取资源
+            stage.addChild(logo)
+
+            // 隐藏精灵的两种方法
+            // setTimeout(() => {
+            //     stage.removeChild(logo)  // 移除精灵
+            //     logo.visible = false  // 隐藏精灵
+            // }, 1000)
+
+            // 修改精灵坐标的两种方式，在添加到舞台之前或之后都能修改
+            // logo.x = 10
+            // logo.y = 20
+            logo.position.set(40, 40)
+
+            // 修改精灵的宽高
+            // logo.width = 60
+            // logo.height = 100
+
+            // // 缩放精灵：精灵的缩放实际也是修改精灵的宽高，只是内部是通过精灵原始宽高进行缩放的
+            // // 所以宽高和缩放只设置一个就行，两个是相冲突的，以后设置的为准
+            // logo.scale.x = 0.8
+            // logo.scale.y = 0.6
+            logo.scale.set(.8, .8);  // 宽高相同可以只传一个参数 .set(.8)
+
+            // 旋转精灵：默认以精灵左上角为锚点进行顺时针旋转
+            logo.rotation = .5
+
+            // 修改锚点位置，0,0为默认的左上角，1,1为精灵的右下角。这里.5,.5就是精灵的中心
+            // 注意：实际移动的是精灵的位置，而不是锚点的位置。这里实际是将精灵往左上移动了自身的50%，从而锚点处于了精灵的中心
+            // logo.anchor.x = .5
+            // logo.anchor.y = .5
+            logo.anchor.set(.5, .5)
+
+            // 修改原点位置，实际作用和锚点差不多，只是锚点值为百分比，原点值为像素
+            // logo.pivot.set(35, 35)
+
+        }
+    </script>
+</body>
+</html>

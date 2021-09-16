@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="container"></div>
+    <div>雪碧图还可以使用 Texture Packer 生成一个带 json 文件的纹理贴图集方便使用，具体使用方式见官方文档。</div>
+    <script src="./pixi.js"></script>
+    <script>
+        const { Application, Loader, Sprite, utils, Rectangle } = PIXI;  // 从 PIXI 中提取出常用成员
+
+        let app = new Application({ width: 500, height: 500 });
+        const { stage, renderer, view, ticker } = app;  // 从 app 中提取出常用成员
+
+        renderer.backgroundColor = 0x565656;
+        const dom = document.getElementById('container')
+        dom.appendChild(view);  // view 即 canvas DOM 元素
+
+        // 雪碧图的使用
+        const loader = new Loader();
+        loader.add('sprite', './images/sprite.png').load(setup)
+        function setup(loader, resources) {
+            // const texture = utils.TextureCache["./images/sprite.png"];
+            const texture = resources.sprite.texture;  // 通过 TextureCache 从图片路径加载纹理和通过 resources 中提取纹理是等效的
+            const rectangle = new Rectangle(96, 64, 32, 32);  // 创建一个用来截取雪碧图的矩形块。传入要截取的雪碧图的 x, y, w, h
+            texture.frame = rectangle;  // 将矩形块赋值给雪碧图纹理的 frame，雪碧图纹理就只有矩形块区域了
+            const rocket = new Sprite(texture);  // 通过纹理创建精灵
+            rocket.position.set(80, 40)
+            stage.addChild(rocket);
+            renderer.render(stage);
+        }
+        
+    </script>
+</body>
+</html>

@@ -1,0 +1,13 @@
+## 关于 LaTeX
+LaTeX 是一种基于 TeX 的排版系统，主要用于生成复杂表格和数学公式。
+
+### LaTex 解析渲染库
+MathJax 是显示数学公式的开源 JS 库，支持 LaTeX、MathML 和 AsciiMath，可以将数学公式解析成 HTML、SVG 或 MathML，然后显示在浏览器中。
+KaTex 类似 MathJax，也是一个在 web 浏览器上解析渲染 LaTeX 公式的 JS 库。但是速度更快。
+
+### LaTeX 输入库
+MathQuill 可以将 LaTeX 语法转化成可视化的 DOM 节点进行输入（如 JMEditor），或是输入框中输入语法进行提示、转换公式符号等。但是一些复杂语法不支持，比如 matrix 相关语法。
+
+MathLive 更为强大的输入库，并支持公式计算。
+
+#### 参考：https://www.jianshu.com/p/94fd92eb7c27

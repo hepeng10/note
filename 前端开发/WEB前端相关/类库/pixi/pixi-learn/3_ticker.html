@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <div id="container"></div>
+    <script src="./pixi.js"></script>
+    <script>
+        const { Application, Loader, Sprite, utils, Rectangle } = PIXI;  // 从 PIXI 中提取出常用成员
+
+        let app = new Application({ width: 500, height: 500 });
+        const { stage, renderer, view, ticker } = app;  // 从 app 中提取出常用成员
+
+        renderer.backgroundColor = 0x565656;
+        const dom = document.getElementById('container')
+        dom.appendChild(view);  // view 即 canvas DOM 元素
+
+        // ticker 的使用
+        const loader = new Loader();
+        loader
+            .add('logo', './images/logo.png')
+            .add('wechat', './images/wechat.png')
+            .load(setupt)
+        let logo;
+        function setupt(loader, resources) {
+            logo = new Sprite(resources.logo.texture)
+            logo.position.set(10, 10)
+            stage.addChild(logo)
+
+            // ticker 每秒更新60次
+            ticker.add(() => {
+                logo.x += 1
+            })
+
+            // 使用 requestAnimationFrame 代替 ticker
+            // loop()
+
+
+            
+            // 使用速度属性来实现动画
+            const wechat = new Sprite(resources.wechat.texture)
+            wechat.position.set(40, 40)
+            stage.addChild(wechat)
+            // 给精灵添加自定义的 vx 和 vy 属性用来表示 x 轴和 y 轴的速度。在动画过程中我们还可以随时修改次值从而改变精灵的移动速度、移动方向等
+            wechat.vx = 1  // 设置 x 轴初始速度
+            wechat.vy = 1  // 设置 y 轴初始速度
+            ticker.add(() => {
+                wechat.x += wechat.vx
+                wechat.y += wechat.vy
+
+                // 通过修改速度值来改变移动方向
+                if (wechat.x >= 300) {
+                    wechat.vx = -1
+                    wechat.vy = -1
+                }
+                if (wechat.x < 10) {
+                    wechat.vx = 2
+                    wechat.vy = 2
+                }
+            })
+        }
+
+        function loop() {
+            requestAnimationFrame(loop)
+            logo.x += 1
+        }
+        
+    </script>
+</body>
+</html>
