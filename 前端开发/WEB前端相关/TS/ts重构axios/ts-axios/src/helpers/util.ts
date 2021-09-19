@@ -7,3 +7,7 @@ export function isDate(v: any): v is Date {  // 返回值使用类型谓词，�
 export function isObject(v: any): v is Object {
     return v !== null && typeof v === 'object';
 }
+// 这里才是判断是否为普通对象
+export function isPlainObject(v: any): v is Object {
+    return oToString.call(v) === '[object Object]';
+}

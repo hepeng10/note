@@ -1,4 +1,4 @@
-import { isDate, isObject } from "./util";
+import { isDate, isPlainObject } from "./util";
 
 function encode(v: string): string {
     return encodeURIComponent(v)
@@ -11,10 +11,12 @@ function encode(v: string): string {
         .replace(/%5D/gi, ']');
 }
 
+// 构造 url 参数
 export function buildUrl(url: string, params?: any): string {
+    console.log('url=', url)
     if (!params) return url;
 
-    const parts: string[] = [];  // url 参数数组。示例:['name=aaa ', 'hobby[]=xx,yy,zz']
+    const parts: string[] = [];  // url 参数数组。示例:['name=aaa', 'hobby[]=xx', 'hobby[]=yy']
     Object.keys(params).forEach(k => {
         const v = params[k];
         if (v === null || v === undefined) {  // 参数值为 null 则不加入到参数中
@@ -29,10 +31,10 @@ export function buildUrl(url: string, params?: any): string {
             values = [v];
         }
 
-        values.forEach(v => {
+        values.forEach(v => {  // values 数组中每条数据都会生成一个 url 参数
             if (isDate(v)) {
                 v = v.toISOString();  // isDate 使用了类型谓词，这里才有代码提示
-            } else if (isObject(v)) {
+            } else if (isPlainObject(v)) {
                 v = JSON.stringify(v);
             }
             parts.push(`${encode(k)}=${encode(v)}`);
@@ -41,7 +43,7 @@ export function buildUrl(url: string, params?: any): string {
     const serializedParams = parts.join('&');
     if (serializedParams) {
         const hashIndex = url.indexOf('#');
-        if (hashIndex) {  // 丢弃 hash 内容
+        if (hashIndex !== -1) {  // 丢弃 hash 内容
             url = url.slice(0, hashIndex);
         }
         if (url.indexOf('?') === -1) {  // url 中没有 ? 则添加 ?
