@@ -20,10 +20,32 @@ export function processHeaders(headers: any, data: any): any {
     normalizeHeaderName(headers, 'Content-Type');
 
     if (isPlainObject(data)) {
-        if (headers && !headers['Content-Type']) {
+        if (headers && !headers['Content-Type']) {  // 没传 content-type 则默认为 application/json
             headers['Content-Type'] = 'application/json;charset=utf-8';
         }
     }
 
     return headers;
+}
+
+
+// 解析响应的 header
+export function parseHeaders(headers: string): any {
+    let parsed = Object.create(null);
+    if (!headers) {
+        return parsed;
+    }
+    // 对返回的 headers 字符串使用回车符进行分割
+    headers.split('\r\n').forEach(line => {
+        let [key, val] = line.split(':');
+        key = key.trim().toLowerCase();
+        if (!key) {  // key 为空字符串直接跳过
+            return;
+        }
+        if (val) {  // 有 val 去除两边的空格
+            val = val.trim();
+        }
+        parsed[key] = val;  // 有 key，但是 val 可能为空字符串
+    });
+    return parsed
 }
