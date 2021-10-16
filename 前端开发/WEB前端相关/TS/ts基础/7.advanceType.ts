@@ -161,8 +161,22 @@
 })()
 
 
+// 去除 null 和 undefined 的类型断言
+;(() => {
+    function char0(name: string): string {
+        return name.charAt(0);
+    }
+    function get0(name?: string): string {
+        name = name || 'tirion';
+        return char0(name!);  // 这里 name 后面加 ! 表示 name 肯定存在，不会为 null 或 undefined。
+    }
+    get0();
+    get0('hepeng');
+})()
+
+
 // 字符串字面量类型
-// 使用 type 关键字定义类型，值是字符串，所以叫字符串字面量类型。值是数字就叫数字字面量类型。
+// 这里使用一个新的关键字 type 来定义类型，在定义简单类型的时候 type 比 interface 更实用。值是字符串，所以叫字符串字面量类型。值是数字就叫数字字面量类型。
 type Easing = "ease-in" | "ease-out" | "ease-in-out";  // 这里还使用了联合类型进行配合。
 class UIElement {
     // easing 的类型是个字符串字面量类型，也就是个联合类型

@@ -1,6 +1,6 @@
-import { AxiosRequestConfig, AxiosPromise, AxiosResponse } from './types';
-import { parseHeaders } from './helpers/headers';
-import { createError } from './helpers/error';
+import { AxiosRequestConfig, AxiosPromise, AxiosResponse } from '../types';
+import { parseHeaders } from '../helpers/headers';
+import { createError } from '../helpers/error';
 
 export default function xhr(config: AxiosRequestConfig): AxiosPromise {
     return new Promise((resolve, reject) => {
@@ -17,7 +17,8 @@ export default function xhr(config: AxiosRequestConfig): AxiosPromise {
             request.timeout = timeout;  // 给 request 添加 timeout 属性，XHR 请求会在超时时自动触发 ontimeout 方法
         }
 
-        request.open(method.toUpperCase(), url, true);
+        // url 进行类型断言
+        request.open(method.toUpperCase(), url!, true);
 
         request.onreadystatechange = function handleLoad() {
             if (request.readyState !== 4) {
