@@ -1,4 +1,5 @@
 **hooks 是为了践行 代数效应，目的是把副作用从函数调用中剥离出去。**
+> 代数效应的自我理解：在代数中函数表达式为 y = f(x)，代数中的函数相同的入参必然会得到相同的结果，是没有副作用的。在程序中对应的就是纯函数。而 react 的 hooks 就是为了让组件看起来更像是一个纯函数，需要将函数的副作用从组件中剥离出去。
 
 比如，我们有一个通过两篇文章 id 获取评论总数的函数 getTotalCommentNum，里面调用 getCommentNum 方法获取每篇文章的评论数，如下代码所示。
 ```js
@@ -35,7 +36,7 @@ try {
 function TotalCommentNum({id1, id2}) {
     const num1 = useCommentNum(id1);  // 这里改成了 useCommentNum hooks
     const num2 = useCommentNum(id2);
-    return num1 + num2;
+    return <div>{num1 + num2}</div>;
 }
 // 自定义 hooks
 function useCommentNum(id) {
@@ -49,4 +50,5 @@ function useCommentNum(id) {
 }
 ```
 这里 TotalCommentNum 函数组件中将异步请求剥离到了 useCommentNum 中，而 useCommentNum 无论是异步还是同步的，并不会影响 TotalCommentNum 函数组件的写法。
+*(TotalCommentNum 看起来是个同步函数组件，但实际可能是个异步组件，并且总能返回正确的结果，是不是很神奇！)*
 所以说 hooks 是为了践行代数效应。
