@@ -1,4 +1,7 @@
+// 注：代码中的 dom 变量表示通过 document.createElement 等方法创建的真实 DOM；element 变量表示虚拟 DOM 对象；fiber 是对虚拟 DOM 的增强
+
 /**
+ * 
  * JSX 通过 babel 编译后就是调用 createElement
  *
  * @param {string} type 节点类型，如 div, p
@@ -31,7 +34,7 @@ function createTextElement(text) {
     };
 }
 
-// fiber 就是一个虚拟 dom 节点。这里通过 fiber 创建一个真实的 dom 节点
+// fiber 就是一个增强的虚拟 dom 节点。这里通过 fiber 创建一个真实的 dom 节点
 function createDom(fiber) {
     const dom =
         fiber.type == "TEXT_ELEMENT"
@@ -97,7 +100,7 @@ function updateDom(dom, prevProps, nextProps) {
         })
 }
 
-// 将提交的修改更新到真实 dom
+// 将提交的修改更新到真实 dom。只会在 fiber 全部构建完成后才会提交，然后一次性把所有改动进行渲染
 function commitRoot() {
     deletions.forEach(commitWork)  // 删除 dom 节点
     commitWork(wipRoot.child)
@@ -118,6 +121,7 @@ function commitWork(fiber) {
     const domParent = hasDomParentFiber.dom
     
     if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
+        // 这里不是 appendChild 这么简单，appendChild 是添加到末尾，而添加可能是添加在中间，需要更多的算法处理
         domParent.appendChild(fiber.dom)
     } else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
         updateDom(
@@ -158,21 +162,24 @@ function render(element, container) {
 
 
 // 调度器的实现
-// 如果在 render 的时候直接将整颗 dom 树进行渲染，可能出现性能问题。所以需要将任务分成一些小块，
+// 一旦开始进行构建虚拟 dom 进行渲染，这过程中构建虚拟 dom 可能会耗费很多时间，出现性能问题。所以需要将构建任务分成一些小块（即 fiber），
 // 每当完成其中一块任务后，就把控制权交给浏览器，让浏览器判断是否有更高优先级的任务需要完成。
-let nextUnitOfWork = null  // 下一次渲染的 fiber 树
+let nextUnitOfWork = null  // 下一次构建的 fiber
 let currentRoot = null  // 保存上次提交到 DOM 节点的 fiber 树的引用，用于对虚拟 DOM 进行比较
 let wipRoot = null  // wipRoot（work in progress root）。一棵树用来记录对 DOM 节点的修改，用于一次性提交进行 DOM 的修改。
 let deletions = []  // 需要移除的 fiber 数组
 function workLoop(deadline) {
     let shouldYield = false;
+    // 每次 while 循环构建一个 fiber，被中断后可以回来继续构建
     while (nextUnitOfWork && !shouldYield) {
+        // 构建 fiber，返回下一个待构建的 fiber
         nextUnitOfWork = performUnitOfWork(nextUnitOfWork);
-        // deadline.timeRemaining() 返回当前闲置周期的预估剩余毫秒数。小于1则说明没有时间了，停止 while 循环终止渲染
+        // deadline.timeRemaining() 返回当前闲置周期的预估剩余毫秒数。小于1则说明没有时间了，停止 while 循环终止 fiber 的构建
         shouldYield = deadline.timeRemaining() < 1
     }
 
-    // 当下一个 fiber 节点为 undefined，并且 DOM 修改记录树有的，则进行提交修改 DOM
+    // 当下一个 fiber 节点为 undefined 即所有 fiber 都构建完成，并且 DOM 修改记录树有的，则进行提交修改 DOM
+    // fiber 没完全构建则等浏览器执行完其它任务后再回来，继续上面的 while 循环，从 nextUnitOfWork 继续构建
     if (!nextUnitOfWork && wipRoot) {
         commitRoot()
     }
@@ -187,7 +194,7 @@ function workLoop(deadline) {
 requestIdleCallback(workLoop)
 
 // 构建 fiber，并返回下一个 fiber。
-// 在渲染的时候至少会完成当前 fiber 的渲染，所以我们返回下一个待渲染的 fiber 存储下来，当中断的时候就可以继续从下一个 fiber 开始。
+// 在构建 fiber 的时候至少会完成当前 fiber 的构建，所以我们返回下一个待构建的 fiber 存储下来，当中断的时候就可以继续从下一个 fiber 开始。
 function performUnitOfWork(fiber) {
     const isFunctionComponent = fiber.type instanceof Function;
     // 函数组件和基础组件不同，基础组件就是一个基本的 dom 元素，而函数组件需要通过运算后获得
@@ -197,7 +204,8 @@ function performUnitOfWork(fiber) {
         updateHostComponent(fiber)
     }
 
-    // 返回下一个待渲染的 fiber 节点
+    // 返回下一个待构建的 fiber 节点
+    // 首先获取 child，没有 child 获取 sibling，没有 sibling 则获取 parent 然后获取 parent 的 sibling。直到所有元素都被遍历，返回 undefined。
     if (fiber.child) {
         return fiber.child
     }
@@ -218,7 +226,7 @@ function updateFunctionComponent(fiber) {
     hookIndex = 0
     wipFiber.hooks = []  // useState 可以多次调用，需要使用一个数组来维护
 
-    // fiber.type 获取到函数并执行。fiber.props 是函数组件接收的属性。运行后就会返回一个基础组件
+    // fiber.type 获取到函数并执行，返回 return 的基础组件虚拟 dom（类组件则应该实例化后调用 render 方法）。fiber.props 是函数组件接收的属性。
     const element = fiber.type(fiber.props);
     const children = [element]
     reconcileChildren(fiber, children)
@@ -323,7 +331,7 @@ function reconcileChildren(wipFiber, elements) {
         }
         ​
         if (oldFiber) {
-            oldFiber = oldFiber.sibling
+            oldFiber = oldFiber.sibling  // oldFiber 指向下一个兄弟节点的 oldFiber，因为 while 循环的下一个循环就是下一个兄弟节点
         }
 
 

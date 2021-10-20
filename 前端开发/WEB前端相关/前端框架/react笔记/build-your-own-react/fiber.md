@@ -30,4 +30,10 @@ fiber 树的数据结构为：
 4. 都没有则继续往上找，直到根节点。则完成了整棵树的渲染。
 
 
-
+# react 的核心功能
+### scheduler
+调度器，requestIdleCallback 的实现。用于在浏览器空闲的时候才去调用 performUnitOfWork 构建 fiber。一次构建一个 fiber，可以中断/继续。
+### reconciler
+协调器，在 performUnitOfWork 构建 fiber 的时候调用，对新旧虚拟 dom 进行对比，标记出需要进行哪类更新。
+### renderer
+渲染器，当 fiber 构建完成后根据标记的更新类型一次性渲染 dom。

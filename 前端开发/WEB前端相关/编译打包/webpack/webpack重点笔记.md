@@ -10,7 +10,7 @@
 Output 配置告诉 webpack 怎么处理打包的代码。
 
 **Hot Module Replacement**
-热模块替换功能可以在不刷新所有文件的情况下实现单独跟新某个模块。
+热模块替换功能可以在不刷新所有文件的情况下实现单独更新某个模块。
 
 **Tree Shaking**
 去除无用代码，比如某个 js 文件里的函数并没有被使用，这段函数代码在打包时将会被去掉。
@@ -19,7 +19,7 @@ Output 配置告诉 webpack 怎么处理打包的代码。
 代码拆分，实现的方式有三种
 
 * Entry Points 手动把代码分成多个入口
-* Prevent Duplication 使用插件 CommonsChunkPlugin 提取公共代码块
+* Prevent Duplication 使用插件 CommonsChunkPlugin | optimization.splitChunks 提取公共代码块
 * Dynamic Imports 用 import 函数动态动引入模块
 
 **Lazy Loading**
