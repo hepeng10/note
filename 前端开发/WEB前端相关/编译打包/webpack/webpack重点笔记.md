@@ -400,7 +400,7 @@ HMR 是 webpack 的一个扩展功能，修改文件后 webpack 的编译器会�
 * [optimization.splitChunks](https://webpack.docschina.org/plugins/split-chunks-plugin/)：代码分割，类似 CommonsChunkPlugin，但拥有更强大的功能。
 * html-webpack-plugin：将 html 复制并插入一些打包后的依赖路径的插件。
 * copy-webpack-plugin：将 static 中文件原样复制到dist的插件。
-* mini-css-extract-plugin：分离提取 css 文件。
+* mini-css-extract-plugin：分离提取 css 文件。和 style-loader 不能一起使用，因为 style-loader 是将 css 插入到 head 中，这个是将 css 提取出来。
 * optimize-css-assets-webpack-plugin | css-minimizer-webpack-plugin（webpack >= v5）：优化/最小化 css。
 * uglifyjs-webpack-plugin | terser-webpack-plugin（支持 ES6 语法）：压缩/混淆 js。
 * webpack-bundle-analyzer：webpack 包分析工具。

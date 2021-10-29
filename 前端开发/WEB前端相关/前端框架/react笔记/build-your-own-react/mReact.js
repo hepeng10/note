@@ -122,6 +122,7 @@ function commitWork(fiber) {
     
     if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
         // 这里不是 appendChild 这么简单，appendChild 是添加到末尾，而添加可能是添加在中间，需要更多的算法处理
+        // 如果是在非末尾添加元素，就会触发添加元素位置之后的所有元素的更新，这是很耗性能的，所有代码中应尽量少用条件来判断一个元素的显示隐藏，应该用 display 来控制
         domParent.appendChild(fiber.dom)
     } else if (fiber.effectTag === "UPDATE" && fiber.dom != null) {
         updateDom(
@@ -187,7 +188,11 @@ function workLoop(deadline) {
     requestIdleCallback(workLoop)
 }
 
-// requestIdleCallback 浏览器内置方法！！！有兼容问题，react 是自己实现的 scheduler，原理相通。
+/**
+* requestIdleCallback 浏览器内置方法！！！有兼容问题，react 是自己实现的 scheduler，原理相通。
+* 每帧为16.6ms，在 scheduler 中，最低会占用每帧的5ms来进行执行任务，这5ms中可能会构建多个 fiber（或是其它任务），
+* 每个 fiber 构建完成时就会判断是否超过5ms，超过就会暂停构建等下一帧再继续。（使用 MessageChannel 或 setTimeout 实现）
+*/
 // requestIdleCallback 类似 setTimeout，只不过这次是浏览器来决定什么时候运行回调函数，而不是 setTimeout 里通过我们指定的一个时间。
 // 浏览器会在主线程有空闲的时候运行回调函数。
 // requestIdleCallback 会给我们一个 deadline 参数。我们可以通过它来判断离浏览器再次拿回控制权还有多少时间。

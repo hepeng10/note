@@ -1,7 +1,7 @@
 源码请看 [hooks的实现.js](./hooks的实现.js)
 这里记录一些关键点的理解。
 
-**每个组件的 fiber 上都有个 memorizedState 属性用于存储这个组件的所有 hooks。hooks 中的每个 hook 也有个 memorizedState 用于存储这个 hook 的数据。**
+**每个组件的 fiber 上都有个 memorizedState 属性用于存储这个组件的所有 hooks。hooks 中的每个 hook 也有个 memorizedState 用于存储这个 hook 的数据。而每个 hook 还有个 next 指向下一个 hook。**
 这里我们用链表实现 hooks 的存储，也可以用数组实现，只要有顺序就行。
 ```js
 // 数据结构示例
