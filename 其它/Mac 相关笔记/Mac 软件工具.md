@@ -29,7 +29,7 @@
 17. 超级右键：Finder 右键增强工具
 ***
 ##### 实用工具
-1. PDF Expert: PDF 阅读器
+1. PDF Expert: PDF 阅读器（发现内存占用很高，用 WPS 也行）
 2. XMind Zen: 思维导图工具
 3. Music Tag Editor: 修改音乐标签
 4. Downie: 下载 YouTube 等网站视频
