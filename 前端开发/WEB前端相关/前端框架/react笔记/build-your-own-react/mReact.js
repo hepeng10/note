@@ -151,9 +151,9 @@ function commitDeletion(fiber, domParent) {
 function render(element, container) {
     // 这里自己构造了一个 wipRoot，结构和 fiber 相同，可以看作是”根 fiber“
     wipRoot = {
-        dom: container,
+        dom: container,  // dom 是 container
         props: {
-            children: [element]
+            children: [element]  // 虚拟 DOM 是 children
         },
         alternate: currentRoot,  // 旧 fiber 节点的引用
     }

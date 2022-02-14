@@ -77,3 +77,63 @@ function Form() {
 }
 ```
 这里，我们修改 input 输入框会修改 textRef 的 current，但是 textRef 没有改变，所以 handleSubmit 也就不会改变。那么子组件 ExpensiveTree 也就不会接收到新的 handleSubmit，不会重新渲染了，性能得到了提升。
+
+## 实例
+最近做项目的时候发现了性能问题，由于需要监听滚动事件不断更新返回顶部按钮的显示和隐藏，而这个更新过程导致兄弟组件中的长列表更新，从而导致性能问题。最后通过 useMemo 和 useCallback 优化。所以在监听滚动这类触发频率很高的事件时需要多留意性能问题。
+```tsx
+const Index = ({ workTypeList }: props) => {
+  const ScrollRef = useRef<ScrollRefData>(null);
+  const [offsetHeight, setOffsetHeight] = useState<number>(0);
+
+  const scroll = (e) => {
+    const { scrollTop } = e.detail;
+    setOffsetHeight(scrollTop);
+  };
+
+  // 缓存 ScrollBoxView 的 props，避免监听页面滚动事件导致重复渲染的性能问题
+  const scrollFn = useCallback((e) => {
+    scroll(e);
+  }, []);
+  const dataForm = useMemo<PropsVal['dataFrom']>(() => {
+    return {
+      type: 'serv',
+      service: findJobList,
+      params: listParams
+    };
+  }, [listParams]);
+  const renderDom = useMemo<PropsVal['renderDom']>(() => {
+    return { tag: listLine, top: TopItem };
+  }, [TopItem]);
+
+  return (
+    <View className={styles.box}>
+      <TitleBar type="job" goSearch={goSearch} />
+      <View className={styles.wrapper}>
+        <View className={styles.list}>
+          {/* 老代码：当前组件重新渲染都会生成新的 props 导致 ScrollBoxView 组件重新渲染 */}
+          <ScrollBoxView
+            refresh
+            ref={ScrollRef}
+            dataFrom={{
+              type: 'serv',
+              service: findJobList,
+              params: listParams
+            }}
+            renderDom={{ tag: listLine, top: TopItem }}
+            onHandleScroll={(e) => scroll(e)}
+          />
+          {/* 新代码：props 都进行了缓存，避免无意义的重复渲染导致性能问题 */}
+          <ScrollBoxView
+            refresh
+            ref={ScrollRef}
+            dataFrom={dataForm}
+            renderDom={renderDom}
+            onHandleScroll={scrollFn}
+          />
+        </View>
+      </View>
+      <BackTop top={50} offsetHeight={offsetHeight} scrollTo={srollTopHandle} />
+    </View>
+  );
+};
+```

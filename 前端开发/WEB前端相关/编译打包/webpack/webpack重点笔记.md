@@ -241,6 +241,7 @@ loader 遵循标准 [模块解析](https://webpack.docschina.org/concepts/module
 
 # plugin
 **插件目的在于解决 loader 无法实现的其他事，包括：打包优化，资源管理，注入环境变量等。**
+
 ### 剖析
 webpack 插件是一个具有 apply 方法的 JavaScript 对象。apply 方法会被 webpack compiler 调用，并且在 整个 编译生命周期都可以访问 compiler 对象。
 
@@ -367,6 +368,7 @@ Vue 热更新流程：
 4. 修改页面代码后，Webpack 监听到文件修改后，开始编译，编译完成后，发送 build 消息给客户端
 5. 客户端获取到 hash，成功后客户端构造 hot-update.js script 链接，然后插入主文档
 6. hot-update.js 插入成功后，执行 hotAPI 的 createRecord 和 reload 方法，获取到 Vue 组件的 render方法，重新 render 组件， 继而实现 UI 无刷新更新。
+
 ### 参考
 [manifest 解析](https://blog.csdn.net/lancewu0907/article/details/76513231/)
 [使用 webpack 提供可预测的长缓存](https://medium.com/webpack/predictable-long-term-caching-with-webpack-d3eee1d3fa31)
@@ -392,25 +394,3 @@ HMR 是 webpack 的一个扩展功能，修改文件后 webpack 的编译器会�
 [HMR 原理解析](https://zhuanlan.zhihu.com/p/30669007)
 [webpack 热更新实现原理分析](https://zhuanlan.zhihu.com/p/30623057)
 [搞懂 webpack 热更新原理](https://github.com/careteenL/webpack-hmr)
-
-
-# webpack 插件及工具
-### 插件
-> 相同类型的插件，使用写在后面的更优。
-* [optimization.splitChunks](https://webpack.docschina.org/plugins/split-chunks-plugin/)：代码分割，类似 CommonsChunkPlugin，但拥有更强大的功能。
-* html-webpack-plugin：将 html 复制并插入一些打包后的依赖路径的插件。
-* copy-webpack-plugin：将 static 中文件原样复制到dist的插件。
-* mini-css-extract-plugin：分离提取 css 文件。和 style-loader 不能一起使用，因为 style-loader 是将 css 插入到 head 中，这个是将 css 提取出来。
-* optimize-css-assets-webpack-plugin | css-minimizer-webpack-plugin（webpack >= v5）：优化/最小化 css。
-* uglifyjs-webpack-plugin | terser-webpack-plugin（支持 ES6 语法）：压缩/混淆 js。
-* webpack-bundle-analyzer：webpack 包分析工具。
-* assets-webpack-plugin | webpack-manifest-plugin：生成一份资源清单的 json 文件。
-* definePlugin | dotenv-webpack：设计全局变量。
-* [wbepack.IgnorePlugin](https://blog.csdn.net/qq_17175013/article/details/86845624)：忽略第三方包指定目录，让这些指定目录不要被打包进去。
-* webpack.DllPlugin & webpack.DllReferencePlugin：提升编译速度。将模块预先编译，DllReferencePlugin 将预先编译好的模块关联到当前编译中，当 webpack 解析到这些模块时，会直接使用预先编译好的模块。
-### 工具
-* webpack-merge：合并 webpack 配置。
-* node-portfinder：检查端口占用情况。可以从一个端口号扫描到另一个端口号，发现未被占用的端口再启动。
-* ora：一个友好的命令行界面提示插件，有可以转圈的图标。
-* rimraf：类似 rm -rf 用于删除文件。
-* chalk：在命令行打印出彩色文字。
