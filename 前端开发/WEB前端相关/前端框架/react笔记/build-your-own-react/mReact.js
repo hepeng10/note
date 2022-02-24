@@ -16,8 +16,8 @@ function createElement(type, props, ...children) {
             ...props,
             children: children.map(child => {
                 typeof child === 'object'
-                ? child
-                : createTextElement(child)
+                    ? child
+                    : createTextElement(child)
             })
         }
     };
@@ -38,8 +38,8 @@ function createTextElement(text) {
 function createDom(fiber) {
     const dom =
         fiber.type == "TEXT_ELEMENT"
-        ? document.createTextNode("")
-        : document.createElement(fiber.type);
+            ? document.createTextNode("")
+            : document.createElement(fiber.type);
 
     // 获取 element.props 上的属性赋值给 dom。（排除 children 属性）
     const isProperty = key => key !== "children";
@@ -90,7 +90,7 @@ function updateDom(dom, prevProps, nextProps) {
         .forEach(name => {
             dom[name] = ""
         })
-​
+
     // 旧属性的 key 值与新属性不同，则修改/添加
     Object.keys(nextProps)
         .filter(isProperty)
@@ -119,7 +119,7 @@ function commitWork(fiber) {
         hasDomParentFiber = hasDomParentFiber.parent
     }
     const domParent = hasDomParentFiber.dom
-    
+
     if (fiber.effectTag === "PLACEMENT" && fiber.dom != null) {
         // 这里不是 appendChild 这么简单，appendChild 是添加到末尾，而添加可能是添加在中间，需要更多的算法处理
         // 如果是在非末尾添加元素，就会触发添加元素位置之后的所有元素的更新，这是很耗性能的，所有代码中应尽量少用条件来判断一个元素的显示隐藏，应该用 display 来控制
@@ -133,7 +133,7 @@ function commitWork(fiber) {
     } else if (fiber.effectTag === "DELETION") {
         commitDeletion(fiber, domParent)
     }
-    
+
     commitWork(fiber.child)
     commitWork(fiber.sibling)
 }
@@ -247,7 +247,11 @@ function updateHostComponent(fiber) {
     reconcileChildren(fiber, elements)
 }
 
-// 初始化值，每次函数组件执行的时候，没旧 hook 则获取初始值；有旧 hook 则获取旧 hook 上的值
+/**
+ * useState 的实现
+ * @param {any} initial 初始值，每次函数组件执行的时候，没旧 hook 则获取初始值；有旧 hook 则获取旧 hook 上的值
+ * @returns 
+ */
 function useState(initial) {
     // 获取当前 fiber 对应的旧 fiber 上的旧 hook
     const oldHook = wipFiber.alternate && wipFiber.alternate.hooks && wipFiber.alternate.hooks[hookIndex]
@@ -294,7 +298,7 @@ function reconcileChildren(wipFiber, elements) {
 
     while (index < elements.length || oldFiber != null) {
         const element = elements[index]
-    ​
+
         // const newFiber = {  // 可以看出 fiber 相对于 mReact.createElement() 生成的数据结构有所不同
         //     type: oldFiber.type,  // 节点类型
         //     props: element.props,  // 节点属性
@@ -306,7 +310,7 @@ function reconcileChildren(wipFiber, elements) {
         let newFiber = null;
 
         const sameType = oldFiber && element && element.type == oldFiber.type
-    ​
+
         // 对于新旧节点类型是相同的情况，我们可以复用旧的 DOM，仅修改上面的属性
         if (sameType) {
             newFiber = {
@@ -334,7 +338,7 @@ function reconcileChildren(wipFiber, elements) {
             oldFiber.effectTag = "DELETION"  // 不会创建新的 fiber，对旧 fiber 进行标记
             deletions.push(oldFiber)
         }
-        ​
+
         if (oldFiber) {
             oldFiber = oldFiber.sibling  // oldFiber 指向下一个兄弟节点的 oldFiber，因为 while 循环的下一个循环就是下一个兄弟节点
         }
@@ -345,7 +349,7 @@ function reconcileChildren(wipFiber, elements) {
         } else {  // 不是第一个节点，则将上一个节点的 sibling 指向此节点。同级节点就是一个单向链表
             prevSibling.sibling = newFiber
         }
-    ​
+
         prevSibling = newFiber  // 当前子节点赋值给上一个子节点
         index++
     }
