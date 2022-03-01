@@ -1,6 +1,16 @@
 #! /bin/bash
 echo "hello world"
 
+# ; && ||
+echo hello; ls  # ; 用来在一行中执行多条命令，前面的命令成功与否都会执行后面的
+mkdir test && ls  # && 表示前面的命令执行成功才会执行后面的
+mkdir test || ls  # || 表示前面的命令执行失败才会执行后面的
+
+# type 查看命令的来源（内部还是外部命令，命令的路径）
+type echo
+type -a echo  # 加上 -a 查看命令的所有定义
+type nginx
+
 # 声明变量
 name='hepeng'
 readonly sex='男'
