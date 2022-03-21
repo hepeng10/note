@@ -1,6 +1,9 @@
 inquirer 是一个提供 node 命令行交互的库。可以允许用户输入内容，密码，单选，多选等，并且支持插件扩展更多的输入形式。
 
+inquirer 调用 node.js 的 readline 等 API 完成交互。利用子进程 child_process 来执行命令或调用文件的能力。
+
 [nodejs交互工具库 -- commander和Inquirer](https://segmentfault.com/a/1190000037629594#item-3-8)
+[一统江湖的大前端（6）commander.js + inquirer.js](https://www.cnblogs.com/dashnowords/p/9632495.html)
 
 插件如：
 [inquirer-autocomplete-prompt](https://github.com/mokkabonna/inquirer-autocomplete-prompt)

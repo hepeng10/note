@@ -16,6 +16,17 @@ inquirer.prompt([
             "Orange",
             "Peach",
         ],
+        // 自定义值
+        // choices: [
+        //     {
+        //         name: '苹果',
+        //         value: 'Apple'
+        //     },
+        //     {
+        //         name: '梨',
+        //         value: 'Pear'
+        //     },
+        // ],
         pageSize: 3,  // 更改显示行数，只对 list, rawList, expand 或 checkbox 有效
         // 使用 filter 获取用户的输入后返回新的内容替代用户的输入
         filter: function (val) {
