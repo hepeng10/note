@@ -68,11 +68,12 @@ JavaScript 解析器，babel-parse，webpack 等就是基于它进行工作的�
 
 # 其它工具
 
-* ts-node: 直接运行 ts 文件，使用 yarn global add ts-node 全局安装即可。在项目中编写脚本，使用到安装的依赖包，`import shelljs from 'shelljs'` 但是后面使用 shelljs 却为 undefined。解决方法：
+* ts-node: 直接运行 ts 文件，使用 yarn global add ts-node 全局安装即可。
+  在项目中编写脚本，使用到安装的依赖包，`import shelljs from 'shelljs'` 但是后面使用 shelljs 却为 undefined。解决方法：
   1. 使用 `import * as shelljs from 'shelljs'`。因为直接使用 ts-node 直接运行时，import 的包使用的是 commonjs 模块。
   2. 在项目中的 tsconfig.json 中配置 compilerOptions 的 `esModuleInterop: true`，这样在 import 包的时候 ts 会帮我们转一下，从而能正常使用。
 * ora：一个友好的命令行界面提示插件，有可以转圈的图标。
-* chalk：在命令行打印出彩色文字。
+* chalk：在命令行打印出彩色文字。v5 版本使用 ESM，使用 esbuild 来运行可以正常使用，但是使用 ts-node 会报错，只能安装 v4.1.2 版本。
 * npm-run-all：方便一次运行多个 scripts 命令：
     ```js
     // 当我们想运行多个 scripts 命令的时候通常会这样写
