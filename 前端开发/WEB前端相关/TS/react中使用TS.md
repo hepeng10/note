@@ -145,3 +145,22 @@ export default forwardRef(MainCalendar) as <T>(
 // 上面的 Props 和 ref 两个类型其实在定义普通泛型组件的时候已经定义了，直接复制下来即可
 // function MainCalendar<DayData>(props: MainCalendarProps<DayData>, ref: React.Ref<CalendarRefFn>) {
 ```
+
+# 获取组件某个 props 的类型
+在使用组件的时候，我们要给组件的 props 赋值，props 的值可能是一个简单的 string, number，但是也可能是复杂的对象、函数等。我们要将自己定义的一个变量或函数赋值给这个复杂的 props 时，需要先定义这个变量或函数的类型。那么在定义类型的时候，其中一个方法是从这个组件导出的 props type 中获取到类型，另一个方法就是使用 `React.ComponentProps` 来获取组件某个 props 的类型。
+```tsx
+// 这个组件的 onScroll 方法会接收一个复杂的事件对象
+<ScrollView
+    className={styles.body}
+    style={{ backgroundImage: `url(${taroActivityCoinTaskTaskHeadImg})` }}
+    scrollY
+    onScroll={onScroll}
+>
+</ScrollView>
+
+// 使用 React.ComponentProps<typeof 组件> 就能获取到组件所有 props 的类型，再取出我们需要的即可
+// 我们就能知道接收的 e 对象的具体类型了，在从 e 对象中取值时也能有完备的代码提示
+const onScroll: React.ComponentProps<typeof ScrollView>['onScroll'] = (e) => {
+  // TODO...
+};
+```
