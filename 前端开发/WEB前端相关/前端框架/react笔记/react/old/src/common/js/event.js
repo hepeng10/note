@@ -1,12 +1,6 @@
 /**
  * 简单实现了一下 subscribe 和 dispatch
  * 注册监听事件规范：
- * 1. 注册的事件名规则 模块名_事件名 module1_add / module1_delete 
- * 2. 注册事件， 统一在组件的 getInitialState 方法里面注册【 该方法只在实例化的时候， 调用一次】
- */
-/**
- * 简单实现了一下 subscribe 和 dispatch
- * 注册监听事件规范：
  * 1. 注册的事件名规则   模块名_事件名  module1_add  / module1_delete  
  * 2. 注册事件，统一在组件的  getInitialState  方法里面注册【该方法只在实例化的时候，调用一次】
  */

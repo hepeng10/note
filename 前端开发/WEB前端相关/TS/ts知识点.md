@@ -280,3 +280,15 @@ let a = 1.23123123;
 };
 console.log((a as any).toFixed2());
 ```
+
+# Parameters
+获取函数的参数类型。  
+[TypeScript 获取函数的参数类型、返回值类型](https://lzw.me/a/typescript-parameters-and-returntype.html)
+```ts
+function add(a: number, b: number): number {
+  return a + b;
+}
+type AddParams = Parameters<typeof add>; // 获取所有参数类型
+type A = AddParams[0]; // 取出第一个参数的类型
+type A = Parameters<typeof add>[0]; // 也是取出第一个参数的类型
+```
