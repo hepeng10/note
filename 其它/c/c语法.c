@@ -1,5 +1,5 @@
 // 编译预处理指令:#开头的是编译预处理指令（在程序编译之前对代码进行一定的处理，主要就是替换操作），不是C语言
-#include <stdio.h>  //引入标准输入输出；h-head头文件
+#include <stdio.h>  //引入标准输入输出；(std-standard, io-in out,h-head头文件)
 #include <string.h>  //引入字符串处理库
 #include <stdbool.h>  //引入布尔类型，原生没有布尔类型
 #include <stdlib.h>  //使用malloc需要这个头文件
@@ -18,7 +18,7 @@ void fn(int i,char a);  //函数可以声明，又叫函数原型，需要写在
 int g=10;  //声明全局变量，类似JS，建议少用
 
 int main(){  //主函数，程序从这个函数开始运行
-    printf("Hello World");  //输出函数；就是来自stdio.h，在编译的时候会通过链接器合并；返回输出的字符数
+    printf("Hello World");  //输出函数；就是来自stdio.h，在编译的时候会通过链接器合并；返回输出的字符数。(最后的 f 表示 formatter)
     printf("%s%d\n","年龄",28 );  //%表示引导符，后面的字符表示期望的类型，s-string|d-decimal(十进制整数)|o-八进制|x-十六进制|i-int|f-float|lf-double|c-char|p-point(地址)
     char(1) int(4) float(4) double(8)  //C语言中各种各种类型占用的字节数，没有string，string实际上是多个char
 
