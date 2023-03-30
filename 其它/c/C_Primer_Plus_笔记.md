@@ -684,3 +684,116 @@ const float rain[5][12] = {
 };
 ```
 初始化时也可省略内部的花括号，只保留最外面的一对花括号。只要保证初始化的数 值个数正确，初始化的效果与上面相同。但是如果初始化的数值不够，则按照先后顺序逐行初始化，直到用完所有的值。后面没有值初始化的元素被统一初始化为0。
+
+### 指针和数组
+首先需要知道**数组的变量名是数组首元素的地址**。所以：
+```c
+int main(void)
+{
+    int arr[10] = {6, 9};
+    // 相等，输出1表示 true
+    printf("%d\n", arr == &arr[0]);
+    // 输出第一个元素6
+    printf("%d\n", *arr);
+}
+```
+由此也就能知道什么不能将一个数组赋值给另一个数组了，数组变量是个地址，地址是个常量，不能进行赋值操作。
+
+由于数组变量是个地址，那么可以将其赋值给指针。赋值给指针后，对指针进行+1操作会怎样呢？
+```c
+#include <stdio.h>
+#define SIZE 4
+int main(void)
+{
+    short index;
+    double bills[SIZE];
+    double *ptf;
+    ptf = bills; // 把数组地址赋给指针
+    for (index = 0; index < SIZE; index++) {
+        // ptf + index 对指针进行+操作
+        printf("pointers + %d: %10p\n", index, ptf + index);
+    }
+}
+
+这是输出结果：
+pointers + 0: 0x7ffee6d59640
+pointers + 1: 0x7ffee6d59648
+pointers + 2: 0x7ffee6d59650
+pointers + 3: 0x7ffee6d59658
+```
+我们打印出指针的地址，发现每+1则地址+8，这是因为 double 类型占8个字节，所以指针+1地址就+8，如果是其它类型那么就是其对应所占字节数。
+
+注：
+1. 上面的例子中指针+1，地址+8也就正好指向数组第2个元素的地址。如果指针声明的类型不对，那么就不会指向第二个元素了。
+2. 数组也是使用的连续内存，每个元素占用的内存空间就是其类型所占用的字节数。下一个数组元素的开始地址会紧接上个元素的结束地址。
+3. 这也是为什么必须声明指针的类型的原因之一。因为只知道地址还不够，计算机还需要知道存储的数据需要多少字节。指针指向了一个内存地址，而类型决定了从这个内存地址开始取多少个字节的数据出来转换成这个类型的值。
+
+由此可见，类型是多么的重要。这也是 C 语言性能高的原因之一。
+
+### 函数、数组和指针
+假设我们要编写一个接收数组进行操作的函数，那么函数的形参该怎么写呢？数组名是该数组首元素的地址，所以函数接收一个数组即是接收一个地址，形参就该是一个指针：
+```c
+int sum(int *arr);
+
+int sum(int *arr) // 相应的函数定义
+{
+    int i;
+    int total = 0;
+    for (i = 0; i < 10; i++) // 假设数组有10个元素
+        total += arr[i];      // arr[i] 与 *(arr + i) 相同
+    return total;
+}
+```
+由于函数参数中使用指针的写法来接收数组，我们不能容易的知道这个函数是接收的数组，所以函数的形参新增了个语法糖来表示接收数组的指针：
+```c
+int sum(int arr[]);
+
+int sum(int arr[]) // 相应的函数定义
+{
+    ...
+}
+```
+由于函数原型可以省略参数名，所以下面4种原型都是等价的：
+```c
+int sum(int *ar, int n);
+int sum(int *, int);
+int sum(int ar[], int n);
+int sum(int [], int);
+```
+
+### 数组和 sizeof
+当我们使用 sizeof 获取数组所占用字节数时一个有趣的现象出现了：
+```c
+int main(void)
+{
+    int n = 10;
+    int arr[10] = {};
+    int *p = arr;
+    printf("%zd\n", sizeof(n)); // 输出4，int 占用的字节数
+    printf("%zd\n", sizeof(&n)); // 输出8，地址（指针）所占用的字节数
+    printf("%zd\n", sizeof(arr)); // 输出40，10个int元素数组所占用的字节数
+    printf("%zd\n", sizeof(p)); // 输出8，地址（指针）所占用的字节数
+    printf("%zd\n", sizeof(*p)); // 输出4，int 所占用的字节数
+}
+```
+可以看出，只有在 sizeof(arr) 的时候输出了数组所占的总字节数，而当把 arr 赋值给指针后就只能获取到指针所占字节数，再也不能通过 p 拿到数组 arr 所占的总字节数了。
+这就意味着如果我们把数组通过指针形式传给函数后，函数内部也拿不到数组的总长度了。那么只能通过传参时计算出数组的长度传给函数才行。如：
+```c
+#include <stdio.h>
+int arrayLength(int arr[], int arrSize);
+
+int main()
+{
+    int b[] = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12};
+    // 计算出数组长度再传入函数
+    int length = sizeof(b) / sizeof(b[0]);
+    arrayLength(b, length);
+    return 0;
+}
+// 需要接收数组长度
+int arrayLength(int arr[], int arrSize)
+{
+    printf("size of array is %d\n", arrSize);
+    return 0;
+}
+```
