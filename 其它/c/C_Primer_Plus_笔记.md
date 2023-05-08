@@ -1195,14 +1195,14 @@ car == &car[0]; // 和首元素的地址相等
 ```
 
 ### 数组和指针
-##### 1. 使用数组的情况：
+#### 1. 使用数组的情况：
 ```c
 char arr1[] = "hello";
 ```
 数组形式（arr1[]）在计算机的内存中分配为一个内含5个元素的数组（每个元素对应一个字符，还加上一个末尾的空字符`\0`），每个元素被初始化为字符串字面量对应的字符。字符串在编译后存储在静态存储区（static memory）中。但是，程序在开始运行时才会为该数组分配内存。此时，才将字符串拷贝到数组中。注意，此时字符串有两个副本。一个是在静态内存中的字符串字面量，另一个是存储在 arr1 数组中的字符串。
 此后，**编译器便把数组名 arr1 识别为该数组首元素地址（&arr1[0]）的别名**。在数组形式中，arr1 是地址常量。不能更改 arr1，如果改变了 arr1，则意味着改变了数组的存储位置（即地址）。**即不能对 arr1 进行赋值，如：`++arr1`。这样操作会将首元素的地址修改为第二个元素的地址，从而导致程序出错。**
 
-##### 2. 使用指针的情况
+#### 2. 使用指针的情况
 ```c
 char *pt1 = "hello";
 ```
@@ -1241,8 +1241,341 @@ address of "I'm special": 0x103c6df50 // 多次使用相同字符串也是同一
 3. 相同的字符串多次出现，在编译阶段会进行优化，存储为一份。（某些编译器可能不会优化，存储为多份）
 4. 编译器使用不同的位数表示两种内存地址（静态存储区和动态内存）。
 
-##### 另外的区别
+#### 关于内存分区
+C 语言内存分区包括以下几个部分：
+* 栈（Stack）：存储函数的参数值、局部变量的值等，由编译器自动分配和释放。
+* 堆（Heap）：动态分配内存，需要手动管理内存的分配和释放，一般由程序员通过调用`malloc()、calloc()、realloc()`等函数来使用。
+* 数据区（Data segment）：包括全局变量和静态变量，程序运行前分配内存，在程序运行期间一直存在，直到程序结束才会被释放。（上面提到的静态存储区也就是数据区）
+* 代码区（Code segment）：存放程序的执行代码。
+
+**字符串常量是存储在数据区（Data segment）中的。在程序编译时，编译器会将所有字符串常量放在数据区，并分配固定的内存空间来存储它们。**
+
+所以，字符串使用数组和指针声明的操作有以下区别：
 ```c
-char arr[] = "I love Tillie!"; // 数组没用 const，但是数组 arr 是常量
-const char *p = "I love Millie!"; // 指针使用了 const，但是指针 p 是变量，*p 才是常量
+// 数组没用 const，但是数组 arr 是常量
+char arr[] = "hello";
+// 指针使用了 const，但是指针 p 是变量，*p 才是常量
+// 使用 const 声明能避免对指针解引用赋值
+const char *p = "world";
+
+不可以：
+arr = p; // 不能对 arr 进行赋值
+*p = 'x'; // 不能修改字符串字面量中的字符，即时上面没使用 const 也不能改
+p[1] = 'x'; // 同上
+
+可以：
+arr[1] = 'x'; // 字符串字面量被拷贝到了动态内存中，所以可以修改
+p++; // 指向下一个字符
+```
+如果需要修改字符串的内容，那么就必须声明为数组；只是将字符串作为常量使用，用于遍历等用指针更好，因为指针的方式会节省很多内存，尤其是在字符串数组中。
+```c
+// 数组的方式由于字符串要拷贝到动态内存中成为数组，所以需要指定字符串的长度，而且要以最长那个为准
+char arr[3][20] = {
+    "1234567890123456789",
+    "12345",
+    "1"
+};
+
+// 指针的方式则只需指定数组的长度即可
+const char *p[3] = {
+    "1234567890123456789",
+    "12345",
+    "1"
+};
+```
+
+### 字符串输入
+**如果想把一个字符串读入程序，首先必须预留存储该字符串的空间，然后用输入函数获取该字符串。**
+
+#### 分配空间
+当要接收字符串输入时，需要先声明变量，并指定能存储的字符串长度。
+
+以下使用指针的形式就**不能**用来接收用户输入的字符串，因为指针指向个地址，用户输入的字符串并不知道地址在哪，可能会随机分配个地址覆盖了其它数据，导致程序出错。
+```c
+char *name; // 不知道指向哪里的指针
+scanf("%s", name);
+```
+所以应该使用数组的形式来接收用户输入的字符串，就能提前分配一块地址用来存储用户输入的字符串了。
+```c
+char name[21]; // 创建了个21个空字符的数组
+scanf("%s", name);
+```
+
+#### gets() 函数（不建议使用）
+gets 函数可以接收用户输入的字符串，不过它的问题在于不会验证输入字符串的长度就赋值给字符串变量，从而可能导致缓冲区溢出（buffer overflow）。
+```c
+char words[11];
+puts("Enter a string, please.");
+gets(words); // 典型用法
+printf("%s\n", words);
+```
+如果输入的字符串超过10位就可能导致程序异常。
+
+#### fgets() 函数
+fgets() 函数通过第2个参数限制读入的字符数来解决溢出的问题。该函数专门设计用于**处理文件输入**，所以一般情况下可能不太好用（会保留换行符，对于控制台的输入不友好）。fgets() 和 gets() 的区别如下。
+
+* fgets() 函数的第2个参数指明了读入字符的最大数量。如果该参数的值是n，那么 fgets() 将读入 n-1 个字符，或者读到遇到的第一个换行符为止。
+* 如果 fgets() 读到一个换行符，会把它存储在字符串中。这点与 gets() 不同，gets() 会丢弃换行符。
+* fgets() 函数的第3个参数指明要读入的文件。如果读入从键盘输入的数据，则以 stdin（标准输入）作为参数，该标识符定义在 stdio.h 中。
+
+fgets() 通常和 fputs() 配对使用来读写文件。
+```c
+#include <stdio.h>
+#define STRLEN 14
+int main(void)
+{
+    char words[STRLEN];
+    puts("Enter a string, please.");
+    fgets(words, STRLEN, stdin); // 接收的输入中就包含 \n
+
+    printf("Your string twice (puts(), then fputs()):\n");
+    puts(words); // puts 输出的会在末尾再加个 \n 导致多个空行
+    fputs(words, stdout); // fputs 输出的不会再添加 \n
+}
+```
+
+fgets() 函数返回指向 char 的指针。如果一切进行顺利，该函数**返回的地址与传入的第1个参数相同**。但是，如果函数**读到文件结尾，它将返回一个特殊的指针：空指针（null pointer）**。C 语言中用宏 NULL 来表示（如果在读入数据时出现某些错误，该函数也返回 NULL）。
+
+#### gets_s() 函数
+C11新增的 gets_s() 函数（可选）和 fgets() 类似，用一个参数限制读入的字符数。gets_s() 与 fgets() 的区别如下。
+
+* gets_s() 只从标准输入中读取数据，所以不需要第3个参数。
+* 如果 gets_s() 读到换行符，会丢弃它而不是存储它。
+* 如果 gets_s() 读到最大字符数都没有读到换行符，会执行以下几步。首先把目标数组中的首字符设置为空字符，读取并丢弃随后的输入直至读到换行符或文件结尾，然后返回空指针。接着，调用依赖实现的“处理函数”（或你选择的其他函数），可能会中止或退出程序。
+
+gets_s() 函数很安全，但是，如果并不希望程序中止或退出，就要知道如何编写特殊的“处理函数”。另外，如果打算让程序继续运行，gets_s() 会丢弃该输入行的其余字符，无论你是否需要。
+
+#### scanf() 函数
+scanf() 函数更像是获取单词的函数，如果使用 %s 转换说明，则遇到空白字符（空行、空格、制表符或换行符）作为字符串的结束（字符串不包括空白字符）。
+
+### 字符串输出
+#### puts() 函数
+puts() 函数很容易使用，只需把字符串的地址作为参数传递给它即可。puts() 函数在显示字符串时会自动在其末尾添加一个换行符。
+```c
+#include <stdio.h>
+#define DEF "I am a #defined string."
+int main(void)
+{
+    char str1[80] = "An array was initialized to me.";
+    const char *str2 = "A pointer was initialized to me.";
+    // 字符串存储在静态存储区，将字符串传给函数实际上传的是首字符的地址
+    puts("I'm an argument to puts().");
+    puts(DEF);
+    puts(str1);
+    puts(str2);
+    puts(&str1[5]);
+    puts(str2 + 4);
+}
+```
+该函数在遇到空字符（`\0`）时就停止输出，所以必须确保有空字符。
+```c
+int main(void)
+{
+    char yes[] = {'W', 'O', 'W', '!', '\0'}; // 末尾有个空字符 \0
+    char no[] = {'W', 'O', 'W', '!'}; // 末尾没有空字符
+    puts(yes);
+    puts(no); // 当打印出 WOW! 后还会继续读取内存数据打印，直到遇到 \0 为止
+}
+```
+
+### 字符串函数
+C 库提供了多个处理字符串的函数，ANSI C 把这些函数的原型放在 string.h 头文件中。其中最常用的函数有 strlen()、strcat()、strcmp()、strncmp()、strcpy() 和 strncpy()。
+
+#### strlen() 函数
+strlen() 函数用于统计字符串的长度。
+```c
+#include <stdio.h>
+#include <string.h>
+
+void fit(char *string, unsigned int size);
+
+int main(void)
+{
+    char str[] = "hello world"; // 由于要修改字符串，所以使用字符串数组而不是指针
+    fit(str, 8);
+    puts(str); // 输出 hello wo。因为 r 被替换成了 \0，puts 读到空字符就终止了
+}
+
+// 由于我们要修改字符串，所以 char *string 没使用 const 声明
+void fit(char *string, unsigned int size)
+{
+    // 使用 strlen 判断字符串长度是否大于指定的长度
+    if (strlen(string) > size)
+    {
+        string[size] = '\0'; // 将字符串的第 size 位改为空字符
+    }
+}
+```
+
+#### strcat() 函数
+strcat()（用于拼接字符串）函数接受两个字符串作为参数。该函数把第2个字符串的备份附加在第1个字符串末尾，并把拼接后形成的新字符串作为第1个字符串，第2个字符串不变。所以，要注意拼接后的字符串长度不能大于第一个参数字符串数组的最大长度。
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    // 这里必须指定长度，而且要大于拼接后的字符串总长度。如果指定的长度小于拼接后的长度，则会报错
+    char str1[40] = "hello world";
+    char str2[] = "aaaaaaaaa";
+    // 将第二个字符串拼接到第一个字符串末尾
+    strcat(str1, str2);
+    puts(str1);
+}
+```
+
+#### strncat() 函数
+strcat() 函数无法检查第1个数组是否能容纳第2个字符串。使用 strncat() 函数可以指定第三个参数，第三个参数是个数值类型，表示最大添加的字符数。
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    // 这里必须指定长度，而且要大于拼接后的字符串总长度。如果指定的长度小于拼接后的长度，则会报错
+    char str1[40] = "hello world";
+    char str2[] = "abcdefg";
+    // 只会添加 str2 的两个字符即 ab 到 str1 中
+    strncat(str1, str2, 2);
+    puts(str1);
+}
+
+```
+
+#### strcmp() 函数
+该函数通过比较运算符来比较字符串，就像比较数字一样。如果两个字符串参数相同，该函数就返回0，否则返回非零值。
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char str1[40] = "hello world";
+    char str2[] = "abcdefg";
+    char str3[] = "hello world";
+    const int res1 = strcmp(str1, str2); // 字符串不相等
+    const int res2 = strcmp(str1, str3); // 字符串相等
+    // 第一个是非0整数，第二个是0
+    printf("%d %d", res1, res2);
+}
+
+```
+由于非0数字都为真，所以我们只需要关注是不是0就行了。
+
+关于返回的非0整数：strcmp() 实际上是比较每个字符的 ASCII 码是否相等，当比较到不相等的字符时，就会计算出两个字符的 ASCII 码差值并返回。所以返回的整数可能是负值。比如：
+```c
+strcmp("A", "B"); // 返回 -1
+strcmp("B", "A"); // 返回 1
+strcmp('B', 'A'); // 报错，不能使用单引号
+
+'B' > 'A' // char 类型的本质就是 ASCII 码，所以可以直接比较，不需要 strcmp 这样的函数
+```
+我们也可以利用返回值的正负来实现按字母排序等功能。
+
+#### strncmp() 函数
+比较到第三个参数指定的个数就停止。
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char str1[40] = "ABCDEFG";
+    char str2[] = "ABCDGGG";
+    const int res1 = strcmp(str1, str2);
+    const int res2 = strncmp(str1, str2, 4); // 只比较前四个，所以相等
+    printf("%d %d", res1, res2);
+}
+
+```
+
+#### strcpy() 和 strncpy() 函数
+将第二个参数字符串拷贝到第一个参数字符串，也要注意拷贝的字符串长度不能大于第一个参数的字符串长度。strcpy() 函数还有两个有用的特性：
+1. strcpy() 的返回类型是 char *，该函数返回的是第1个参数的值，即一个字符的地址。
+2. 第1个参数不必指向数组的开始。这个属性可用于拷贝数组的一部分。
+```c
+#include <stdio.h>
+#include <string.h>
+
+int main(void)
+{
+    char str1[40] = "ABCDEFGHIJK";
+    char str2[] = "1234567";
+    char str3[] = "abcdefg";
+    strcpy(str1, str3); // 拷贝 str3 到 str1 中
+    strncpy(str2, str3, 3); // str3 只拷贝前三个字符到 str2 中
+
+    char str4[] = "aaaaaaa";
+    char str5[] = "abc\0de";
+    strncpy(str4, str5, 6); // str5 中含有空字符，拷贝到空字符则停止
+
+    printf("%s\n%s\n%s", str1, str2, str4);
+}
+
+输出：
+abcdefg
+abc4567
+abc
+```
+从输出的内容可以看出：
+* 使用 strcpy 时，str1 被整个替换成了 str3，str3 的字符拷贝完后，str1 中多余的字符会替换成空字符。可以看做 str3 的内容赋值给了 str1。
+* 使用 strncpy 时，str2 只替换了前三个，并且未替换的保留了。
+* 使用 strncpy 时，str5 中含有空字符，则拷贝到空字符就停止了继续拷贝后面的字符（空字符和置顶的长度先遇到哪个就会终止拷贝），并且 str4 中拷贝到空字符之后的其它字符也被替换成了空字符。
+
+#### 其它字符串函数
+除了以上的字符串函数外，string.h 中还有很多其它字符串函数，如 strchr, strstr, strlen 等，具体使用方法可查看相关文档。
+
+#### ctype.h 字符函数和字符串
+ctype.h 中有很多处理字符的函数，我们不能直接用来处理字符串，但是可以通过遍历字符串等方式来处理字符串中的每个字符，从而达到处理字符串的目的。如 toupper() 函数可以将字符转为大写，要将字符串转为都转为大写就需要遍历字符串再调用 toupper() 函数：
+```c
+void ToUpper(char *str)
+{
+    while (*str)
+    {
+        // 将每个字符转换为大写字符
+        *str = toupper(*str);
+        str++;
+    }
+}
+```
+
+### 命令行参数
+main() 函数的第二个参数可以接收命令行传参。
+```c
+#include <stdio.h>
+
+// 第一个参数能知道命令行传了几个参数，第二个参数接收命令行具体参数
+int main(int argc, char *argv[])
+{
+    int count;
+    printf("The command line has %d arguments:\n", argc - 1);
+    // 循环打印每个参数
+    for (count = 1; count < argc; count++)
+    {
+        printf("%d: %s\n", count, argv[count]);
+    }
+}
+
+
+假设我们将以上代码编译成了 test 程序，使用 ./test 运行次程序并传入参数：
+./test --name Tirion
+
+程序将会输出：
+The command line has 2 arguments:
+1: --name
+2: Tirion
+```
+C 编译器允许 main() 没有参数或者有两个参数（一些实现允许 main() 有更多参数，属于对标准的扩展）。main() 有两个参数时，第1个参数是命令行中的字符串数量。过去，这个 int 类型的参数被称为 argc（表示参数计数 argument count）。系统用空格表示一个字符串的结束和下一个字符串的开始。该程序把命令行字符串存储在内存中，并把每个字符串的地址存储在指针数组中。而该数组的地址则被存储在 main() 的第2个参数中。按照惯例，这个指向指针的指针称为 argv（表示参数值 argument value）。许多环境都允许用双引号把多个单词括起来形成一个参数。如：`./test "--name Tirion"`。
+
+### 字符串转数字
+使用 atoi() 函数可以将字符串转为数字。
+```c
+#include <stdio.h>
+#include <stdlib.h> // 引入 stdlib.h
+
+int main(void)
+{
+    // 输出数字123
+    printf("%d", atoi("123asdf"));
+}
 ```
