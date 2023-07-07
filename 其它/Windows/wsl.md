@@ -30,7 +30,7 @@ set_proxy(){
   echo "Proxy has been opened."
 }
 ```
-
+没发现防火墙会导致不能代理，所以不需要关闭。
 
 # 安装 oh-my-zsh
 使用文章中的安装 oh-my-zsh 的命令即可安装：https://zhuanlan.zhihu.com/p/68336685
