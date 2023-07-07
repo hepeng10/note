@@ -7,8 +7,7 @@ git clone: hepeng10    HePeng0822
 我司小程序平台为用户提供招工找活场景，场景中招工用户发布招聘信息，需明确用工地址，需要定位进行地址选择；找活用户在寻找工作时，也需要通过当前定位判断招工职位用工地址与自己的距离来做出选择，我方平台保证仅会在用户使用过程中去获取权限
 
 ### Key
-gitHub 个人令牌，有效期90天
-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
+gitHub personal token: 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
 
 Gists token: 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
 

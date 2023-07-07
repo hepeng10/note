@@ -8,10 +8,32 @@ wsl2 不是就一定比 wsl1 好，wsl2 的优点是拥有完整的 linux 环境
 `wsl -l -v` 可以查看 wsl 使用的版本。
 `wsl --set-version Ubuntu 1` 修改 wsl 版本为 wsl1，最好在 powershell 中运行，我在 gitbash 中运行就卡住半天不动。
 
-# 安装 oh-my-zsh
+# 代理
 需要先开启代理才能从 github 上拉取安装 oh-my-zsh，安装后可以通过环境变量里配置或通过脚本来快速启动或关闭代理，我使用的是新建个脚本来快速开启和关闭代理。
 https://solidspoon.xyz/2021/02/17/%E9%85%8D%E7%BD%AEWSL2%E4%BD%BF%E7%94%A8Windows%E4%BB%A3%E7%90%86%E4%B8%8A%E7%BD%91/
 https://www.cnblogs.com/tuilk/p/16287472.html
+需要注意的是，文章中的脚本文件在 WSL1 中可能失效，是因为获取主机ip有问题，并且配置也有点问题，我改成这样后正常了：
+```sh
+hostip=$(hostname -I | awk '{print $1}')
+wslip=$(hostname -I | awk '{print $1}')
+port=7890
+
+PROXY_HTTP="http://${hostip}:${port}"
+
+set_proxy(){
+  export ALL_PROXY="${PROXY_HTTP}"
+
+  git config --global http.https://github.com.proxy ${PROXY_HTTP}
+  git config --global https.https://github.com.proxy ${PROXY_HTTP}
+
+  echo "Proxy has been opened."
+}
+```
+
+
+# 安装 oh-my-zsh
+使用文章中的安装 oh-my-zsh 的命令即可安装：https://zhuanlan.zhihu.com/p/68336685
+`sh -c "$(curl -fsSL https://raw.githubusercontent.com/robbyrussell/oh-my-zsh/master/tools/install.sh)"`
 
 # 修改 oh-my-zsh 主题
 1. 运行 `wsl` 进入 wsl
