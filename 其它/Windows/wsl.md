@@ -8,6 +8,7 @@ wsl2 不是就一定比 wsl1 好，wsl2 的优点是拥有完整的 linux 环境
 `wsl -l -v` 可以查看 wsl 使用的版本。
 `wsl --set-version Ubuntu 1` 修改 wsl 版本为 wsl1，最好在 powershell 中运行，我在 gitbash 中运行就卡住半天不动。
 需要注意的是，在 clone 项目的时候就应该用 wsl1 跳转到 windows 的项目目录进行 clone，如果在 windows 上使用 gitbash 等 clone，那么用 wsl1 进入到此项目就会出很多问题，如 git 提交识别，husky 报错等。
+（最后还是使用 git bash 安装 zsh 再安装 oh-my-zsh 后直接在 Windows 中使用方便点。）
 
 # 代理
 需要先开启代理才能从 github 上拉取安装 oh-my-zsh，安装后可以通过环境变量里配置或通过脚本来快速启动或关闭代理，我使用的是新建个脚本来快速开启和关闭代理。

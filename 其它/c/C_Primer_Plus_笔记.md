@@ -507,7 +507,7 @@ int main(void)
 ### 间接运算符（解引用运算符）
 间接运算符的作用是从地址中解出它的值。
 ```c
-// 将 c 的地址赋值给 a
+// 将 b 的地址赋值给 a
 a = &b;
 // 将 a 地址解析出来赋值给 c
 c = *a;
@@ -1243,7 +1243,7 @@ address of "I'm special": 0x103c6df50 // 多次使用相同字符串也是同一
 
 #### 关于内存分区
 C 语言内存分区包括以下几个部分：
-* 栈（Stack）：存储函数的参数值、局部变量的值等，由编译器自动分配和释放。
+* 栈（Stack）：存储函数的参数值、局部变量的值等，由编译器自动分配和释放。由于占空间是比较有限的，所以无法分配太大的数组等。
 * 堆（Heap）：动态分配内存，需要手动管理内存的分配和释放，一般由程序员通过调用`malloc()、calloc()、realloc()`等函数来使用。
 * 数据区（Data segment）：包括全局变量和静态变量，程序运行前分配内存，在程序运行期间一直存在，直到程序结束才会被释放。（上面提到的静态存储区也就是数据区）
 * 代码区（Code segment）：存放程序的执行代码。
@@ -1791,3 +1791,638 @@ int rand1(void)
 ```
 但是这样的随机数算法每次重新启动都会生成相同的随机数，因为种子相同，所以我们需要使用不同的种子。
 通常会使用时钟系统来初始化种子，就可以每次运行生成的随机数都不一样了。当然，这也是最基本的随机数生成方式。
+
+### 分配内存：malloc() 和 free()
+malloc() 函数， 该函数接受一个参数：所需的内存字节数。malloc() 函数会找到合适的空闲内存块，这样的内存是匿名的。也就是说，malloc() 分配内存，但是不会为其赋名。然而，它确实返回动态分配内存块的首字节地址。因此，可以把该地址赋给一个指针变量，并使用指针访问这块内存。因为 char 表示1字节，malloc() 的返回类型通常被定义为指向`char`的指针。然而，从 ANSI C 标准开始， C 使用一个新的类型：指向`void`的指针。该类型相当于一个“通用指针”。malloc() 函数可用于返回指向数组的指针、 指向结构的指针等，所以通常该函数的返回值会被强制转换为匹配的类型。在 ANSI C 中，应该坚持使用强制类型转换，提高代码的可读性。然而，把指向`void`的指针赋给任意类型的指针完全不用考虑类型匹配的问题。如果 malloc() 分配内存失败，将返回空指针。
+```c
+#include <stdio.h>
+#include <stdlib.h> // malloc 需要引入 stdlib.h
+
+int main() {
+    double *db;
+    // 使用 malloc 分配内存，30个 double 类型的字节数，
+    // 并使用 (double *) 强制转换为 double 类型的指针
+    db = (double *) malloc(30 * sizeof(double));
+    db[0] = 1.23;
+    printf("%.2f\n", db[0]);
+}
+```
+通常，malloc() 要与 free() 配套使用。free() 函数的参数是之前 malloc() 返回的地址，该函数释放之前 malloc() 分配的内存。因此，动态分配内存的存储期从调用 malloc() 分配内存到调用 free() 释放内存为止。free() 的参数应该是一个指针，指向由 malloc() 分配的一块内存。不能用 free() 释放通过其他方式（如，声明一个数组）分配的内存。
+如果内存分配失败，可以调用 exit() 函数结束程序，其原型也在 stdlib.h 中。EXIT_SUCCESS（或者，相当于0）表示普通的程序结束，EXIT_FAILURE 表示程序异常中止。 **unix、Linux 等系统中，退出是0表示正常退出，其它数字表示不同异常的退出代码。**
+```c
+#include <stdio.h>
+#include <stdlib.h> /* 为 malloc()、 free()提供原型 */
+
+int main(void)
+{
+    double *ptd;
+    int max;
+    int number;
+    int i = 0;
+
+    puts("输入存储 double 类型的个数");
+
+    if (scanf("%d", &max) != 1)
+    {
+        puts("不是正确的数字 -- bye.");
+        exit(EXIT_FAILURE);
+    }
+
+    ptd = (double *)malloc(max * sizeof(double)); // 分配內存
+
+    if (ptd == NULL) // malloc()可能分配不到所需的内存。在这种情况下，该函数返回空指针，程序结束
+    {
+        puts("分配内存失败. Goodbye.");
+        exit(EXIT_FAILURE);
+    }
+
+    /* ptd 现在指向有max个元素的数组 */
+    puts("输入存储的值 (q to quit):");
+
+    while (i < max && scanf("%lf", &ptd[i]) == 1)
+    {
+        ++i;
+    }
+
+    printf("你现在有 %d 个数:\n", number = i);
+
+    for (i = 0; i < number; i++)
+    {
+        printf("%7.2f ", ptd[i]);
+        if (i % 7 == 6)
+        {
+            putchar('\n');
+        }
+    }
+
+    if (i % 7 != 0)
+    {
+        putchar('\n');
+    }
+
+    puts("Done.");
+    printf("释放内存前的第一个数：%.2f \n", ptd[0]); // 正常输出第一个数
+    free(ptd); // 釋放內存
+    printf("释放内存后的第一个数：%.2f \n", ptd[0]); // 内存被释放，不再有值，输出的是0.00
+    return 0;
+}
+```
+在 C 中，不一定要使用强制类型转换`(double *)`，但是在 C++ 中必须使用。所以，使用强制类型转换更容易把C程序转换为 C++ 程序。
+使用动态数组可以在一定程度上做到根据需要创建合适的数组长度，而不是创建一个很长的数组从而浪费内存。
+
+##### 内存泄漏
+```c
+int main()
+{
+    double glad[2000];
+    int i;
+    ... 
+    for (i = 0; i < 1000; i++)
+        gobble(glad, 2000);
+    ...
+}
+
+void gobble(double ar[], int n)
+{
+    double *temp = (double *) malloc(n * sizeof(double)); // 分配内存
+    ... /* free(temp); // 假设忘记使用free() */
+}
+```
+以上代码，我们不断循环调用 gobble() 函数，函数中使用 malloc() 分配了内存，但是却没使用 free() 释放，这部分内存就将永远不会被复用，最终内存耗尽导致内存泄漏。
+
+##### 动态内存分配和变长数组
+变长数组（VLA） 和调用 malloc() 在功能上有些重合。例如，两者都可用于创建在运行时确定大小的数组。不同的是，变长数组是自动存储类型。因此，程序在离开变长数组定义所在的块时，变长数组占用的内存空间会被自动释放，不必使用 free()。另一面， 用 malloc() 创建的数组不必局限在一个函数内访问。 例如，可以这样做：被调函数创建一个数组并返回指针，供主调函数访问， 然后主调函数在末尾调用 free() 释放之前被调函数分配的内存。
+对多维数组而言，使用变长数组更方便。下面是用 malloc 创建二维数组：
+```c
+int n = 5;
+int m = 6;
+int ar1[n][m]; // n×m 的变长数组（VLA）
+int (* p1)[m]; // 要求支持变长数组
+p1 = (int (*)[m]) malloc(n * m * sizeof(int)); // n×m 数组（要求支持变长数组）
+ar1[1][2] = p1[1][2] = 12;
+```
+由于 malloc() 函数返回一个指针， 所以 p1 必须是一个指向合适类型的指针。 第1个指针声明：
+```c
+int (* p1)[m]; // 声明一个指针，指向一个包含 m 个整型的数组
+```
+表明 p1 指向一个内含 m 个 int 类型值的数组。因此，p1[i] 代表一个由 m 个整数构成的元素， p1[i][j] 代表一个整数。
+而 `p1 = (int (*)[m]) malloc(n * m * sizeof(int));` 这行代码的意思是(来自 ChatGPT)：
+这行代码分配了内存给指针 `p1`，并让它指向一个包含 `n` 行、每行有 `m` 个整数的二维数组。
+让我们逐步解释这行代码：
+1. `malloc(n * m * sizeof(int))`: `malloc` 是 C/C++ 中的函数，用于动态分配内存。`n * m * sizeof(int)` 计算了需要分配的内存大小。由于我们有 `n` 行、每行有 `m` 个整数，而整数类型一般占用 `sizeof(int)` 字节的空间，因此需要 `n * m * sizeof(int)` 字节的内存空间来存储这个二维数组。
+2. `(int (*)[m])`: 这是一种类型转换，将 `malloc` 返回的通用指针 `void*` 转换为指向包含 `m` 个整数的数组的指针类型。这样做是为了确保分配的内存能够正确地与指针 `p1` 关联。（malloc 返回的是通用指针 `void*`，而我们使用 `int*` 转换为 int 类型指针。）
+3. `p1 = ...`: 这是将分配的内存地址赋值给指针 `p1`，从而使其指向新分配的二维数组。
+综合起来，这行代码的含义是：分配了一个有 `n` 行、每行有 `m` 个整数的二维数组的内存，并将指针 `p1` 指向这个新分配的内存。这样，你就可以通过 `p1` 指针来访问和操作这个二维数组的元素了。需要注意的是，使用完这段代码后，如果不再需要这个内存，应该使用 `free(p1)` 来释放它，防止内存泄漏。
+
+### 存储类别和动态内存分配
+一个理想化模型：程序将内存分为三部分：
+1. 一部分为静态存储类别，在编译时确定，只要程序还在运行就能访问。该类别的变量在程序开始执行时创建，结束时销毁。
+2. 一部分为自动存储类别，在程序进入变量定义所在块时创建，离开块时销毁。这部分的内存通常作为栈来处理，这意味着新创建的变量按顺序加入内存，然后以相反的顺序销毁。
+3. 一部分为动态分配的内存，在调用 malloc() 或相关函数时创建，调用 free() 后释放。这部分的内存由程序员管理，而不是一套规则。所以内存块可以在一个函数中创建，在另一个函数中销毁。正是因为这样，这部分的内存用于动态内存分配会支离破碎。也就是说，未使用的内存块分散在已使用的内存块之间。另外，使用动态内存通常比使用栈内存慢。
+
+### ANSI C 类型限定符
+##### const 类型限定符
+以 const 关键字声明的对象，其值不能通过赋值或递增、递减来修改。
+使用 const 声明指针，要区分是限定指针本身为 const 还是限定指针指向的值为 const。
+```c
+const float * pf; /* pf 指向一个 float 类型的 const 值 */
+float const * pfc; /* 与 const float * pfc; 相同 */
+float * const pt; /* pt 是一个 const 指针 */
+const float * const ptr; /* 表明ptr既不能指向别处， 它所指向的值也不能改变 */
+```
+简而言之，const 放在 * 左侧任意位置，限定了指针指向的数据不能改变；const 放在 * 的右侧，限定了指针本身不能改变。
+
+形参中使用 const 用来保证传给形参的外部实参不会被更改：
+```c
+// 数组实际上是个指针，使用 const 声明保证了在函数中不会被指向别的地址
+void display(const int array[], int limit);
+```
+ANSI C 库遵循这种做法。如果一个指针仅用于给函数访问值，应将其声明为一个指向 const 限定类型的指针。 如果要用指针更改主调函数中的数据，就不使用 const 关键字。 如：
+```c
+char *strcat(char * restrict s1, const char * restrict s2);
+```
+strcat() 函数在第1个字符串的末尾添加第2个字符串的副本。这更改了第1个字符串，但是未更改第2个字符串。
+
+##### volatile 类型限定符
+volatile 限定符告知计算机，代理（而不是变量所在的程序）可以改变该变量的值。通常，它被用于硬件地址以及在其他程序或同时运行的线程中共享数据。例如，一个地址上可能存储着当前的时钟时间，无论程序做什么，地址上的值都随时间的变化而改变。或者一个地址用于接受另一台计算机传入的信息。
+volatile 的语法和 const 一样：
+```c
+volatile int loc1; /* loc1 是一个易变的位置 */
+volatile int * ploc; /* ploc 是一个指向易变的位置的指针 */
+```
+volatile 不是必须的，但是在合适的地方使用 volatile 变量编译器会对其进行优化。
+
+##### restrict 类型限定符
+restrict 关键字允许编译器优化某部分代码以更好地支持计算。它只能用于指针，表明该指针是访问数据对象的**唯一且初始**的方式。
+```c
+int * restrict restar = (int *) malloc(10 * sizeof(int));
+```
+这里，指针 restar 是访问由 malloc() 所分配内存的唯一且初始的方式。因此，可以用 restrict 关键字限定它。
+
+# 文件输入/输出
+文件是当今计算机系统不可或缺的部分。文件用于存储程序、文档、数据、书信、表格、图形、照片、视频和许多其他种类的信息。作为程序员，必须会编写创建文件和从文件读写数据的程序。
+
+### 与文件进行通信
+##### 文件是什么
+文件（file）通常是在磁盘或固态硬盘上的一段已命名的存储区。对我们而言，stdio.h 就是一个文件的名称，该文件中包含一些有用的信息。然而，对操作系统而言，文件更复杂一些。C 把文件看作是一系列连续的字节，每个字节都能被单独读取。C 提供两种文件模式：文本模式和二进制模式。
+
+##### 文本模式和二进制模式
+首先，要区分文本内容和二进制内容、文本文件格式和二进制文件格式，以及文件的文本模式和二进制模式。
+所有文件的内容都以二进制形式（0或1）存储。但是，如果文件最初使用二进制编码的字符（例如， ASCII 或 Unicode）表示文本（就像 C 字符串那样），该文件就是文本文件，其中包含文本内容。如果文件中的二进制值代表机器语言代码或数值数据（使用相同的内部表示，假设，用于 long 或 double 类型的值）或图片或音乐编码，该文件就是二进制文件，其中包含二进制内容。
+**文件都是二进制，所以根据二进制编码来判断是文本文件还是二进制文件。**
+C 在使用文本模式或二进制模式读写文本文件时，也是有所区别的。如，在使用文本模式读写不同系统的文件时，UNIX 以 \n 结尾，MAC 以 \r 结尾，MS-DOS 以 \r\n 结尾。C 在读取时会以 UNIX 的 \n 为标准，在 MAC 中读取文件遇到 \r 会转换为 \n，写入时会将 \n 转换为 \r 写入。而用二进制模式读写则不会有这样的操作，文本中是什么就是什么。由于 C 是以 UNIX 为标准，所以 UNIX 中使用文本模式和二进制模式读写文件，内容都是一样的，UNIX 中两种模式的方法实现也是一样的。
+
+##### I/O 的级别
+除了选择文件的模式，大多数情况下，还可以选择 I/O 的两个级别（即处理文件访问的两个级别）。底层 I/O（low-level I/O）使用操作系统提供的基本I/O服务。标准高级 I/O（standard high-level I/O）使用C库的标准包和 stdio.h 头文件定义。**因为无法保证所有的操作系统都使用相同的底层 I/O 模型，C 标准只支持标准 I/O 包。**
+
+##### 标准文件
+C 程序会自动打开3个文件，它们被称为标准输入（standard input）、标准输出（standard output） 和标准错误输出（standard error output）。在默认情况下，标准输入是系统的普通输入设备，通常为键盘；标准输出和标准错误输出是系统的普通输出设备，通常为显示屏。
+通常，标准输入为程序提供输入，它是 getchar() 和 scanf() 使用的文件。程序通常输出到标准输出， 它是 putchar()、puts() 和 printf() 使用的文件。“重定向”把其他文件视为标准输入或标准输出。标准错误输出提供了一个逻辑上不同的地方来发送错误消息。 
+
+### 标准 I/O
+与底层 I/O 相比，标准 I/O 包除了可移植以外还有两个好处。第一，标准 I/O 有许多专门的函数简化了处理不同 I/O的 问题。例如，printf() 把不同形式的数据转换成与终端相适应的字符串输出。第二，输入和输出都是缓冲的。也就是说，一次转移一大块信息而不是一字节信息（通常至少512字节）。例如，当程序读取文件时，一块数据被拷贝到缓冲区（一块中介存储区域）。这种缓冲极大地提高了数据传输速率。程序可以检查缓冲区中的字节。缓冲在后台处理，所以让人有逐字符访问的错觉。
+```c
+#include <stdio.h>
+#include <stdlib.h> // 提供 exit()的原型
+int main(int argc, char *argv[])
+{
+    int ch;   // 读取文件时， 存储每个字符的地方
+    FILE *fp; // FILE 类型表示文件指针
+    unsigned long count = 0;
+
+    printf("%d\n", argc); // 打印出参数个数 ./test a.txt 就有两个参数，一个是 ./test 另一个是 a.txt。通过空格区分
+
+    if (argc != 2)
+    {
+        printf("Usage: %s filename\n", argv[0]); // 第一个参数值，就算命令行中的 ./test
+        exit(EXIT_FAILURE); // 使用标准库中的 exit 退出
+    }
+    if ((fp = fopen(argv[1], "r")) == NULL) // 第二个参数是打开的文件，返回指向文件内容的指针。为空表示没能打开文件
+    {
+        printf("Can't open %s\n", argv[1]);
+        exit(EXIT_FAILURE);
+    }
+    while ((ch = getc(fp)) != EOF) // 一个个字符的读取文件，到 EOF 中止
+    {
+        putc(ch, stdout); // 一个个字符输出到标准输出中
+        count++; // 统计总字符数
+    }
+    if (fclose(fp) != 0) // 关闭文件，并做容错处理
+    {
+        printf("Error in closing file %s\n", argv[1]);
+    }
+    printf("File %s has %lu characters\n", argv[1], count);
+}
+```
+- 上面的代码使用 exit() 而不是 return 0，因为 exit() 在任意地方调用都会终止程序，如递归或调用的其它函数中，所以当要终止程序运行时应该使用 exit()。
+- 为了避免读到空文件，应该使用入口条件循环（使用 while 而不是 do while 循环）进行文件输入。
+- fopen() 第二个参数 r 表示以只读模式打开，具体模式有：
+    * r: 以只读模式打开文件
+    * w: 以写模式打开文件，把现有文件的长度截为0，如果文件不存在，则创建一个新文件
+    * a: 以写模式打开文件，在现有文件末尾添加内容，如果文件不存在 ，则创建一个新文件
+    * r+: 以更新模式打开文件（ 即可以读写文件 ）
+    * w+: 以更新模式打开文件（ 即读和写 ），如果文件存在，则将其长度截为0；如果文件不存在则创建一个新文件
+    * a+: 以更新模式打开文件（即读和写 ），在现有文件的末尾添加内容，如果文件不存在则创建一个新文件；可以读整个文件，但是只能从末尾添加内容
+    * "rb"、"wb"、"ab"、"rb+"、"r+b"、"wb+"、"w+b"、"ab+"、"a+b": 与上一个模式类似，但是以二进制模式而不是文本模式打开文件
+    * "wx"、"wbx"、"w+x"、"wb+x" 或 "w+bx": (C11)类似非 x 模式，但是如果文件已存在或以独占模式打开文件，则打开文件失败
+
+##### 随机访问：fseek() 和 ftell()
+有了 fseek() 函数，便可把文件看作是数组，在 fopen() 打开的文件中直接移动到任意字节处。
+```c
+#include <stdio.h>
+#include <stdlib.h>
+#define CNTL_Z '\032' /* DOS文本文件中的文件结尾标记 */
+#define SLEN 81
+
+int main(void)
+{
+    char file[SLEN];
+    char ch;
+    FILE *fp;
+    long count, last;
+    puts("Enter the name of the file to be processed:");
+    scanf("%80s", file);
+    if ((fp = fopen(file, "rb")) == NULL) /* 只读模式，以二进制打开 */
+    {   // 文件不存在，打开失败
+        printf("reverse can't open %s\n", file);
+        exit(EXIT_FAILURE);
+    }
+    fseek(fp, 0L, SEEK_END); /* 定位到文件末尾（文件末尾，偏移量0） */
+    last = ftell(fp);
+    printf("ftell: %ld\n", last); // 如：打开文件中内容为1234，则输出4
+    for (count = 1L; count <= last; count++)
+    {
+        fseek(fp, -count, SEEK_END); /* 回退。通过遍历，从文件末尾回退1位、2位、3位这样 */
+        ch = getc(fp); // 每次回退后获取当前位置的字符
+        if (ch != CNTL_Z && ch != '\r') /* MS-DOS 文件 */
+            putchar(ch); // 打印当前字符。如1234就会打印出4321
+    }
+    putchar('\n');
+    fclose(fp); // 关闭文件指针
+}
+```
+fseek() 的第1个参数是FILE指针， 指向待查找的文件， fopen() 应该已打开该文件。
+fseek() 的第2个参数是偏移量（offset）。该参数表示从起始点开始要移动的距离。该参数必须是一个long类型的值，可以为正（前移）、负（后移）或0（保持不动）。
+fseek() 的第3个参数是模式，该参数确定起始点。在 stdio.h 头文件中规定了几个表示模式的明示常量（manifest constant）。SEEK_SET 文件开始处，SEEK_CUR 当前位置，SEEK_END 文件末尾。
+```c
+fseek(fp, 0L, SEEK_SET); // 定位至文件开始处
+fseek(fp, 10L, SEEK_SET); // 定位至文件中的第10个字节
+fseek(fp, 2L, SEEK_CUR); // 从文件当前位置前移2个字节
+fseek(fp, 0L, SEEK_END); // 定位至文件结尾
+fseek(fp, -10L, SEEK_END); // 从文件结尾处回退10个字节
+```
+如果一切正常，fseek() 的返回值为0；如果出现错误（如试图移动的距离超出文件的范围），其返回值为-1。
+ftell() 函数的返回类型是 long，它返回的是参数指向文件的当前位置距文件开始处的字节数。
+
+##### fgetpos() 和 fsetpos() 函数
+fseek() 和 ftell() 函数被限制在了 long 类型的范围，但是随着存储设备容量的增长，文件也越来越大。所以这两个函数不够用了。
+ANSI C 新增了两个处理较大文件的新定位函数：fgetpos() 和 fsetpos()。这两个函数不使用 long 类型的值表示位置，它们使用一种新类型：fpos_t（代表 file position type，文件定位类型）。fpos_t 类型不是基本类型，它根据其他类型来定义。fpos_t 类型的变量或数据对象可以在文件中指定一个位置。fpos_t 不能是数组类型，没有其它限制，所以可以实现为数值，或是结构等。
+ANSI C 定义了如何使用 fpos_t 类型。fgetpos() 函数的原型如下：
+```c
+int fgetpos(FILE * restrict stream, fpos_t * restrict pos);
+```
+fpos_t 类型的值 pos 表示文件中的当前位置距离文件开头的字节数。如果成功，fgetpos() 函数返回0；如果失败，返回非0。
+fsetpos() 函数的原型如下：
+```c
+int fsetpos(FILE *stream, const fpos_t *pos);
+```
+调用该函数时，使用 pos 指向位置上的 fpos_t 类型值来设置文件指针指向偏移该值后指定的位置。如果成功，fsetpos()函数返回0；如果失败，则返回非0。fpos_t 类型的值应通过之前调用 fgetpos() 获得。
+
+### 标准 I/O 的机理
+##### 一、调用 fopen() 打开文件：
+通常使用标准 I/O 的第1步是调用 fopen() 打开文件，fopen() 函数不仅打开一个文件，还创建了一个缓冲区（在读写模式下会创建两个缓冲区）以及一个包含文件和缓冲区数据的结构。另外，fopen()返回一个指向该结构的指针，以便其他函数知道如何找到该结构。假设把该指针赋给一个指针变量 fp，我们说 fopen() 函数“打开一个流”。如果以文本模式打开该文件， 就获得一个文本流；如果以二进制模式打开该文件，就获得一个二进制流。
+这个结构通常包含一个指定流中当前位置的文件位置指示器。除此之外，它还包含错误和文件结尾的指示器、一个指向缓冲区开始处的指针、一个文件标识符和一个计数（统计实际拷贝进缓冲区的字节数）。
+##### 二、调用输入函数，如 fscanf()
+通常，使用标准I/O的第2步是调用一个定义在 stdio.h 中的输入函数，如fscanf()、getc() 或 fgets()。一调用这些函数，文件中的缓冲大小数据块就被拷贝到缓冲区中。最初调用函数，除了填充缓冲区外，还要设置 fp 所指向的结构中的值。尤其要设置流中的当前位置和拷贝进缓冲区的字节数。通常，当前位置从字节0开始。
+在初始化结构和缓冲区后，输入函数按要求从缓冲区中读取数据。在它读取数据时，文件位置指示器被设置为指向刚读取字符的下一个字符。由于 stdio.h 系列的所有输入函数都使用相同的缓冲区，所以调用任何一个函数都将从上一次函数停止调用的位置开始。
+当输入函数发现已读完缓冲区中的所有字符时，会请求把下一个缓冲大小的数据块从文件拷贝到该缓冲区中。以这种方式，输入函数可以读取文件中的所有内容，直到文件结尾。函数在读取缓冲区中的最后一个字符后，把结尾指示器设置为真。于是，下一次被调用的输入函数将返回 EOF。
+##### 三、调用输出函数，如 fprintf()
+输出函数以类似的方式把数据写入缓冲区。当缓冲区被填满或到末尾时，数据将被拷贝至文件中。
+##### 缓冲区
+这里的重要知识就是缓冲区，输入函数读取文件放到缓冲区中，当缓冲区填满或到文件末尾等情况会通过输出函数拷贝到另一个文件中。
+C 语言中，文件的 I/O 操作时，缓冲区还分为全缓冲、行缓冲和无缓冲。
+* 全缓冲（Fully Buffered）：当使用标准库函数如 fread 和 fwrite 进行文件读写时，如果没有显式地设置缓冲区大小，C 标准库会自动使用全缓冲。在全缓冲模式下，文件数据会先暂时存储在内存中的缓冲区中，当缓冲区满或者达到一定条件时，才会将数据写入或读取到文件中。
+* 行缓冲（Line Buffered）：当使用标准库函数如 fprintf 和 fscanf 进行文件读写时，如果输出或输入的流是指向终端设备（例如终端或控制台），C 标准库会使用行缓冲。行缓冲模式下，数据会在遇到换行符时被写入或读取到文件中，或者缓冲区满时进行写入或读取。
+* 无缓冲（Unbuffered）：当使用标准库函数如 open、read、write 和 close 进行文件读写时，C 标准库不会使用任何缓冲区，数据会直接从文件读取或写入到内存中，也就是无缓冲模式。
+需要注意的是，在某些情况下，缓冲区可能会导致一些问题，比如在不适当的时候刷新缓冲区可能导致输出乱序。为了避免这些问题，你可以使用 fflush 函数来手动刷新缓冲区，或者使用无缓冲输入输出函数来避免输出缓冲区的问题。
+
+##### int fflush() 函数
+fflush() 函数原型是：`int fflush(FILE *fp)`。
+调用 fflush() 函数引起输出缓冲区中所有的未写入数据被发送到 fp 指定的输出文件。这个过程称为刷新缓冲区。如果 fp 是空指针，所有输出缓冲区都被刷新。
+
+#### 二进制 I/O: fread() 和 fwrite()
+当我们使用 fprintf() 函数存储数值时，实际上是存储的字符串，如：
+```c
+double num = 1 / 3;
+fprintf(fp, "%f", num);
+```
+我们通过转换说明 %f 将分数转换成浮点数写入文件中，实际上写入的是 0.33 这样的一个字符串。从文件中获取到的也就是0.33，而无法恢复到更高的精度。
+为保证数值在存储前后一致，最精确的做法是使用与计算机相同的位组合来存储。因此，double 类型的值应该存储在一个 double 大小的单元中。
+**如果以程序所用的表示法把数据存储在文件中，则称以二进制形式存储数据。不存在从数值形式到字符串的转换过程。对于标准 I/O，fread() 和 fwrite 函数用于以二进制形式处理数据。**
+![图 0](assets/1691056628254.png)  
+实际上，所有的数据都是以二进制形式存储的，甚至连字符都以字符码的二进制表示来存储。如果文件中的所有数据都被解释成字符码，则称该文件包含文本数据。如果部分或所有的数据都被解释成二进制形式的数值数据，则称该文件包含二进制数据（另外，用数据表示机器语言指令的文件都是二进制文件）。
+
+##### fwrite() 函数
+fwrite() 函数的原型是：
+```c
+size_t fwrite(const void *ptr, size_t size, size_t nmemb, FILE *stream);
+```
+size_t 是根据标准 C 类型定义的类型，它是 size_of 运算符返回的类型，通常是 unsigned int，但是具体实现跟编译器有关。指针 ptr 是待写入数据块的地址，size 表示待写入数据块的大小，nmemb 表示待写入数据块的数量，stream 指定待写入的文件。
+例如，要保存一个大小为256字节的数据对象（如数组），可以这样做：
+```c
+char buffer[256];
+fwrite(buffer, 256, 1, fp);
+```
+要保存一个内含10个 double 类型值的数组，可以这样做：
+```c
+double earnings[10];
+fwrite(earnings, sizeof(double), 10, fp);
+```
+可以看出第一个参数即可接收 char 类型指针，也可接收 double 类型指针。在函数的原型定义中使用的是 void *ptr，void 类型指针表示通用类型指针。
+fwrite() 函数返回成功写入项的数量。正常情况下，该返回值就是 nmemb，但如果出现写入错误，返回值会比 nmemb 小。
+
+##### fread() 函数
+fread() 函数的原型是：
+```c
+size_t fread(void * restrict ptr, size_t size, size_t nmemb, FILE *restrict stream);
+```
+fread() 函数接受的参数和 fwrite() 函数相同。在 fread() 函数中，ptr 是待读取文件数据在内存中的地址，stream 指定待读取的文件。该函数用于读取被 fwrite() 写入文件的数据。
+```c
+double earnings[10];
+fread(earnings, sizeof(double), 10, fp);
+```
+该调用把10个 double 大小的值拷贝进 earnings 数组中。
+fread() 函数返回成功读取项的数量。正常情况下，该返回值就是 nmemb，但如果出现读取错误或读到文件结尾，该返回值就会比 nmemb 小。
+
+##### int feof(FILE *fp) 和 int ferror(FILE *fp) 函数
+如果标准输入函数返回 EOF，则通常表明函数已到达文件结尾。然而，出现读取错误时，函数也会返回 EOF。feof() 和 ferror() 函数用于区分这两种情况。当上一次输入调用检测到文件结尾时，feof() 函数返回一个非零值，否则返回0。当读或写出现错误，ferror() 函数返回一个非零值，否则返回0。
+
+文件操作 Demo：
+```c
+/* append.c -- 把文件附加到另一个文件末尾 */
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#define BUFSIZE 4096 // 用于指定缓冲区大小
+#define SLEN 81 // 用于指定文件名最大长度
+
+void append(FILE *source, FILE *dest);
+char *s_gets(char *st, int n);
+
+int main(void)
+{
+    FILE *fa, *fs;       // fa 指向目标文件，fs 指向源文件
+    int files = 0;       // 附加的文件数量
+    char file_app[SLEN]; // 目标文件名
+    char file_src[SLEN]; // 源文件名
+    int ch;
+
+    puts("Enter name of destination file:");
+    s_gets(file_app, SLEN); // 读取标准输入的目标文件名，保存到 file_app 中
+
+    // 打开输入的文件
+    if ((fa = fopen(file_app, "a+")) == NULL)
+    {
+        fprintf(stderr, "Can't open %s\n", file_app);
+        exit(EXIT_FAILURE);
+    }
+
+    // setvbuf 设置文件流的缓冲区，从而改变文件流的缓冲方式。这个函数可以在文件打开后但在开始读写文件之前调用。
+    // 设置缓冲区的大小为 BUFSIZE
+    if (setvbuf(fa, NULL, _IOFBF, BUFSIZE) != 0)
+    {
+        fputs("Can't create output buffer\n", stderr);
+        exit(EXIT_FAILURE);
+    }
+
+    puts("Enter name of first source file (empty line to quit):");
+
+    // 遍历标准输入，每次输入一个文件名
+    while (s_gets(file_src, SLEN) && file_src[0] != '\0')
+    {
+        if (strcmp(file_src, file_app) == 0)
+            fputs("Can't append file to itself\n", stderr);
+        else if ((fs = fopen(file_src, "r")) == NULL)
+            fprintf(stderr, "Can't open %s\n", file_src);
+        else
+        {
+            if (setvbuf(fs, NULL, _IOFBF, BUFSIZE) != 0)
+            {
+                fputs("Can't create input buffer\n", stderr);
+                continue;
+            }
+            append(fs, fa); // 开始读写文件
+            if (ferror(fs) != 0)
+                fprintf(stderr, "Error in reading file %s.\n", file_src);
+            if (ferror(fa) != 0)
+                fprintf(stderr, "Error in writing file %s.\n", file_app);
+
+            fclose(fs);
+            files++;
+            printf("File %s appended.\n", file_src);
+            // 提示输入下个文件名
+            puts("Next file (empty line to quit):");
+        }
+    }
+
+    printf("Done appending. %d files appended.\n", files);
+    rewind(fa); // 将目标文件流的指针重置到文件开头
+    printf("%s contents:\n", file_app);
+
+    while ((ch = getc(fa)) != EOF) // 读取目标文件将内容输出到终端
+        putchar(ch);
+
+    puts("Done displaying.");
+    fclose(fa);
+    return 0;
+}
+
+// 从 source 文件读取，写入到 dest 中
+void append(FILE *source, FILE *dest)
+{
+    size_t bytes; // 每次读写的长度
+    static char temp[BUFSIZE]; // temp 数组分配 BUFSIZE 长度
+    // 循环读取，从 source 每次读取 BUFSIZE 的长度保存到 temp 中。返回本次读取的长度（读到末尾的那次返回的长度可能就不是 BUFSIZE 了）
+    while ((bytes = fread(temp, sizeof(char), BUFSIZE, source)) > 0)
+        fwrite(temp, sizeof(char), bytes, dest); // 将 temp 数组中的内容写入到 dest 中，写入的长度为上次读取返回的长度
+}
+
+/*
+* 读取输入的字符串
+* st 是输入的字符串保存到的变量的指针
+* n 是限制输入的字符串最大长度
+*/
+char *s_gets(char *st, int n)
+{
+    char *ret_val;
+    char *find;
+    ret_val = fgets(st, n, stdin); // 从标准输入中获取输入的字符串保存到指针 st 所指向的变量中
+
+    if (ret_val)
+    {
+        find = strchr(st, '\n'); // 查找第一个换行符
+        if (find)
+            *find = '\0'; // 如果找到了换行符，将换行符替换成空字符
+        else
+            // 如果没有找到换行符，说明输入的字符串长度超过了 n-1，此时我们需要继续读取并丢弃多余的字符，直到遇到换行符为止，以确保后续的输入不受影响。
+            while (getchar() != '\n')
+                continue;
+    }
+    return ret_val;
+}
+```
+
+##### 关键概念
+C 程序把输入看作是字节流，输入流来源于文件、输入设备（如键盘），或者甚至是另一个程序的输出。类似地，C 程序把输出也看作是字节流，输出流的目的地可以是文件、视频显示等。
+C 如何解释输入流或输出流取决于所使用的输入/输出函数。程序可以不做任何改动地读取和存储字节，或者把字节依次解释成字符，随后可以把这些字符解释成普通文本以用文本表示数字。类似地，对于输出，所使用的函数决定了二进制值是被原样转移，还是被转换成文本或以文本表示数字。
+
+# 结构
+结构类似于对象，首先我们先看一个 Demo：
+```c
+//* book.c -- 一本书的图书目录 */
+#include <stdio.h>
+#include <string.h>
+char *s_gets(char *st, int n); // 同上面示例中的 s_gets() 函数
+#define MAXTITL 41 // 书名的最大长度 + 1
+#define MAXAUTL 31 // 作者姓名的最大长度 + 1
+
+// 结构模版：标记是 book
+struct book
+{
+    char title[MAXTITL]; // book 的标题（title）是字符串数组
+    char author[MAXAUTL]; // book 的作者（author）也是字符串数组
+    float value; // book 的价格（value）是个浮点数
+};
+
+int main(void)
+{
+    struct book library; /* 把 library 声明为一个 book 类型的变量 */
+    printf("Please enter the book title.\n");
+    s_gets(library.title, MAXTITL); /* 使用 . 符号来访问 title 部分 */
+    printf("Now enter the author.\n");
+    s_gets(library.author, MAXAUTL);
+    printf("Now enter the value.\n");
+    scanf("%f", &library.value);
+    printf("%s by %s: $%.2f\n", library.title,
+           library.author, library.value);
+    printf("%s: \"%s\" ($%.2f)\n", library.author,
+           library.title, library.value);
+    printf("Done.\n");
+    return 0;
+}
+```
+首先是关键字 struct，它表明跟在其后的是一个结构，后面是一个可选的标记（该例中是 book），稍后程序中可以使用该标记引用该结构。所以，我们在后面的程序中可以这样声明：`struct book library;`这把library声明为一个使用 book 结构布局的结构变量。在结构声明中，用一对花括号括起来的是结构成员列表。每个成员都用自己的声明来描述。
+book 中有3部分，每个部分都称为成员（member）或字段（field）。
+
+声明结构模板时只是告诉编译器如何表示数据，此时并没有让编译器为数据分配空间。当编译器执行到 `struct book library` 时，才使用 book 模板为 library 变量分配空间。并且通常是连续的内存空间，因为 C 语言在声明变量时就需要确定变量所占空间的大小，book 里的 title, author, value 都指定了大小，所以可以将它们使用连续的内存空间存储，这样在对结构中的成员进行操作时能得到更高的性能。
+
+`struct book library` 实际上是以下代码的简写：
+```c
+struct book {
+    char title[MAXTITL];
+    char author[AXAUTL];
+    float value;
+} library; // 变量名在分号之前
+```
+所以，声明结构的过程和定义结构变量的过程可以组合成一个步骤：
+```c
+struct { /* 无结构标记 */
+    char title[MAXTITL];
+    char author[MAXAUTL];
+    float value;
+} library;
+```
+
+##### 初始化结构
+上面我们是先声明了 library 变量再读取用户输入的内容对结构中的字段进行赋值。实际上在声明结构变量时也能进行赋值操作，与初始化数组的语法类似：
+```c
+struct book library = {
+    "The Pious Pirate and the Devious Damsel", // title 的值
+    "Renee Vivotte", // author 的值
+    1.95 // value 的值
+};
+```
+由于不能将一个数组变量赋值给另一个数组变量，所以：
+```c
+char ar[] = "abcd";
+float v = 1.23;
+struct book a = {
+    // 这里不行，因为这里实际是将数组 ar 赋值给了 a.title，而数组不能赋值给另一个数组
+    // 因为数组的值实际上是一个地址，而 title 需要的是字符串数组
+    ar,
+    v // 这里可以
+};
+
+// 也不行，因为一个数组的长度和另一个数组可能不一样，所以 C 语言做了限制不能将一个数组赋值给另一个数组
+library.title = ar;
+
+// 另一种方式
+struct book {
+    char *title; // 将 title 声明为指针
+};
+struct book b = {
+    ar // 数组变量是个指针，将它赋值给另一个指针是可以的
+};
+```
+
+##### 结构的初始化器
+C99 和 C11 为结构提供了指定初始化器，其语法如下：
+```c
+struct book surprise = {
+    // 使用 .fieldName 为某个字段初始化值
+    .value = 10.99
+};
+```
+
+##### 声明结构数组
+声明结构数组和声明其他类型的数组类似。下面是一个声明结构数组的例子：
+```c
+struct book library[MAXBKS]; // MAXBKS 个 book 结构的数组 library
+```
+
+##### 访问结构数组的成员
+```c
+library[0].title; // 通过数组方式访问到第一个结构，再获取 title 字段
+```
+
+### 嵌套结构
+在一个结构中包含另一个结构即为嵌套结构。
+```c
+#include <stdio.h>
+#define LEN 20
+const char * msgs[5] =
+{
+    " Thank you for the wonderful evening, ",
+    "You certainly prove that a ",
+    "is a special kind of guy. We must get together",
+    "over a delicious ",
+    " and have a few laughs"
+};
+struct names { // 第1个结构
+    char first[LEN];
+    char last[LEN];
+};
+struct guy { // 第2个结构
+    struct names handle; // 嵌套结构
+    char favfood[LEN];
+    char job[LEN];
+    float income;
+};
+int main(void)
+{
+    struct guy fellow = { // 初始化一个结构变量
+        { "Ewen", "Villard" }, // 给嵌套结构赋值
+        "grilled salmon",
+        "personality coach",
+        68112.00
+    };
+    printf("Dear %s, \n\n", fellow.handle.first); // 通过 fellow.handle 访问嵌套结构
+    printf("%s%s.\n", msgs[0], fellow.handle.first);
+    printf("%s%s\n", msgs[1], fellow.job);
+    printf("%s\n", msgs[2]);
+    printf("%s%s%s", msgs[3], fellow.favfood, msgs[4]);
+}
+```
+
+### 指向结构的指针
+至少有4个理由可以解释为何要使用指向结构的指针。第一，就像指向数组的指针比数组本身更容易操控（如，排序问题）一样，指向结构的指针通常比结构本身更容易操控。第二，在一些早期的C实现中，结构不能作为参数传递给函数，但是可以传递指向结构的指针。第三，即使能传递一个结构，传递指针通常更有效率。第四，一些用于表示数据的结构中包含指向其他结构的指针。
