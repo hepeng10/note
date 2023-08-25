@@ -511,6 +511,8 @@ hepengsoul
 建筑招工找活、吉工家：jlg_20151027
 记工记账：jigongjia2022
 git clone: hepeng10    HePeng0822
+工地随手记  secret: cd32ca5addb193f482b46de10a572d72
+2020开工测一测  secret: 3e8ea2f28eee38610cdd13981dc780de
 
 Key：
 gitHub personal token: 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

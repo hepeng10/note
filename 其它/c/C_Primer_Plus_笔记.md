@@ -120,8 +120,20 @@ int main(void) {
 当声明字符串时，应该使用 char 数组进行声明，并且使用双引号。由于字符串最后会有个 \0 结束符，所有实际上能存储的字符长度比声明时的长度少一位。**（但是我在 Mac 中测试，并未发现需要少输入一位，可能编译器不同？）**
 
 ### char 数组长度和中文
-上面我们使用 `char s[40]` 定义了 s 的长度为40，由于1个 char 类型元素占用1字节，所以表示的是40字节。上面的内容为 `这是个字符串` 是6个中文字符，40个字节可以容纳6个中文字符，但是当我们改为 `char s[10]` 时，编译器就会发出警告，说我们的字符串太长了，是因为1个中文并不是只占用1个字节，中文不在 ASCII 编码中，属于 Unicode 编码，经测试1个中文字符占用的是3个字节，所以需要 `char s[18]` 才能正常编译。（上面 strlen(s) 输出18也能看出一个中文占用3个字节）
+上面我们使用 `char s[40]` 定义了 s 的长度为40，由于1个 char 类型元素占用1字节，所以表示的是40字节。上面的内容为 `这是个字符串` 是6个中文字符，40个字节可以容纳6个中文字符，但是当我们改为 `char s[10]` 时，编译器就会发出警告，说我们的字符串太长了，是因为1个中文并不是只占用1个字节，中文不在 ASCII 编码中，属于 Unicode 编码，在常用的 UTF-8 中，1个中文字符占用的是3个字节，所以需要 `char s[18]` 才能正常编译。（上面 strlen(s) 输出18也能看出一个中文占用3个字节）
 **Unicode 编码中的中文等字符存储在内存中也是二进制数字，一个汉字对应一个数值，3个字节足以表示各种语言的文字了。（计算机读取到 Unicode 编码内存位置时，应该会有某种机制告诉计算机这里存储的是 Unicode 编码，而不是普通的数字，读取后会使用 Unicode 编码进行解析成汉字输出。）**
+```c
+// 错误
+int main() {
+    char a = '你'; // 因为一个中文字符占3个字节，所以不能赋值给 char 类型
+    printf("%c\n", a);
+}
+// 正确
+int main() {
+    char a[] = "你"; // 一个中文字符也需要用字符串数组进行存储
+    printf("%s\n", a);
+}
+```
 
 # 常量
 ### 使用 #define 定义常量
@@ -936,7 +948,7 @@ int main(void)
 {
     int n = 10;
     int *p;
-    int **pp; // 指向指针的指针，使用两个 *
+    int **pp; // 指向指针的指针，使用两个 *。类型也是解引用后最终值的类型
     pp = &p;
     printf("变量 n 的内存地址：%p\n", &n);
     printf("未赋值的 p 指向的内存地址：%p\n", p);
@@ -2426,3 +2438,1332 @@ int main(void)
 
 ### 指向结构的指针
 至少有4个理由可以解释为何要使用指向结构的指针。第一，就像指向数组的指针比数组本身更容易操控（如，排序问题）一样，指向结构的指针通常比结构本身更容易操控。第二，在一些早期的C实现中，结构不能作为参数传递给函数，但是可以传递指向结构的指针。第三，即使能传递一个结构，传递指针通常更有效率。第四，一些用于表示数据的结构中包含指向其他结构的指针。
+```c
+/* friends.c -- 使用指向结构的指针 */
+#include <stdio.h>
+#define LEN 20
+
+struct names
+{
+    char first[LEN];
+    char last[LEN];
+};
+
+struct guy
+{
+    struct names handle;
+    char favfood[LEN];
+    char job[LEN];
+    float income;
+};
+
+int main(void)
+{
+    struct guy fellow[2] = { // fellow 是 guy 结构数组，包含两个 guy 结构
+        {
+            {"Ewen", "Villard"},
+            "grilled salmon",
+            "personality coach",
+            68112.00
+        },
+        {
+            {"Rodney", "Swillbelly"},
+            "tripe",
+            "tabloid editor",
+            432400.00
+        }
+    };
+    struct guy *him; /* 声明一个指向 guy 结构的指针 */
+    printf("address #1: %p #2: %p\n", &fellow[0], &fellow[1]);
+    him = &fellow[0]; /* fellow[0] 是个 guy 结构，将其地址赋值给 guy 结构指针 */
+    printf("pointer #1: %p #2: %p\n", him, him + 1);
+    printf("him->income is $%.2f: (*him).income is $%.2f\n",
+           him->income, (*him).income);
+    him++; /* 指向下一个 guy 结构 */
+    printf("him->favfood is %s: him->handle.last is %s\n",
+           him->favfood, him->handle.last);
+    return 0;
+}
+```
+下面也是将一个结构赋值给指针的示例，此示例用于说明结构变量不是地址（和数组不同），所以需要使用 & 地址符进行赋值：
+```c
+struct guy tom = {
+    {"Ewen", "Villard"},
+    "grilled salmon",
+    "personality coach",
+    68112.00
+};
+him = &tom;
+```
+##### 用指针访问成员
+从上面的示例可以看出，使用指针访问成员有两种方式：
+```c
+him->income; // 第一种方式，使用 -> 运算符来访问
+(*him).income; // *him 得到指针所指地址的值，即结构。再通过 . 运算符就能访问了
+```
+注意：(*him) 必须加括号，因为 . 运算符优先级比 * 更高。
+
+### 向函数传递结构
+##### 传递结构成员
+只要结构成员是一个具有单个值的数据类型（即，int 及其相关类型、char、float、double 或指针），便可把它作为参数传递给接受该特定类型的函数。
+```c
+#include <stdio.h>
+#define FUNDLEN 50
+struct funds
+{
+    char bank[FUNDLEN];
+    double bankfund;
+    char save[FUNDLEN];
+    double savefund;
+};
+double sum(double, double);
+
+int main(void)
+{
+    struct funds stan = {
+        "Garlic-Melon Bank",
+        4032.27,
+        "Lucky's Savings and Loan",
+        8543.94
+    };
+    printf("Stan has a total of $%.2f.\n",
+           sum(stan.bankfund, stan.savefund)); // 将结构成员传递给函数
+    return 0;
+}
+
+/* 两个double类型的数相加 */
+double sum(double x, double y)
+{
+    return (x + y);
+}
+```
+
+##### 传递结构地址
+所有编译器都允许将结构地址作为参数传递。
+```c
+#include <stdio.h>
+#define FUNDLEN 50
+struct funds // 声明 funds 结构
+{
+    char bank[FUNDLEN];
+    double bankfund;
+    char save[FUNDLEN];
+    double savefund;
+};
+double sum(const struct funds *); /* 参数是 funds 结构的指针。由于函数要处理 funds 结构，所以必须先声明 funds 结构。 */
+
+int main(void)
+{
+    struct funds stan = {
+        "Garlic-Melon Bank",
+        4032.27,
+        "Lucky's Savings and Loan",
+        8543.94
+    };
+    printf("Stan has a total of $%.2f.\n", sum(&stan)); // 将 funds 结构的地址传进去
+    return 0;
+}
+
+double sum(const struct funds *money) // money 是 funds 结构的指针
+{
+    return (money->bankfund + money->savefund); // 由于 money 是指针，所以使用 -> 获取成员
+}
+```
+
+##### 传递结构
+较新版本的编译器允许把结构作为参数直接传给函数。
+```c
+#include <stdio.h>
+#define FUNDLEN 50
+struct funds
+{
+    char bank[FUNDLEN];
+    double bankfund;
+    char save[FUNDLEN];
+    double savefund;
+};
+double sum(struct funds moolah); /* 参数是一个结构 */
+
+int main(void)
+{
+    struct funds stan = {
+        "Garlic-Melon Bank",
+        4032.27,
+        "Lucky's Savings and Loan",
+        8543.94
+    };
+    printf("Stan has a total of $%.2f.\n", sum(stan)); // 直接将结构传入
+    return 0;
+}
+double sum(struct funds moolah) // 接收一个结构变量
+{
+    return (moolah.bankfund + moolah.savefund); // 可以直接使用 . 获取成员
+}
+```
+
+##### 将结构赋值给结构
+现在的C允许把一个结构赋值给另一个结构，但是**数组不能这样做**。也就是说，如果 n_data 和 o_data 都是相同类型的结构，可以这样做：
+```c
+o_data = n_data; // 把一个结构赋值给另一个结构
+```
+这条语句把 n_data 的每个成员的值都赋给 o_data 的相应成员。即使成员是数组，也能完成赋值。另外，还可以把一个结构初始化为相同类型的另一个结构：
+```c
+struct names right_field = {"Ruthie", "George"};
+struct names captain = right_field; // 把一个结构初始化为另一个结构
+```
+
+##### 结构和结构指针的选择
+把指针作为参数有两个优点：无论是以前还是现在的 C 实现都能使用这种方法，而且执行起来很快，只需要传递一个地址。缺点是无法保护数据。被调函数中的某些操作可能 会意外影响原来结构中的数据。不过，ANSI C 新增的 const 限定符解决了这个问题。
+把结构作为参数传递的优点是，函数处理的是原始数据的副本，这保护了原始数据。另外，代码风格也更清楚。
+传递结构的两个缺点是：较老版本的实现可能无法处理这样的代码，而且传递结构浪费时间和存储空间。尤其是把大型结构传递给函数，而它只使用结构中的一两个成员时特别浪费。这种情况下传递指针或只传递函数所需的成员更合理。
+**通常，程序员为了追求效率会使用结构指针作为函数参数，如需防止原始数据被意外修改，使用const限定符。按值传递结构是处理小型结构最常用的方法。**
+
+##### 结构中的字符数组和字符指针
+在结构中的值为字符串的成员，使用数组存储或指针存储有什么区别呢？这点主要从内存分配上来看。当使用字符串数组进行存储时，结构中就会分配指定的字符串空间用于存储字符串；而当使用指针存储字符串时，结构中就只会分配一个指针的存储空间，而字符串会根据程序的编写情况存储在其它位置。
+不过使用指针存储字符串有个问题：
+```c
+struct pnames {
+    char * first;
+    char * last;
+};
+
+struct pnames attorney;
+
+puts("Enter the last name of your attorney:"); // 让用户输入字符串
+scanf("%s", attorney.last); // 将用户输入的字符串赋值给指针
+```
+当用户数组字符串后，系统会分配个内存空间用于存储此字符串，但是这实际上只是个临时空间，我们并没有用变量进行存储。所以直接赋值给了字符串指针，可能程序运行过程中这个字符串占用的内存就会被其它覆盖，导致问题。如果是使用的普通字符串数组就不会出现这种情况。这也是字符串数组和字符串指针的重要区别之一。
+
+##### 结构、指针和malloc()
+如果使用 malloc() 分配内存并使用指针存储该地址，那么在结构中使用指针处理字符串就比较合理。这种方法的优点是，可以请求 malloc() 为字符串分配合适的存储空间。
+```c
+struct namect
+{
+    char *fname; // 用指针代替数组
+    char *lname;
+    int letters;
+};
+
+void getinfo(struct namect *pst)
+{
+    char temp[SLEN];
+    printf("Please enter your first name.\n");
+    s_gets(temp, SLEN); // 将输入的内容存储到 temp 变量中
+    // 给成员 fname 分配内存，大小为 temp 长度
+    pst->fname = (char *)malloc(strlen(temp) + 1);
+    // 把 temp 的内容拷贝到已分配的内存
+    strcpy(pst->fname, temp);
+    printf("Please enter your last name.\n");
+    s_gets(temp, SLEN); // 又使用 temp 存储另一个字符串
+    pst->lname = (char *)malloc(strlen(temp) + 1); // 给 lname 分配内存
+    strcpy(pst->lname, temp); // 将 temp 内容拷贝到 lname 内存中
+}
+```
+由于使用 malloc 来分配内存进行存储，也就不用将字符串指针指向另一个字符串变量了，可以减少程序中创建的变量。
+因为使用了 malloc 分配内存，所以通常也要使用 free 来释放内存，我们可以封装个函数用于释放这里的内存，在合适的时候调用：
+```c
+void cleanup(struct namect * pst)
+{
+    free(pst->fname);
+    free(pst->lname);
+}
+```
+
+##### 复合字面量和结构（C99）
+C99的复合字面量特性可用于结构和数组。如果只需要一个临时结构值，复合字面量很好用。例如，可以使用复合字面量创建一个结构作为函数的参数或赋给另一个结构。语法是把类型名放在圆括号中，后面紧跟一个用花括号括起来的初始化列表。
+```c
+(struct book) {"The Idiot", "Fyodor Dostoyevsky", 6.99}
+```
+```c
+#include <stdio.h>
+#define MAXTITL 41
+#define MAXAUTL 31
+struct book // 结构模版：标记是 book
+{
+    char title[MAXTITL];
+    char author[MAXAUTL];
+    float value;
+};
+int main(void)
+{
+    struct book readfirst;
+    int score;
+    printf("Enter test score: ");
+    scanf("%d", &score);
+    if (score >= 84)
+        // 使用复合字面量创建临时结构并赋值给另一个结构变量
+        readfirst = (struct book){"Crime and Punishment",
+                                  "Fyodor Dostoyevsky",
+                                  11.25};
+    else
+        readfirst = (struct book){"Mr. Bouncy's Nice Hat",
+                                  "Fred Winsome",
+                                  5.99};
+    printf("%s by %s: $%.2f\n", readfirst.title,
+           readfirst.author, readfirst.value);
+}
+```
+还可以把复合字面量作为函数的参数：
+```c
+struct rect {double x; double y;};
+double rect_area(struct rect r){return r.x * r.y;}
+...
+double area;
+area = rect_area( (struct rect) {10.5, 20.0});
+```
+复合字面量在所有函数的外部，具有静态存储期；如果复合字面量在块中，则具有自动存储期。
+
+##### 伸缩型数组成员（C99）
+C99新增了一个特性：伸缩型数组成员（flexible array member），利用这项特性声明的结构，其最后一个数组成员具有一些特性。第1个特性是，该数组不会立即存在。第2个特性是，使用这个伸缩型数组成员可以编写合适的代码，就好像它确实存在并具有所需数目的元素一样。
+首先，声明一个伸缩型数组成员有如下规则：
+● 伸缩型数组成员必须是结构的最后一个成员；
+● 结构中必须至少有一个成员；
+● 伸缩数组的声明类似于普通数组，只是它的方括号中是空的。
+```c
+struct flex
+{
+    int count;
+    double average;
+    double scores[]; // 伸缩型数组成员
+};
+```
+实际上，C99的意图并不是让你声明 struct flex 类型的变量，而是希望你声明一个指向 struct flex 类型的指针，然后用 malloc() 来分配足够的空间，以存储 struct flex 类型结构的常规内容和伸缩型数组成员所需的额外空间。
+```c
+struct flex * pf; // 声明一个指针
+// 使用 malloc 分配大小，大小为结构体 flex 的大小加上5个 double 类型大小的和
+// 所以伸缩型数组成员 scores 的大小就为 5 个 double 元素
+pf = malloc(sizeof(struct flex) + 5 * sizeof(double));
+```
+**使用伸缩型数组成员的好处是，可以动态决定结构变量的大小：多个变量属于同一个结构，但是最后一个成员大小可以不同，从而节省内存空间。**
+带伸缩型数组成员的结构确实有一些特殊的处理要求。
+第一，不能用结构进行赋值或拷贝：
+```c
+struct flex * pf1, *pf2; // *pf1 和*pf2 都是结构
+...
+*pf2 = *pf1; // 不要这样做
+```
+这样做只能拷贝除伸缩型数组成员以外的其他成员。确实要进行拷贝，应使用 memcpy() 函数。
+第二，不要以按值方式把这种结构传递给结构。原因相同，按值传递一个参数与赋值类似。要把结构的地址传递给函数。
+第三，不要使用带伸缩型数组成员的结构作为数组成员或另一个结构的成员。
+
+##### 匿名结构（C11）
+当结构中的成员也是结构时，可以使用匿名结构来定义。
+```c
+struct person
+{
+    int id;
+    struct {char first[20]; char last[20];}; // 匿名结构（注意没有成员名）
+};
+struct person ted = {8483, {"Ted", "Grass"}};
+puts(ted.first); // 匿名结构没有成员名，访问时可以直接访问匿名结构中的成员（有点类似JS的解构）
+```
+上面的代码发现匿名结构和直接声明两个成员没啥区别，其实匿名特性在嵌套联合中更加有用。
+
+### 把结构内容保存到文件中
+由于结构可以存储不同类型的信息，所以它是构建数据库的重要工具。例如，可以用一个结构存储雇员或汽车零件的相关信息。最终，我们要把这些信息存储在文件中，并且能再次检索。数据库文件可以包含任意数量的此类数据对象。存储在一个结构中的整套信息被称为记录（record），单独的项被称为字段（field）。
+
+### 链式结构
+结构的多种用途之一：创建新的数据形式。这些形式包括队列、二叉树、堆、哈希表和图表。许多这样的形式都由链式结构（linked structure）组成。通常，**每个结构都包含一两个数据项和一两个指向其他同类型结构的指针**。这些指针把一个结构和另一个结构链接起来，并提供一种路径能遍历整个彼此链接的结构。
+
+### 联合
+联合（union）是一种数据类型，它能在同一个内存空间中存储不同的数据类型（不是同时存储）。其典型的用法是，设计一种表以存储既无规律、事先也不知道顺序的混合类型。使用联合类型的数组，其中的联合都大小相等，每个联合可以存储各种数据类型。
+创建联合和创建结构的方式相同，需要一个联合模板和联合变量。
+```c
+union hold {
+    int digit;
+    double bigfl;
+    char letter;
+};
+```
+以上代码如果将 union 改为 struct 那么是声明一个包含3个成员的结构。然而这里使用的是 union，表示这是一个只能存储一个 int 类型的值或一个 double 类型的值或 char 类型的值的联合（不是3个字段存储3个值，而是同一时刻只能选择存储某种类型的值）。
+使用联合声明变量：
+```c
+union hold fit; // hold 类型的联合变量
+union hold save[10]; // 内含10个联合变量的数组
+union hold * pu; // 指向 hold 类型联合变量的指针
+```
+第1个声明创建了一个单独的联合变量 fit。**编译器分配足够的空间以便它能存储联合声明中占用最大字节的类型**。在本例中，占用空间最大的是 double 类型的数据。在我们的系统中，double 类型占64位，即8字节。第2个声明创建了一个数组 save，内含10个元素，每个元素都是8字节。第3个声明创建了一个指针，该指针变量存储 hold 类型联合变量的地址。
+
+##### 使用联合
+```c
+fit.digit = 23; //把23存储在 fit，占2字节
+fit.bigfl = 2.0; // 清除23，存储 2.0，占8字节
+fit.letter = 'h'; // 清除2.0，存储 h，占1字节
+```
+点运算符表示正在使用哪种数据类型。在联合中，一次只存储一个值。即使有足够的空间，也不能同时存储一个 char 类型值和一个 int 类型值。**编写代码时要注意当前存储在联合中的数据类型。**
+和用指针访问结构使用`->`运算符一样，用指针访问联合时也要使用`->`运算符：
+```c
+pu = &fit; // 将联合的地址赋值给指针 pu
+x = pu->digit; // 使用指针访问联合。相当于 x = fit.digit
+```
+联合的一种用法是，在结构中存储与其成员有从属关系的信息。例如，假设用一个结构表示一辆汽车。如果汽车属于驾驶者，就要用一个结构成员来描述这个所有者。如果汽车被租赁，那么需要一个成员来描述其租赁公司。可以用下面的代码来完成：
+```c
+struct owner
+{
+    char socsecurity[12];
+    ...
+};
+struct leasecompany
+{
+    char name[40];
+    char headquarters[40];
+    ...
+};
+union data
+{
+    struct owner owncar;
+    struct leasecompany leasecar;
+};
+struct car_data
+{
+    char make[15];
+    int status; /* 私有为0，租赁为1 */
+    union data ownerinfo; // 当 status 为0时会取 ownerinfo.owncar，1时取 ownerinfo.leasecar
+    ...
+};
+```
+
+##### 匿名联合（C11）
+匿名联合和匿名结构的工作原理相同，即匿名联合是一个结构或联合的无名联合成员。
+```c
+struct car_data
+{
+    char make[15];
+    int status; /* 私有为0，租赁为1 */
+    // 匿名联合
+    union
+    {
+        struct owner owncar;
+        struct leasecompany leasecar;
+    };
+    ...
+};
+```
+现在，如果 flits 是 car_data 类型的结构变量，可以用 flits.owncar.socsecurity 代替 flits.ownerinfo.owncar.socsecurity。
+
+### 枚举类型
+可以用枚举类型（enumerated type）声明符号名称来表示整型常量。使用 enum 关键字，可以创建一个新“类型”并指定它可具有的值。**枚举主要用来提高程序的可读性和可维护性。**
+```c
+// 声明枚举类型。此枚举类型可能的值为 red、orange、yellow...。这些符号常量被称为枚举符（enumerator）
+enum spectrum {red, orange, yellow, green, blue, violet};
+// 使用枚举类型声明变量。color 的值就可能为 red、orange、yellow...
+enum spectrum color;
+color = blue; // 给 color 赋值为枚举类型中的枚举符
+```
+第1个声明创建了 spetrum 作为标记名，允许把 enum spectrum 作为一个类型名使用。第2个声明使 color 作为该类型的变量。
+枚举符实际是 int 类型的值，red 是0，orange 是1...
+注意：我们声明了枚举中的枚举符后，就不能声明相同的变量名了，这里我们就不能再声明名为 red, orange 的变量了。但是可以声明名为 spectrum 的变量，因为 enum spectrum 中的 spectrum 是声明的枚举类型的名称而不是变量名，它们处于不同的名称空间。
+
+##### 赋值
+在枚举声明中，可以为枚举常量指定整数值：
+```c
+enum levels {low = 100, medium = 500, high = 2000};
+// cat 是0，puma 是11，tiger 是12
+enum feline {cat, lynx = 10, puma, tiger};
+```
+
+### typedef
+typedef 工具是一个高级数据特性，利用 typedef 可以为某一类型自定义名称。这方面与 #define 类似，但是两者有3处不同：
+● 与 #define 不同，typedef 创建的符号名只受限于类型，不能用于值。
+● typedef 由编译器解释，不是预处理器。
+● 在其受限范围内，typedef 比 #define 更灵活。
+基本语法：
+```c
+// 定义一个名为 BYTE 的类型，等同于 unsigned char
+typedef unsigned char BYTE;
+BYTE x = 1; // 使用 BYTE 类型声明变量
+```
+通常，typedef 定义中用**大写字母**表示被定义的名称，以提醒用户这个类型名实际上是一个符号缩写。typedef 中使用的名称遵循变量的命名规则。
+
+typedef 的一些特性与 #define 的功能重合。例如：
+```c
+#define BYTE unsigned char
+```
+这使预处理器用 BYTE 替换 unsigned char。但是也有 #define 没有的功能：
+```c
+typedef char * STRING;
+```
+我们使用 typedef 的 STRING 声明变量：
+```c
+STRING name, sign;
+等同于
+char * name, * sign;
+```
+如果将 typedef 改为 #define 就会出问题了：
+```c
+#define STRING char *
+STRING name, sign;
+将被翻译成：
+char * name, sign; // sign 不再是指针
+```
+还可以把 typedef 用于结构：
+```c
+typedef struct complex {
+    float real;
+    float imag;
+} COMPLEX;
+COMPLEX num = {1.1, 2.2};
+```
+使用 typedef 的第1个原因是：为经常出现的类型创建一个方便、易识别的类型名。如上面的 COMPLEX。
+使用 typedef 的第2个原因是：typedef 常用于给复杂的类型命名：
+```c
+typedef char (* FRPTC ()) [5];
+```
+把 FRPTC 声明为一个函数类型，该函数返回一个指针，该指针指向内含5个 char 类型元素的数组。
+```c
+#include <stdio.h>
+// 定义一个函数类型为返回5个字符的数组的指针
+typedef char (* FRPTC ()) [5];
+// 包含5个字符的字符串数组
+char myArray[5] = "Hello";
+// 声明一个函数，返回值为5个字符的数组的指针
+char (*myFunction())[5] {
+    return &myArray;
+}
+
+int main() {
+    FRPTC func = myFunction; // 声明的函数与我们定义的 FRPTC 类型匹配，所以可以赋值
+    printf("%s\n", *func()); // 输出 "Hello"
+}
+```
+
+使用 typedef 时要记住，typedef 并没有创建任何新类型，它只是为某个已存在的类型增加了一个方便使用的标签。
+
+### 函数和指针
+我们可以声明一个指向函数的指针。通常，函数指针常用作另一个函数的参数，告诉该函数要使用哪一个函数。
+我们知道 int 变量存储在内存中，它有个内存中的地址。同样，函数也有地址，因为函数的机器语言实现由载入内存的代码组成。指向函数的指针中存储着函数代码的起始处的地址。声明一个数据指针时，必须声明指针所指向的数据类型。声明一个函数指针时，必须声明指针指向的函数类型。为了指明函数类型，要指明函数签名，即函数的返回类型和形参类型。
+```c
+void ToUpper(char *); // 函数原型：把字符串中的字符转换成大写字符
+```
+ToUpper() 函数的类型是“带`char *`类型参数、返回类型是`void`的函数”。下面声明了一个指针 pf 指向该函数类型：
+```c
+void (*pf)(char *); // 声明一个函数指针 pf，这个函数接收一个参数 char *，返回 void
+```
+**注意，把函数名 ToUpper 替换为表达式 `(*pf)` 是创建指向函数指针最简单的方式。**
+声明了函数指针后，可以把类型匹配的函数地址赋给它。在这种上下文中，函数名可以用于表示函数的地址：
+```c
+void ToUpper(char *);
+void ToLower(char *);
+int round(double);
+void (*pf)(char *);
+pf = ToUpper; // 有效，ToUpper是该类型函数的地址
+pf = ToLower; //有效，ToLower是该类型函数的地址
+pf = round; // 无效，round与指针类型不匹配
+pf = ToLower(); // 无效，ToLower()不是地址
+```
+使用函数指针调用函数：
+```c
+void ToUpper(char *);
+void ToLower(char *);
+void (*pf)(char *);
+char mis[] = "Nina Metier";
+pf = ToUpper;
+// (*pf) 通过地址获取到函数本身后进行调用
+(*pf)(mis); // 把 ToUpper 作用于mis（语法1）
+pf = ToLower; // 函数名本身就是指针，所以是将一个指针赋值给另一个指针
+// 由于函数名本身就是指针，所以也可以直接通过指针调用
+pf(mis); // 把 ToLower 作用于mis（语法2）
+```
+接收函数指针的函数：
+```c
+void show(void (* fp)(char *), char * str); // 函数原型
+void show(void (*fp)(char *), char *str)
+{
+    (*fp)(str); /* 调用传入的函数，把所选函数作用于 str */
+    puts(str);  /* 显示结果 */
+}
+// 由于函数名本身就是指针，所以可以直接传给参数
+show(ToLower, mis);
+// 将函数指针作为参数传进去
+show(pf, mis);
+```
+通过参数接收函数指针就能实现将一个函数作为参数传给另一个函数了。
+
+# 位操作
+在 C 语言中，可以单独操控变量中的位。读者可能好奇，竟然有人想这样做。有时必须单独操控位，而且非常有用。例如，通常向硬件设备发送一两个字节来控制这些设备，其中每个位（bit）都有特定的含义。另外，与文件相关的操作系统信息经常被存储，通过使用特定位表明特定项。许多压缩和加密操作都是直接处理单独的位。
+
+### 有符号整数
+如何表示有符号整数取决于硬件，而不是C语言。也许表示有符号数最简单的方式是用1位（如，高阶位）存储符号，只剩下7位表示数字本身（假设存储在1字节中）。用这种符号量（sign-magnitude）表示法，10000001表示−1，00000001表示1。因此，其表示范围是−127～+127。这种方法的缺点是有两个0：+0和-0。这很容易混淆，而且用两个位组合来表示一个值也有些浪费。
+二进制补码（two’s-complement）方法避免了这个问题，是当今最常用的系统。
+要得到一个二进制补码数的相反数，最简单的方法是反转每一位（即0变为1，1变为0），然后加1。如：因为1是00000001，那么−1则是11111110+1，或11111111；-1是11111111，那么1则是00000000+1，或00000001。
+所以，负数的补码就是其正数的每位取反再+1；也是其原码（-1的原码是10000001）除符号位每位取反再+1。因为负数的原码就是正数的符号位取反，所以负数用原码计算补码就不用再将符号位取反了。
+**原码只是方便人阅读的，如-1的原码是10000001。而在计算机中进行存储、运算都是使用的补码，如-1是11111111,1是00000001，-1+1是11111111+00000001=100000000，丢掉超出位数的最高位即00000000就是0**
+
+### 二进制浮点数
+浮点数分两部分存储：二进制小数和二进制指数。
+##### 二进制小数
+十进制的浮点数0.527，表示如下：
+5/10 + 2/100 + 7/1000
+从左往右，各分母都是10的递增次幂。
+在二进制小数中，使用2的幂作为分母，所以二进制小数 .101 表示为：
+1/2 + 0/4 + 1/8
+用十进制表示法为：
+0.50 + 0.00 + 0.125
+即0.625
+许多分数（如，1/3）不能用十进制表示法精确地表示。与此类似，许多分数也不能用二进制表示法准确地表示。**实际上，二进制表示法只能精确地表示多个1/2的幂的和**。因此，3/4和7/8可以精确地表示为二进制小数，但是1/3和2/5却不能。
+##### 浮点数表示法
+为了在计算机中表示一个浮点数，要留出若干位（因系统而异）存储二进制分数，其他位存储指数。
+
+### 其他进制数
+计算机界通常使用八进制记数系统和十六进制记数系统。因为8和16都是2的幂，这些系统比十进制系统更接近计算机的二进制系统。
+##### 八进制
+八进制（octal）是指八进制记数系统。该系统基于8的幂，用0～7表示数字。每个八进制位对应3个二进制位。
+##### 十六进制
+十六进制（hexadecimal或hex）是指十六进制记数系统。该系统基于16的幂，用0～15表示数字。但是，由于没有单独的数（digit，即0～9这样单独一位的数）表示10～15，所以用字母A～F来表示。
+每个十六进制位都对应一个4位的二进制数（即4个二进制位），那么两个十六进制位恰好对应一个8位字节。
+
+### C按位运算符
+C提供按位逻辑运算符和移位运算符。在下面的例子中，为了方便读者了解位的操作，我们用二进制记数法写出值。但是在实际的程序中不必这样，用一般形式的整型变量或常量即可。例如，在程序中用25或031或0x19，而不是00011001。
+#### 按位逻辑运算符
+4个按位逻辑运算符都用于整型数据，包括 char。之所以叫作按位（bitwise）运算，是因为这些操作都是针对每一个位进行，不影响它左右两边的位。
+1. 二进制反码或按位取反：～
+    一元运算符`～`把1变为0，把0变为1。
+    ```c
+    ～(10011010) // 表达式
+    (01100101) // 结果值
+    ```
+    假设 val 的类型是 unsigned char，已被赋值为2。在二进制中，00000010表示2。那么，～val 的返回值是11111101，即253。`~`运算符不会改变原 val 的值。
+2. 按位与：&
+    二元运算符&通过逐位比较两个运算对象，生成一个新值。对于每个位，只有两个运算对象中相应的位都为1时，结果才为1。
+    ```c
+    (10010011) & (00111101) // 表达式
+    (00010001) // 结果值
+    ```
+3. 按位或：|
+    二元运算符|，通过逐位比较两个运算对象，生成一个新值。对于每个位，如果两个运算对象中相应的位为1，结果就为1。
+    ```c
+    (10010011) | (00111101) // 表达式
+    (10111111) // 结果值
+    ```
+4. 按位异或：^
+    二元运算符^逐位比较两个运算对象。对于每个位，如果两个运算对象中相应的位一个为1（但不是两个为1），结果为1。
+    ```c
+    (10010011) ^ (00111101) // 表达式
+    (10101110) // 结果值
+    ```
+##### 用法：掩码
+按位与运算符常用于掩码（mask）。所谓掩码指的是一些设置为开（1）或关（0）的位组合。
+假设定义符号常量 MASK 为2（即，二进制形式为00000010），只有1号位是开的（左边第一位是7号位，右边第一位是0号位），其它都是关。而现在有个 flag 变量，可能有多个位置是1，我们现在要把除1号位外的其它位都改为0，就可以使用按位与：
+```c
+flags = flags & MASK;
+01101010 & 00000010 -> 00000010
+00110000 & 00000010 -> 00000000
+```
+当使用按位与时，就不会改变 flags 中1号位的状态，而将其它位都改为了0。
+这个过程就叫做“使用掩码”，掩码中的0表示不透明，1表示透明，就像把掩码掩盖在 flags 上面，让透明的位置得到保留，不透明的位置被抹去。
+![图 1](assets/1692778774168.png) 
+##### 用法：打开位（设置位）
+有时，需要打开一个值中的特定位，同时保持其他位不变。例如，一台 IBM PC 通过向端口发送值来控制硬件。为了打开内置扬声器，必须打开1号位，同时保持其他位不变。这种情况可以使用按位或运算（|）。
+```c
+flags = flags | MASK;
+01101000 & 00000010 -> 01101010
+```
+##### 用法：关闭位（清空位）
+和打开特定的位类似，有时也需要在不影响其他位的情况下关闭指定的位。假设要关闭变量 flags 中的1号位。同样，MASK 只有1号位为1（即，打开）。可以这样做：
+```c
+flags = flags & ～MASK;
+01101010 & ~00000010
+-> 01101010 & 11111101
+-> 01101000
+```
+即把需要关闭的位置设置为0，然后掩盖上去。
+##### 用法：切换位
+切换位指的是打开已关闭的位，或关闭已打开的位。可以使用按位异或运算符（^）切换位。
+```c
+flags = flags ^ MASK;
+01101010 ^ 00000010 -> 01101000 // 将1号位切换为了0
+flags ^= MASK; // 再次切换
+01101000 ^ 00000010 -> 01101010 // 将1号位切换为了1
+```
+可以看出，掩码中值为1的位开启了切换位的功能。
+##### 用法：检查位的值
+前面介绍了如何改变位的值。有时，需要检查某位的值。例如，flags中1号位是否被设置为1？此时就要先将其它位覆盖掉再进行比较：
+```c
+if ((flags & MASK) == MASK)
+```
+#### 移位运算符
+移位运算符向左或向右移动位。
+1. 左移：<<
+    左移运算符（<<）将其左侧运算对象每一位的值向左移动其右侧运算对象指定的位数。左侧运算对象移出左末端位的值丢失，用0填充空出的位置。
+    ```c
+    (10001010) << 2 // 表达式
+    (00101000) // 结果值
+    ```
+2. 右移：>>
+    右移运算符（>>）将其左侧运算对象每一位的值向右移动其右侧运算对象指定的位数。左侧运算对象移出右末端位的值丢。对于无符号类型，用0填充空出的位置；对于有符号类型，其结果取决于机器。空出的位置可用0填充，或者用符号位（即，最左端的位）的副本填充：
+    ```c
+    (10001010) >> 2 // 表达式，有符号值
+    (00100010) // 在某些系统中的结果值
+    (10001010) >> 2 // 表达式，有符号值
+    (11100010) // 在另一些系统上的结果值，用符号位填充
+
+    (10001010) >> 2 // 表达式，无符号值（使用 unsigned 声明的）
+    (00100010) // 所有系统都得到该结果值
+    ```
+##### 用法：移位运算符
+移位运算符针对2的幂提供快速有效的乘法和除法：
+```c
+number << n // number乘以2的n次幂
+number >> n // 如果number为非负，则用number除以2的n次幂
+```
+这些移位运算符类似于在十进制中移动小数点来乘以或除以10。
+移位运算符还可用于从较大单元中提取一些位：
+```c
+#define BYTE_MASK 0xff // 一个16进制数是4位，两个是8位
+unsigned long color = 0x002a162f;
+unsigned char blue, green, red;
+// 使用掩码得到最后两位0x2f
+red = color & BYTE_MASK;
+// 右移8位得到 0x00002a16，然后掩码得到0x16
+green = (color >> 8) & BYTE_MASK;
+// 右移16位得到 0x0000002a，然后掩码得到0x2a
+blue = (color >> 16) & BYTE_MASK;
+```
+##### 获取 int 变量中某位的值
+使用右移位运算符、位掩码和位与操作（&）：
+```c
+// pos 从0开始，右移 pos 位在和掩码1进行按位与运算就能得到当前位是0还是1
+int bitValue = (num >> pos) & 1;
+```
+
+### 位字段
+操控位的第2种方法是位字段（bit field）。位字段是一个 signed int 或 unsigned int 类型变量中的一组相邻的位（C99和C11新增了 _Bool 类型的位字段）。位字段通过一个结构声明来建立，该结构声明为每个字段提供标签，并确定该字段的宽度。例如，下面的声明建立了一个4个1位的字段：
+```c
+struct {
+    // 使用 xxx : 1; 声明了宽度，所以这是个位字段而不是普通的结构成员
+    unsigned int autfd : 1;
+    unsigned int bldfc : 1;
+    unsigned int undln : 1;
+    unsigned int itals : 1;
+} prnt;
+// 赋值只能0或1
+prnt.itals = 0;
+prnt.undln = 1;
+```
+根据该声明，prnt 变量包含4个1位的字段。由于每个字段恰好为1位，所以只能为其赋值1或0。变量 prnt 被存储在 int 大小的内存单元中，但是在本例中只使用了其中的4位。
+有时，某些设置也有多个选择，因此需要多位来表示：
+```c
+struct {
+    unsigned int code1 : 2;
+    unsigned int code2 : 2;
+    unsigned int code3 : 8;
+} prcode;
+// 根据所占位数赋值
+prcode.code1 = 0;
+prcode.code2 = 3;
+prcode.code3 = 102;
+```
+##### 位字段示例
+通常，把位字段作为一种更紧凑存储数据的方式。例如，假设要在屏幕上表示一个方框的属性。为简化问题，我们假设方框具有如下属性：
+● 方框是透明的或不透明的；
+● 方框的填充色选自以下调色板：黑色、红色、绿色、黄色、蓝色、紫色、青色或白色；
+● 边框可见或隐藏；
+● 边框颜色与填充色使用相同的调色板；
+● 边框可以使用实线、点线或虚线样式。
+```c
+struct box_props {
+    bool opaque : 1 ;
+    unsigned int fill_color : 3 ;
+    // 未命名字段。用于占位，一般不会声明未命名字段，特殊情况才可能用到（如需要内存对齐）
+    unsigned int : 4 ;
+    bool show_border : 1 ;
+    unsigned int border_color : 3 ;
+    unsigned int border_style : 2 ;
+};
+```
+C 以 unsigned int 作为位字段结构的基本布局单元。因此，即使一个结构唯一的成员是1位字段，该结构的大小也是一个 unsigned int 类型的大小，unsigned int 在我们的系统中是32位。
+
+**在同类型的编程问题中，位字段和按位运算符是两种可替换的方法，用哪种方法都可以。**
+
+### 对齐特性（C11）
+C11的对齐特性比用位填充字节更自然，它们还代表了C在处理硬件相关问题上的能力。在这种上下文中，对齐指的是如何安排对象在内存中的位置。例如，为了效率最大化，系统可能要把一个double类型的值存储在4字节内存地址上，但却允许把char存储在任意地址。大部分程序员都对对齐不以为然。但是，有些情况又受益于对齐控制。例如，把数据从一个硬件位置转移到另一个位置，或者调用指令同时操作多个数据项。**很少用，需要时再学习。**
+
+# C 预处理器和 C 库
+C 预处理器在程序执行之前查看程序（故称之为预处理器）。根据程序中的预处理器指令，预处理器把符号缩写替换成其表示的内容。预处理器可以包含程序所需的其他文件，可以选择让编译器查看哪些代码。预处理器并不知道C。基本上它的工作是把一些文本转换成另外一些文本。
+
+### 翻译程序的第一步
+在预处理之前，编译器必须对该程序进行一些翻译处理。
+首先，编译器把源代码中出现的字符映射到源字符集。
+第二，编译器定位每个反斜杠后面跟着换行符的实例，并删除它们。也就是说，把下面两个物理行（physical line）：
+```c
+printf("That's wond\
+        erful!\n");
+```
+转换成一个逻辑行（logical line）：
+```c
+printf("That's wonderful\n!");
+```
+注意，在这种场合中，“换行符”的意思是通过按下Enter键在源代码文件中换行所生成的字符，而不是指符号表征\n。
+由于预处理表达式的长度必须是一个逻辑行，所以这一步为预处理器做好了准备工作。一个逻辑行可以是多个物理行。
+第三，编译器把文本划分成预处理记号序列、空白序列和注释序列。这里要注意的是，编译器将用一个空格字符替换每一条注释。因此，下面的代码：
+```c
+int/* 这看起来并不像一个空格*/fox;
+```
+将变成：
+```c
+int fox;
+```
+而且，实现可以用一个空格替换所有的空白字符序列（不包括换行符）。
+最后，程序已经准备好进入预处理阶段，预处理器查找一行中以#号开始的预处理指令。
+##### 明示常量：#define
+指令可以出现在源文件的任何地方，其定义从指令出现的地方到该文件末尾有效。我们大量使用 #define 指令来定义明示常量（manifest constant）（也叫作符号常量），但是该指令还有许多其他用途。
+```c
+#include <stdio.h>
+#define TWO 2        /* 可以使用注释 */
+#define OW "Consistency is the last refuge of the unimagina\
+tive. - Oscar Wilde" /* 反斜杠把该定义延续到下一行 */
+#define FOUR TWO * TWO
+#define PX printf("X is %d.\n", x)
+#define FMT "X is %d.\n"
+int main(void)
+{
+    int x = TWO;
+    PX;
+    x = FOUR;
+    printf(FMT, x);
+    printf("%s\n", OW);
+    printf("TWO: OW\n");
+    return 0;
+}
+```
+预处理器指令从#开始运行，到后面的第1个换行符为止。也就是说，指令的长度仅限于一行。然而，前面提到过，在预处理开始前，编译器会把多行物理行处理为一行逻辑行。
+![图 3](assets/1692847000588.png)  
+##### 重定义常量
+假设先把LIMIT定义为20，稍后在该文件中又把它定义为25。这个过程称为重定义常量。只有新定义和旧定义完全相同才允许重定义。具有相同的定义意味着替换体中的记号必须相同，且顺序也相同。因此，下面两个定义相同：
+```c
+#define SIX 2 * 3
+#define SIX 2 * 3
+```
+这两条定义都有3个相同的记号，额外的空格不算替换体的一部分。而下面的定义则与上面两条宏定义不同：
+```c
+#define SIX 2*3
+```
+这条宏定义中只有一个记号，因此与前两条定义不同。如果需要重定义宏，使用 #undef 指令。
+##### 在 #define 中使用参数
+在 #define 中使用参数可以创建外形和作用与函数类似的类函数宏。
+![Alt text](image.png)
+```c
+#define SQUARE(X) X*X // 类函数宏接收参数X，替换成 X*X
+z = SQUARE(2);
+```
+这看上去像函数调用，但是它的行为和函数调用完全不同。
+```c
+#include <stdio.h>
+#define SQUARE(X) X*X
+#define PR(X) printf("The result is %d.\n", X)
+int main(void)
+{
+    int x = 5;
+    SQUARE(x); // 替换成 x*x
+    SQUARE(2);  // 替换成 2*2
+    PR(SQUARE(x + 2)); // 替换成 x + 2 * x + 2
+    PR(100 / SQUARE(2)); // 替换成 100 / 2*2
+    PR(SQUARE(++x)); // 替换成 ++x*++x
+}
+```
+**所以我们需要使用足够的括号来解决这个问题：**
+```c
+#define SQUARE(x) ((x)*(x))
+```
+尽管如此，这样做还是无法避免程序中最后一种情况的问题。SQUARE(++x)变成了(++x)*(++x)，递增了两次x，一次在乘法运算之前，一次在乘法运算之后：
+(++x)*(++x) = 6*7 = 42
+由于标准并未对这类运算规定顺序，所以有些编译器得7*6。而有些编译器可能在乘法运算之前已经递增了x，所以7*7得49。
+解决这个问题最简单的方法是，避免用 ++x 作为宏参数。**一般而言，不要在宏中使用递增或递减运算符**。但是，++x 可作为函数参数，因为编译器会对 ++x 求值得5后，再把5传递给函数。
+
+##### 用宏参数创建字符串：# 运算符
+首先看一个 DEMO：
+```c
+#define PSQR(X) printf("The square of X is %d.\n", ((X)*(X)));
+PSQR(8);
+// 输出
+The square of X is 64.
+```
+DEMO 中字符串中的 of X 的 X 并没有被替换。
+C 允许在字符串中包含宏参数。在类函数宏的替换体中，`#`号作为一个预处理运算符，可以把记号转换成字符串。例如，如果`x`是一个宏形参，那么`#x`就是转换为字符串"x"的形参名。这个过程称为字符串化（stringizing）。
+```c
+#define PSQR(X) printf("The square of " #X " is %d.\n", ((X)*(X)));
+PSQR(8);
+PSQR(2 + 4);
+int y = 3;
+PSQR(y);
+// 输出
+The square of 8 is 64.
+The square of 2 + 4 is 36.
+The square of y is 9.
+```
+##### 预处理器黏合剂：## 运算符
+与`#`运算符类似，`##`运算符可用于类函数宏的替换部分。而且，`##`还可用于对象宏的替换部分。`##`运算符把两个记号组合成一个记号。
+```c
+#define XNAME(n) x ## n
+#define PRINT_XN(n) printf("x" #n " = %d\n", x ## n)
+int XNAME(1) = 1; // 变成 int x1 = 1;
+int XNAME(2) = 10; // 变成 int x2 = 10;
+PRINT_XN(1); // 变成 printf("x1 = %d\n", x1);
+```
+##### 变参宏：... 和 __VA_ARGS__
+一些函数（如 printf()）接受数量可变的参数。stdvar.h头文件提供了工具，让用户自定义带可变参数的函数。C99/C11也对宏提供了这样的工具。虽然标准中未使用“可变”（variadic）这个词，但是它已成为描述这种工具的通用词。
+通过把宏参数列表中最后的参数写成省略号（即，3个点 `...`）来实现这一功能。__VA_ARGS__可用在替换部分中，表明省略号代表什么。
+```c
+#define PR(...) printf(__VA_ARGS__)
+PR("Howdy");
+PR("weight = %d, shipping = $%.2f\n", wt, sp);
+```
+##### 宏和函数的选择
+宏和函数的选择实际上是时间和空间的权衡。宏生成内联代码，即在程序中生成语句。如果调用20次宏，即在程序中插入20行代码。如果调用函数20次，程序中只有一份函数语句的副本，所以节省了空间。然而另一方面，程序的控制必须跳转至函数内，随后再返回主调程序，这显然比内联代码花费更多的时间。
+宏的一个优点是，不用担心变量类型（这是因为宏处理的是字符串，而不是实际的值）。因此，只要能用 int 或 float 类型都可以使用 SQUARE(x) 宏。
+对于简单的函数，程序员通常使用宏，如下所示：
+```c
+#define MAX(X,Y) ((X) > (Y) ? (X) : (Y))
+#define ABS(X) ((X) < 0 ? -(X) : (X))
+#define ISSIGN(X) ((X) == '+' || (X) == '-' ? 1 : 0)
+```
+要注意以下几点。
+● 记住宏名中不允许有空格，但是在替换字符串中可以有空格。ANSI C允许在参数列表中使用空格。
+● 用圆括号把宏的参数和整个替换体括起来。这样能确保被括起来的部分在下面这样的表达式中正确地展开：
+forks = 2 * MAX(guests + 3, last);
+● 用大写字母表示宏函数的名称。该惯例不如用大写字母表示宏常量应用广泛。但是，大写字母可以提醒程序员注意，宏可能产生的副作用。
+● 如果打算使用宏来加快程序的运行速度，那么首先要确定使用宏和使用函数是否会导致较大差异。在程序中只使用一次的宏无法明显减少程序的运行时间。在嵌套循环中使用宏更有助于提高效率。许多系统提供程序分析器以帮助程序员压缩程序中最耗时的部分。
+
+### 文件包含：#include
+当预处理器发现`#include`指令时，会查看后面的文件名并把文件的内容包含到当前文件中，即替换源文件中的`#include`指令。这相当于把被包含文件的全部内容输入到源文件`#include`指令所在的位置。`#include`指令有两种形式：
+```c
+#include <stdio.h> // 文件名在尖括号中
+#include "mystuff.h" // 文件名在双引号中
+```
+在 UNIX 系统中，尖括号告诉预处理器在标准系统目录中查找该文件。双引号告诉预处理器首先在当前目录中（或文件名中指定的其他目录）查找该文件，如果未找到再查找标准系统目录：
+```c
+#include <stdio.h> // 查找系统目录
+#include "hot.h" // 查找当前工作目录
+#include "/usr/biff/p.h" // 查找/usr/biff目录
+```
+集成开发环境（IDE）也有标准路径或系统头文件的路径。许多集成开发环境提供菜单选项，指定用尖括号时的查找路径。在 UNIX 中，使用双引号意味着先查找本地目录，但是具体查找哪个目录取决于编译器的设定。有些编译器会搜索源代码文件所在的目录，有些编译器则搜索当前的工作目录，还有些搜索项目文件所在的目录。
+包含一个大型头文件不一定显著增加程序的大小。在大部分情况下，头文件的内容是编译器生成最终代码时所需的信息，而不是添加到最终代码中的材料。
+##### 头文件示例
+```c
+// names_st.h -- names_st 结构的头文件
+// 常量
+#include <string.h>
+#define SLEN 32
+// 结构声明
+struct names_st
+{
+    char first[SLEN];
+    char last[SLEN];
+};
+// 类型定义
+typedef struct names_st names;
+// 函数原型
+void get_names(names *);
+void show_names(const names *);
+char * s_gets(char * st, int n);
+```
+头文件中通常用来编写：#define 指令、结构声明、typedef 和函数原型。注意，这些内容是编译器在创建可执行代码时所需的信息，而不是可执行代码。为简单起见，这个特殊的头文件过于简单。通常，应该用`#ifndef`和`#define`防止多重包含头文件。可执行代码通常在源代码文件中，而不是在头文件中。
+头文件中的函数实现等，我们通常会写到一个单独的 c 文件中，在编译时通过链接的方式一起编译得到可执行文件。
+```sh
+gcc file1.c file2.c -o my_program
+```
+另外，还可以使用头文件声明外部变量供其他文件共享。例如，如果已经开发了共享某个变量的一系列函数，该变量报告某种状况（如，错误情况），这种方法就很有效。这种情况下，可以在包含这些函数声明的源代码文件定义一个文件作用域的外部链接变量：
+```c
+int status = 0; // 该变量具有文件作用域，在源代码文件
+```
+然后，可以在与源代码文件相关联的头文件中进行引用式声明：
+```c
+extern int status; // 在头文件中
+```
+这行代码会出现在包含了该头文件的文件中，这样使用该系列函数的文件都能使用这个变量。
+
+### 其他指令
+程序员可能要为不同的工作环境准备 C 程序和 C 库包。不同的环境可能使用不同的代码类型。预处理器提供一些指令，程序员通过修改 `#define` 的值即可生成可移植的代码。`#undef` 指令取消之前的`#define`定义。`#if、#ifdef、#ifndef、#else、#elif 和 #endif` 指令用于指定什么情况下编译哪些代码。`#line` 指令用于重置行和文件信息，`#error` 指令用于给出错误消息，`#pragma` 指令用于向编译器发出指令。
+##### #undef 指令
+\#undef 指令用于“取消”已定义的 #define 指令。
+```c
+#define LIMIT 400
+#undef LIMIT // 程序中使用 LIMIT 不再会被替换成400
+```
+如果想使用一个名称，又不确定之前是否已经用过，为安全起见，可以用 #undef 指令取消该名字的定义（未定义过也不会出错）。
+##### 条件编译
+```c
+#ifdef MAVIS
+    #include "horse.h" // 如果已经用 #define 定义了 MAVIS，则执行下面的指令
+    #define STABLES 5
+#else
+    #include "cow.h" //如果没有用 #define 定义 MAVIS，则执行下面的指令
+    #define STABLES 15
+#endif
+```
+这里使用的较新的编译器和ANSI标准支持的缩进格式。如果使用旧的编译器，必须左对齐所有的指令或至少左对齐 # 号。
+下面这种情况就会在代码中间使用预编译指令了：
+```c
+#include <stdio.h>
+#define JUST_CHECKING
+#define LIMIT 4
+int main(void)
+{
+    int i;
+    int total = 0;
+    for (i = 1; i <= LIMIT; i++)
+    {
+        total += 2 * i * i + 1;
+#ifdef JUST_CHECKING
+        printf("i=%d, running total = %d\n", i, total);
+#endif
+    }
+    printf("Grand total = %d\n", total);
+    return 0;
+}
+```
+##### #ifndef 指令
+\#ifndef 指令与 #ifdef 指令的用法类似，也可以和 #else、#endif 一起使用，但是它们的逻辑相反。#ifndef 指令判断后面的标识符是否是未定义的，常用于定义之前未定义的常量。
+```c
+#ifndef SIZE
+#define SIZE 100
+#endif
+```
+通常，包含多个头文件时，其中的文件可能包含了相同宏定义。#ifndef 指令可以防止相同的宏被重复定义。
+\#ifndef 指令通常用于防止多次包含一个文件。也就是说，应该像下面这样设置头文件：
+```c
+/* things.h */
+#ifndef THINGS_H_
+#define THINGS_H_
+/* 省略了头文件中的其他内容*/
+#endif
+```
+**一个头文件可能被多个地方引用，test.c 文件引用了 a.h 和 b.h，b.h 文件也引用了 a.h，那么 a.h 中的定义就会重复定义。所以，我们在编写头文件的时候就需要一些技巧，比如头文件都使用文件名定义一个常量，当文件名常量不存在时才定义这个头文件要定义的东西，如 stdio.h 头文件：**
+```c
+#ifndef _STDIO_H
+#define _STDIO_H
+// 省略了文件的内容
+#endif
+```
+标准头文件使用 _文件名大写_H 的格式定义这个判断是否已引用的常量，第一次引用 stdio.h 时 _STDIO_H 不存在，所以载入了头文件中的内容，载入头文件内容时 `#define _STDIO_H` 定义了 _STDIO_H。引入的其它文件中还引用了 stdio.h 就会发现已定义 _STDIO_H 便不会再次载入正式内容了。
+由于标准头文件使用 _文件名大写_H 的格式，我们自己的头文件为了避免冲突就需要改一个格式，如 文件名大写_H_ 这样的。
+```c
+// my.h
+#ifndef MY_H_
+#define MY_H_
+// 其它正式内容
+#endif
+```
+##### #if 和 #elif 指令
+C 语言中的 #if 指令很像 if。#if 后面跟整型常量表达式，如果表达式为非零，则表达式为真。可以在指令中使用 C 的关系运算符和逻辑运算符：
+```c
+#if SYS == 1
+    #include "ibmpc.h"
+#elif SYS == 2
+    #include "vax.h"
+#elif SYS == 3
+    #include "mac.h"
+#else
+    #include "general.h"
+#endif
+```
+##### 预定义宏
+C 标准规定了一些预定义宏：
+![图 4](assets/1692871601254.png)  
+```c
+#include <stdio.h>
+void why_me();
+int main()
+{
+    printf("The file is %s.\n", __FILE__); // /home/hepeng/Test/C/test.c
+    printf("The date is %s.\n", __DATE__); // Aug 24 2023
+    printf("The time is %s.\n", __TIME__); // 18:42:22
+    printf("The version is %ld.\n", __STDC_VERSION__); // 201710
+    printf("This is line %d.\n", __LINE__); // 9
+    printf("This function is %s\n", __func__); // main
+    why_me();
+}
+void why_me()
+{
+    printf("This function is %s\n", __func__); // why_me
+    printf("This is line %d.\n", __LINE__); // 17
+}
+```
+##### #line 和 #error
+\#line 指令重置 \_\_LINE__ 和 \_\_FILE__ 宏报告的行号和文件名。
+```c
+#line 1000 // 把当前行号重置为1000
+#line 10 "cool.c" // 把行号重置为10，把文件名重置为cool.c
+```
+\#error 指令让预处理器发出一条错误消息，该消息包含指令中的文本。如果可能的话，编译过程应该中断。
+```c
+#if __STDC_VERSION__ != 201112L
+#error Not C11
+#endif
+```
+##### 泛型选择（C11）
+C11新增了一种表达式，叫作泛型选择表达式（generic selection expression），可根据表达式的类型（即表达式的类型是 int、double 还是其他类型）选择一个值。泛型选择表达式不是预处理器指令，但是在一些泛型编程中它常用作 #define 宏定义的一部分。
+```c
+_Generic(x, int: 0, float: 1, double: 2, default: 3)
+```
+_Generic 是C11的关键字。_Generic 后面的圆括号中包含多个用逗号分隔的项。第1个项是一个表达式，后面的每个项都由一个类型、一个冒号和一个值组成，如 float: 1。第1个项的类型匹配哪个标签，整个表达式的值是该标签后面的值。例如，假设上面表达式中 x 是 int 类型的变量，x 的类型匹配 int:标签，那么整个表达式的值就是0。如果没有与类型匹配的标签，表达式的值就是 default: 标签后面的值。泛型选择语句与 switch 语句类似，只是前者用表达式的类型匹配标签，而后者用表达式的值匹配标签。
+```c
+#define MYTYPE(X) _Generic((X),\
+    int: "int",\
+    float : "float",\
+    double: "double",\
+    default: "other"\
+)
+printf("%s\n", MYTYPE(5)); // 输出 int
+printf("%s\n", MYTYPE(2.0)); // 输出 float
+```
+宏必须定义为一条逻辑行，但是可以用`\`把一条逻辑行分隔成多条物理行。
+
+### 内联函数（C99）
+通常，函数调用都有一定的开销，因为函数的调用过程包括建立调用、传递参数、跳转到函数代码并返回。使用宏使代码内联，可以避免这样的开销。C99还提供另一种方法：内联函数（inline function）。
+创建内联函数的定义有多种方法。标准规定具有内部链接的函数可以成为内联函数，还规定了内联函数的定义与调用该函数的代码必须在同一个文件中。因此，最简单的方法是使用函数说明符 inline 和存储类别说明符 static。通常，内联函数应定义在首次使用它的文件中，所以内联函数也相当于函数原型。
+```c
+#include <stdio.h>
+inline static void eatline() // 内联函数定义/原型
+{
+    while (getchar() != '\n')
+    continue;
+}
+int main()
+{
+    ...
+    eatline(); // 函数调用
+    ...
+}
+```
+编译器查看内联函数的定义（也是原型），可能会用函数体中的代码替换 eatline() 函数调用。也就是说，效果相当于在函数调用的位置输入函数体中的代码：
+```c
+#include <stdio.h>
+inline static void eatline() //内联函数定义/原型
+{
+    while (getchar() != '\n')
+    continue;
+}
+int main()
+{
+    ...
+    while (getchar() != '\n') //替换函数调用
+    continue;
+    ...
+}
+```
+内联函数应该比较短小。把较长的函数变成内联并未节约多少时间，因为执行函数体的时间比调用函数的时间长得多。
+如果程序有多个文件都要使用某个内联函数，那么这些文件中都必须包含该内联函数的定义。最简单的做法是，把内联函数定义放入头文件，并在使用该内联函数的文件中包含该头文件即可。
+```c
+// eatline.h
+#ifndef EATLINE_H_
+#define EATLINE_H_
+inline static void eatline()
+{
+    while (getchar() != '\n')
+    continue;
+}
+#endif
+```
+一般都不在头文件中放置可执行代码，内联函数是个特例。因为内联函数具有内部链接，所以在多个文件中定义同一个内联函数不会产生什么问题。
+
+### C 库
+##### 访问 C 库
+1. 自动访问：在一些系统中，只需编译程序，就可使用一些常用的库函数。
+2. 文件包含：如果函数被定义为宏，那么可以通过#include指令包含定义宏函数的文件。通常，类似的宏都放在合适名称的头文件中。
+3. 库包含：在编译或链接程序的某些阶段，可能需要指定库选项。即使在自动检查标准库的系统中，也会有不常用的函数库。必须通过编译时选项显式指定这些库。注意，这个过程与包含头文件不同。头文件提供函数声明或原型，而库选项告诉系统到哪里查找函数代码。
+##### 类型变体
+基本的浮点型数学函数接受 double 类型的参数，并返回 double 类型的值。当然，也可以把 float 或 long double 类型的参数传递给这些函数，它们仍然能正常工作，因为这些类型的参数会被转换成 double 类型。这样做很方便，但并不是最好的处理方式。如果不需要双精度，那么用 float 类型的单精度值来计算会更快些。而且把 long double 类型的值传递给 double 类型的形参会损失精度，形参获得的值可能不是原来的值。为了解决这些潜在的问题，C 标准专门为 float 类型和 long double 类型提供了标准函数，即在原函数名后加上 f 或 l 后缀。因此，sqrtf() 是 sqrt() 的 float 版本，sqrtl() 是 sqrt() 的 long double 版本。
+利用 C11 新增的泛型选择表达式定义一个泛型宏，根据参数类型选择最合适的数学函数版本。
+```c
+#include <stdio.h>
+#include <math.h>
+#define RAD_TO_DEG (180 / (4 * atanl(1)))
+// 泛型平方根函数
+#define SQRT(X) _Generic((X), \
+    long double: sqrtl,       \
+    default: sqrt,            \
+    float: sqrtf)(X) // 使用 _Generic 根据 X 的类型选择对应的函数后，还要使用 (X) 进行调用传入 X
+// 泛型正弦函数，角度的单位为度
+#define SIN(X) _Generic((X),             \
+    long double: sinl((X) / RAD_TO_DEG), \  // 也可以在匹配到对应类型的时候直接替换成对应函数的调用
+    default: sin((X) / RAD_TO_DEG),      \
+    float: sinf((X) / RAD_TO_DEG))
+int main(void)
+{
+    float x = 45.0f;
+    double xx = 45.0;
+    long double xxx = 45.0L;
+    long double y = SQRT(x);
+    long double yy = SQRT(xx);
+    long double yyy = SQRT(xxx);
+    printf("%.17Lf\n", y);   // 匹配 float
+    printf("%.17Lf\n", yy);  // 匹配 default
+    printf("%.17Lf\n", yyy); // 匹配 long double
+    int i = 45;
+    yy = SQRT(i); // 匹配 default
+    printf("%.17Lf\n", yy);
+    yyy = SIN(xxx); // 匹配 long double
+    printf("%.17Lf\n", yyy);
+}
+```
+##### tgmath.h 库（C99）
+C99标准提供的 tgmath.h 头文件中定义了泛型类型宏，其效果与上面类型变体类似。
+```c
+#include <tgmath.h> // 引入 tgmath.h，math 函数会被定义成宏
+...
+float x = 44.0;
+double y;
+y = sqrt(x); // 直接调用是调用的宏，所以是函数 sqrtf(x)
+y = (sqrt)(x); // 这种写法可以直接调用函数 sqrt()
+```
+##### atexit() 函数
+在 main() 返回系统时将自动调用 exit() 函数，我们也可以手动调用 exit() 函数退出程序。atexit() 通过注册要在退出时调用的函数来提供这一特性，atexit() 函数接受一个函数指针作为参数。
+```c
+#include <stdio.h>
+#include <stdlib.h>
+void sign_off(void);
+void too_bad(void);
+int main(void)
+{
+    int n;
+    atexit(sign_off); /* 注册 sign_off()函数 */
+    puts("Enter an integer:");
+    if (scanf("%d", &n) != 1) // 输入的内容没有赋值成功，即输入的内容不是整数才执行
+    {
+        puts("That's no integer!");
+        atexit(too_bad); /* 注册 too_bad()函数 */
+        exit(EXIT_FAILURE); // 调用 exit() 时会调用 too_bad 和 sign_off
+    }
+    printf("%d is %s.\n", n, (n % 2 == 0) ? "even" : "odd");
+}
+void sign_off(void)
+{
+    puts("Thus terminates another magnificent program from");
+    puts("SeeSaw Software!");
+}
+void too_bad(void)
+{
+    puts("SeeSaw Software extends its heartfelt condolences");
+    puts("to you upon the failure of your program.");
+}
+```
+atexit() 注册的函数以栈的形式存储，所以是后进先出，后注册的函数线执行。
+以上代码即使输入整数也会执行 sign_off，因为 main 函数执行完时会隐式调用 exit() 函数，从而执行注册的 sign_off。
+exit() 执行完 atexit() 指定的函数后，会完成一些清理工作：刷新所有输出流、关闭所有打开的流和关闭由标准 I/O 函数 tmpfile() 创建的临时文件等。然后 exit() 把控制权返回主机环境，如果可能的话，向主机环境报告终止状态。通常，UNIX程序使用0表示成功终止，用非零值表示终止失败。
+
+### 断言库
+assert.h 头文件支持的断言库是一个用于辅助调试程序的小型库。它由 assert() 宏组成，接受一个整型表达式作为参数。如果表达式求值为假（非零），assert() 宏就在标准错误流（stderr）中写入一条错误信息，并调用 abort() 函数终止程序（abort() 函数的原型在 stdlib.h 头文件中）。
+##### assert 的用法
+程序清单演示了一个使用 assert 的小程序。在求平方根之前，该程序断言 z 是否大于或等于0。程序还错误地减去一个值而不是加上一个值，故意让 z 得到不合适的值。
+```c
+#include <stdio.h>
+#include <math.h>
+#include <assert.h>
+int main()
+{
+    double x, y, z;
+    puts("Enter a pair of numbers (0 0 to quit): ");
+    while (scanf("%lf%lf", &x, &y) == 2 && (x != 0 || y != 0))
+    {
+        z = x * x - y * y;
+        assert(z >= 0); // 当 z 小于0时会终止执行，并报错
+        printf("answer is %f\n", sqrt(z));
+        puts("Next pair of numbers: ");
+    }
+    puts("Done");
+}
+```
+使用 assert() 有几个好处：它不仅能自动标识文件和出问题的行号，还有一种无需更改代码就能开启或关闭 assert() 的机制。如果认为已经排除了程序的 bug，就可以把下面的宏定义写在包含 assert.h 的位置前面：`#define NDEBUG`并重新编译程序，这样编译器就会禁用文件中的所有 assert() 语句。如果程序又出现问题，可以移除这条 #define 指令（或者把它注释掉），然后重新编译程序，这样就重新启用了 assert() 语句。
+##### _Static_assert（C11）
+assert() 表达式是在运行时进行检查。C11新增了一个特性：_Static_assert 声明，可以在编译时检查 assert() 表达式。因此，assert() 会导致正在运行的程序中止，而 _Static_assert() 会导致程序无法通过编译。
+_Static_assert() 接受两个参数。第1个参数是整型常量表达式，第2个参数是一个字符串。如果第1个表达式求值为0（或_False），编译器会显示字符串，而且不编译该程序。
+```c
+#include <stdio.h>
+#include <limits.h>
+// 编译时发现 CHAR_BIT 不等于 16 会终止并显示后面的字符串
+_Static_assert(CHAR_BIT == 16, "16-bit char falsely assumed");
+int main(void)
+{
+    puts("char is 16 bits.");
+    return 0;
+}
+```
+
+##### string.h 库中的 memcpy() 和 memmove()
+不能把一个数组赋给另一个数组，所以要通过循环把数组中的每个元素赋给另一个数组相应的元素。有一个例外的情况是：使用 strcpy() 和 strncpy() 函数来处理字符数组。memcpy() 和 memmove() 函数提供类似的方法处理任意类型的数组。
+```c
+void *memcpy(void * restrict s1, const void * restrict s2, size_t n);
+void *memmove(void *s1, const void *s2, size_t n);
+```
+这两个函数都从 s2 指向的位置拷贝 n 字节到 s1 指向的位置，而且都返回 s1 的值。所不同的是，memcpy() 的参数带关键字 restrict，即 memcpy() 假设两个内存区域之间没有重叠；而 memmove() 不作这样的假设，所以拷贝过程类似于先把所有字节拷贝到一个临时缓冲区，然后再拷贝到最终目的地。作为程序员，在使用 memcpy() 函数时有责任确保两个区域不重叠。
+由于这两个函数设计用于处理任何数据类型，所有它们的参数都是两个指向 void 的指针。C 允许把任何类型的指针赋给`void *`类型的指针。如此宽容导致函数无法知道待拷贝数据的类型。因此，这两个函数使用第3个参数指明待拷贝的字节数。
+
+### 可变参数：stdarg.h
+stdarg.h 头文件为函数提供了可变参数的功能，但是用法比较复杂。必须按如下步骤进行：
+1．提供一个使用省略号的函数原型；
+2．在函数定义中创建一个 va_list 类型的变量；
+3．用宏把该变量初始化为一个参数列表；
+4．用宏访问参数列表；
+5．用宏完成清理工作。
+首先：这种函数的原型应该有一个形参列表，其中至少有一个形参和一个省略号：
+```c
+void f1(int n, ...); // 有效
+int f2(const char * s, int k, ...); // 有效
+char f3(char c1, ..., char c2); // 无效，省略号不在最后
+double f3(...); // 无效，没有形参
+```
+最右边的形参（即省略号的前一个形参）起着特殊的作用，标准中用 parmN 这个术语来描述该形参。在上面的例子中，第1行 f1() 中 parmN 为 n，第2行 f2() 中 parmN 为 k。传递给该形参的实际参数是省略号部分代表的参数数量。例如，可以这样使用前面声明的 f1() 函数：
+```c
+f1(2, 200, 400); // 第一个参数是2，代表2个额外的参数，后面传了2个参
+f1(4, 13, 117, 18, 23); // 第一个参数是4，代表4个额外的参数，后面传了4个参
+```
+接下来，声明在 stdarg.h 中的 va_list 类型代表一种用于存储形参对应的形参列表中省略号部分的数据对象。
+然后，该函数将使用定义在 stdarg.h 中的 va_start() 宏，把参数列表拷贝到 va_list 类型的变量中。该宏有两个参数：va_list 类型的变量和 parmN 形参。
+下一步是访问参数列表的内容，这涉及使用另一个宏 va_arg()。该宏接受两个参数：一个 va_list 类型的变量和一个类型名。第1次调用 va_arg() 时，它返回参数列表的第1项；第2次调用时返回第2项，以此类推。
+最后，要使用va_end()宏完成清理工作。
+```c
+double sum(int lim,...) // lim 是 parmN 形参，它表明变参列表中参数的数量。
+{
+    va_list ap; // 使用 va_list 类型声明一个存储参数的对象
+    va_start(ap, lim); // 使用 va_start() 宏拷贝参数列表到 va_list 变量 ap 中
+
+    // 我们在编写可变参数函数的时候肯定知道每个参数期望接收的类型
+    double tic;
+    int toc;
+    tic = va_arg(ap, double); // 获取第1个参数
+    toc = va_arg(ap, int); // 获取第2个参数
+    ...
+    va_end(ap); // 完成清理工作，接收 va_list 类型变量
+}
+```
+因为 va_arg() 不提供退回之前参数的方法，所以有必要保存 va_list 类型变量的副本。C99新增了一个宏用于处理这种情况：va_copy()。
+```c
+va_list ap;
+va_list apcopy;
+double tic;
+int toc;
+...
+va_start(ap, lim); // 把 ap 初始化为一个参数列表
+va_copy(apcopy, ap); // 把 apcopy 作为 ap 的副本
+```
+最后，看一个接收可变参数函数的 demo:
+```c
+#include <stdio.h>
+#include <stdarg.h>
+double sum(int, ...);
+int main(void)
+{
+    double s, t;
+    s = sum(3, 1.1, 2.5, 13.3);
+    t = sum(6, 1.1, 2.1, 13.1, 4.1, 5.1, 6.1);
+    printf("return value for "
+           "sum(3, 1.1, 2.5, 13.3): %g\n",
+           s);
+    printf("return value for "
+           "sum(6, 1.1, 2.1, 13.1, 4.1, 5.1, 6.1): %g\n",
+           t);
+    return 0;
+}
+double sum(int lim, ...)
+{
+    va_list ap; // 声明一个对象存储参数
+    double tot = 0;
+    int i;
+    va_start(ap, lim); // 把ap初始化为参数列表
+    for (i = 0; i < lim; i++)
+        tot += va_arg(ap, double); // 访问参数列表中的每一项
+    va_end(ap);                    // 清理工作
+    return tot;
+}
+```
