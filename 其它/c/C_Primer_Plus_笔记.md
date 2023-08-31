@@ -3767,3 +3767,409 @@ double sum(int lim, ...)
     return tot;
 }
 ```
+
+# 高级数据表示
+### 研究数据表示
+如何表示存储在内存中的位图图像？位图图像中的每个像素在屏幕上都单独设置。在以前黑白屏的年代，可以使用一个计算机位（1或0）来表示一个像素点（开或闭），因此称之为位图。对于彩色显示器而言，如果有32位色，且显示器有2560×1440的分辨率，则需要将近1.18亿位（14M）来表示一个屏幕的位图图像。是用这种方法表示，还是开发一种压缩信息的方法？是有损压缩（丢失相对次要的数据）还是无损压缩（没有丢失数据）？
+假设我们要保存一个用户每年所看电影的相关信息，可以使用一个结构数组来存储。但是电影的片名长度，该用多大的数组呢？每年所看电影数量，每个人都有所不同，该设置多大的结构数组呢？设置大了浪费空间，设置小了也不行，所以我们应该使用动态内存分配来解决这个问题。
+```c
+#define TSIZE 45 /*存储片名的数组大小*/
+struct film
+{
+    char title[TSIZE];
+    int rating;
+};
+...
+int n, i;
+struct film *movies; /* 指向结构的指针 */
+...
+// 让用户输入每年看电影的数量
+printf("Enter the maximum number of movies you'll enter:\n");
+scanf("%d", &n);
+// 使用 malloc 分配内存，指定为 struct film * 类型
+movies = (struct film *)malloc(n * sizeof(struct film));
+```
+使用 malloc()，可以推迟到程序运行时才确定数组中的元素数量。所以，如果只需要20个元素，程序就不必分配存放500个元素的空间。**但是，这样做的前提是，用户要为元素个数提供正确的值**。
+
+### 从数组到链表
+理想的情况是，用户可以不确定地添加数据（或者不断添加数据直到用完内存量），而不是先指定要输入多少项，也不用让程序分配多余的空间。这可以通过在输入每一项后调用 malloc() 分配正好能存储该项的空间。如果用户输入3部影片，程序就调用 malloc() 3次；如果用户输入300部影片，程序就调用 malloc() 300次。
+不过调用1次 malloc() 分配300个存储空间的数组，这个数组是连续内存，我们可以通过索引进行访问。而调用 malloc() 300次分配的内存就不再是连续的，所以每个 malloc() 分配的内存数据都需要一个指针来访问，也就是需要300个指针。
+![图 5](assets/1693018690094.png)  
+**（在 JS 中我们就可以使用数组来存储，因为 JS 中数组可以动态变化长度的，这也让我们对数据结构的理解不够深刻。而 C 语言中就明显了解到了数据结构的重要性。）**
+
+在结构中新增个指针字段来存储使用 malloc() 创建结构内存时返回的地址，从而形成一个链表结构：
+```c
+#define TSIZE 45 /* 存储片名的数组大小*/
+struct film {
+    char title[TSIZE];
+    int rating;
+    struct film * next;
+};
+```
+虽然结构不能含有与本身类型相同的结构，但是可以含有指向同类型结构的指针。这种定义是定义链表（linked list）的基础，链表中的每一项都包含着在何处能找到下一项的信息。
+为了表明该结构后面没有其他结构，程序要把 next 成员指针设置为 NULL（NULL 是一个定义在 stdio.h 头文件中的符号常量，表示空指针）。当然，还需要一个单独的指针存储第1个结构的地址，该指针被称为头指针（head pointer）。头指针指向链表中的第1项。
+![图 6](assets/1693033812406.png)  
+##### 使用链表
+从概念上了解了链表的工作原理，接着我们来实现它。
+```c
+#include <stdio.h>
+#include <stdlib.h> /* 提供malloc()原型 */
+#include <string.h> /* 提供strcpy()原型 */
+#define TSIZE 45    /* 存储片名的数组大小 */
+// 结构声明
+struct film
+{
+    char title[TSIZE];
+    int rating;
+    struct film *next; /* 指向链表中的下一个结构 */
+};
+char *s_gets(char *st, int n);
+
+int main(void)
+{
+    struct film *head = NULL; // 头指针
+    struct film *prev, *current;
+    char input[TSIZE];
+    /* 收集并存储信息 */
+    puts("Enter first movie title:");
+    while (s_gets(input, TSIZE) != NULL && input[0] != '\0')
+    {
+        // 使用 malloc 分配 film 结构的内存，并返回 film 结构类型的地址。当前指针指向此地址
+        current = (struct film *)malloc(sizeof(struct film));
+        if (head == NULL) /* 第1个结构 */
+            head = current; // 头指针指向第一个结构的地址
+        else /* 后续的结构 */
+            prev->next = current;
+        current->next = NULL; // 暂时将 next 设置为 NULL
+        strcpy(current->title, input); // 用户输入的标题复制到 title 字符串数组中
+        puts("Enter your rating <0-10>:");
+        scanf("%d", &current->rating); // 评分保存到 rating 中
+        while (getchar() != '\n') // 不断读取用户的输入，将缓冲区清空
+            continue;
+        puts("Enter next movie title (empty line to stop):");
+        prev = current; // 将当前结构的地址保存到 prev 中，下个结构添加时使用
+    }
+    /* 显示电影列表 */
+    if (head == NULL)
+        printf("No data entered. ");
+    else
+        printf("Here is the movie list:\n");
+    current = head;
+    while (current != NULL)
+    {
+        printf("Movie: %s Rating: %d\n",
+               current->title, current->rating);
+        current = current->next;
+    }
+    /* 完成任务，释放已分配的内存 */
+    current = head;
+    while (current != NULL)
+    {
+        head = current->next; // 这里 head 用来充当临时变量
+        free(current); // 使用 malloc 分配的内存都需要释放
+        current = head;
+    }
+    printf("Bye!\n");
+}
+
+char *s_gets(char *st, int n)
+{
+    char *ret_val;
+    char *find;
+    ret_val = fgets(st, n, stdin);
+    if (ret_val)
+    {
+        find = strchr(st, '\n'); // 查找换行符
+        if (find)                // 如果地址不是 NULL，
+            *find = '\0';        // 在此处放置一个空字符
+        else
+            while (getchar() != '\n')
+                continue; // 处理剩余输入行
+    }
+    return ret_val;
+}
+```
+程序还有些不足。例如，程序没有检查 malloc() 是否成功请求到内存，也无法删除链表中的项。这些不足可以弥补。例如，添加代码检查 malloc() 的返回值是否是 NULL（返回 NULL 说明未获得所需内存）。如果程序要删除链表中的项，还要编写更多的代码。
+
+### 抽象数据类型（ADT）
+什么是类型？类型特指两类信息：属性和操作。例如，int 类型的属性是它代表一个整数值，因此它共享整数的属性。允许对 int 类型进行的算术操作有：改变 int 类型值的符号、两个 int 类型值相加、相减、相乘、相除、求模。
+假设要定义一个新的数据类型。首先，必须提供存储数据的方法，例如设计一个结构。其次，必须提供操控数据的方法。
+计算机科学领域已开发了一种定义新类型的好方法，用3个步骤完成从抽象到具体的过程。
+1. 提供类型属性和相关操作的抽象描述。这些描述既不能依赖特定的实现，也不能依赖特定的编程语言。这种正式的抽象描述被称为抽象数据类型（ADT）。
+2. 开发一个实现 ADT 的编程接口。也就是说，指明如何存储数据和执行所需操作的函数。例如在 C 中，可以提供结构定义和操控该结构的函数原型。这些作用于用户定义类型的函数相当于作用于 C 基本类型的内置运算符。需要使用该新类型的程序员可以使用这个接口进行编程。
+3. 编写代码实现接口。这一步至关重要，但是使用该新类型的程序员无需了解具体的实现细节。
+##### 建立抽象
+比如上面的电影项目可以抽象为：
+类型名： 简单链表
+类型属性： 可以存储一系列项
+类型操作： 初始化链表为空、确定链表为空、确定链表已满、确定链表中的项数、在链表末尾添加项、遍历链表，处理链表中的项、清空链表
+##### 建立接口
+这个简单链表的接口有两个部分。第1部分是描述如何表示数据，第2部分是描述实现 ADT 操作的函数。可以用 C 的 typedef 功能来定义所需的 Item 类型：
+```c
+#define TSIZE 45 /* 存储电影名的数组大小 */
+struct film
+{
+    char title[TSIZE];
+    int rating;
+};
+typedef struct film Item; // 将 struct film 定义为 Item 类型
+```
+定义了 Item 之后，现在必须确定如何存储这种类型的项。实际上这一步属于实现步骤，但是现在决定好可以让示例更简单些。
+```c
+// 定义 Node 类型为 node 结构，node 结构包含 Item 类型即 film 结构和指向 node 结构的指针
+typedef struct node
+{
+    Item item;
+    struct node * next;
+} Node;
+// 定义 List 类型为指向 Node 类型的指针
+typedef Node * List;
+```
+在链表的实现中，每一个链节叫作节点（node）。每个节点包含形成链表内容的信息和指向下一个节点的指针。为了强调这个术语，我们把 node 作为节点结构的标记名，并使用 typedef 把 Node 作为 struct node 结构的类型名。最后，为了管理链表，还需要一个指向链表开始处的指针，我们使用 typedef 把 List 作为该类型的指针名。因此，下面的声明：
+```c
+List movies;
+```
+创建了该链表所需类型的指针 movies。
+然后，我们提供一个函数用来初始化链表：
+```c
+/* 操作：初始化一个链表 */
+/* 前提条件：plist指向一个链表 */
+/* 后置条件：该链表初始化为空 */
+void InitializeList(List * plist);
+```
+这里要注意3点。第1，注释中的“前提条件”（precondition）是调用该函数前应具备的条件。例如，需要一个待初始化的链表。第2，注释中的“后置条件”（postcondition）是执行完该函数后的情况。第3，该函数的参数是一个指向链表的指针，而不是一个链表。所以应该这样调用该函数：
+```c
+InitializeList(&movies);
+```
+由于按值传递参数，所以该函数只能通过指向该变量的指针才能更改主调程序传入的变量。这里，由于语言的限制使得接口和抽象描述略有区别。
+C语言把所有类型和函数的信息集合成一个软件包的方法是：把类型定义和函数原型（包括前提条件和后置条件注释）放在一个头文件中。该文件应该提供程序员使用该类型所需的所有信息。
+```c
+/* list.h -- 简单链表类型的头文件 */
+#ifndef LIST_H_ // 防止重复定义
+#define LIST_H_
+#include <stdbool.h> /* C99特性 */
+/* 特定程序的声明 */
+#define TSIZE 45 /* 存储电影名的数组大小 */
+struct film
+{
+    char title[TSIZE];
+    int rating;
+};
+/* 一般类型定义 */
+typedef struct film Item;
+typedef struct node
+{
+    Item item;
+    struct node *next;
+} Node;
+typedef Node *List;
+/* 函数原型 */
+/* 操作： 初始化一个链表 */
+/* 前提条件： plist指向一个链表 */
+/* 后置条件： 链表初始化为空 */
+void InitializeList(List *plist);
+/* 操作： 确定链表是否为空，plist指向一个已初始化的链表 */
+/* 后置条件： 如果链表为空，该函数返回true；否则返回false */
+bool ListIsEmpty(const List *plist);
+/* 操作： 确定链表是否已满，plist指向一个已初始化的链表 */
+/* 后置条件： 如果链表已满，该函数返回真；否则返回假 */
+bool ListIsFull(const List *plist);
+/* 操作： 确定链表中的项数, plist指向一个已初始化的链表 */
+/* 后置条件： 该函数返回链表中的项数 */
+unsigned int ListItemCount(const List *plist);
+/* 操作： 在链表的末尾添加项 */
+/* 前提条件： item是一个待添加至链表的项, plist指向一个已初始化的链表 */
+/* 后置条件： 如果可以，该函数在链表末尾添加一个项，且返回true；否则返回false */
+bool AddItem(Item item, List *plist);
+/* 操作： 把函数作用于链表中的每一项 */
+/* plist指向一个已初始化的链表 */
+/* pfun指向一个函数，该函数接受一个Item类型的参数，且无返回值 */
+/* 后置条件： pfun指向的函数作用于链表中的每一项一次 */
+void Traverse(const List *plist, void (*pfun)(Item item));
+/* 操作： 释放已分配的内存（如果有的话） */
+/* plist指向一个已初始化的链表 */
+/* 后置条件： 释放了为链表分配的所有内存，链表设置为空 */
+void EmptyTheList(List *plist);
+#endif
+```
+##### 实现接口
+接下来我们需要实现 list.h 中的接口。C 方法是把函数定义统一放在 list.c 文件中。
+```c
+/* list.c -- 支持链表操作的函数 */
+#include <stdio.h>
+#include <stdlib.h>
+#include "list.h" // 需要用到 list.h 中的类型和函数原型
+/* 局部函数原型 */
+static void CopyToNode(Item item, Node *pnode);
+/* 接口函数 */
+/* 把链表设置为空 */
+void InitializeList(List *plist)
+{
+    plist = NULL;
+}
+/* 如果链表为空，返回true */
+bool ListIsEmpty(const List *plist)
+{
+    if (*plist == NULL)
+        return true;
+    else
+        return false;
+}
+/* 如果链表已满，返回true */
+bool ListIsFull(const List *plist)
+{
+    Node *pt;
+    bool full;
+    pt = (Node *)malloc(sizeof(Node));
+    if (pt == NULL)
+        full = true;
+    else
+        full = false;
+    free(pt);
+    return full;
+}
+/* 返回节点的数量 */
+unsigned int ListItemCount(const List *plist)
+{
+    unsigned int count = 0;
+    Node *pnode = *plist; /* 设置链表的开始 */
+    while (pnode != NULL)
+    {
+        ++count;
+        pnode = pnode->next; /* 设置下一个节点 */
+    }
+    return count;
+}
+/* 创建存储项的节点，并将其添加至由plist指向的链表末尾（较慢的实现） */
+bool AddItem(Item item, List *plist)
+{
+    Node *pnew;
+    Node *scan = *plist;
+    pnew = (Node *)malloc(sizeof(Node));
+    if (pnew == NULL)
+        return false; /* 失败时退出函数 */
+    CopyToNode(item, pnew);
+    pnew->next = NULL;
+    if (scan == NULL)  /* 空链表，所以把 */
+        *plist = pnew; /* pnew放在链表的开头 */
+    else
+    {
+        while (scan->next != NULL)
+            scan = scan->next; /* 找到链表的末尾 */
+        scan->next = pnew;     /* 把pnew添加到链表的末尾 */
+    }
+    return true;
+}
+/* 访问每个节点并执行pfun指向的函数 */
+void Traverse(const List *plist, void (*pfun)(Item item))
+{
+    Node *pnode = *plist; /* 设置链表的开始 */
+    while (pnode != NULL)
+    {
+        (*pfun)(pnode->item); /* 把函数应用于链表中的项 */
+        pnode = pnode->next;  /* 前进到下一项 */
+    }
+}
+/* 释放由malloc()分配的内存 */
+/* 设置链表指针为NULL */
+void EmptyTheList(List *plist)
+{
+    Node *psave;
+    while (*plist != NULL)
+    {
+        psave = (*plist)->next; /* 保存下一个节点的地址 */
+        free(*plist);           /* 释放当前节点 */
+        *plist = psave;         /* 前进至下一个节点 */
+    }
+}
+/* 局部函数定义 */
+/* 把一个项拷贝到节点中 */
+static void CopyToNode(Item item, Node *pnode)
+{
+    pnode->item = item; /* 拷贝结构 */
+}
+```
+我们在接口文件中声明了一个 static 的 CopyToNode() 函数，static 表明该函数是内部链接的，只有本文件中可以使用，所以辅助函数应该使用 static 声明，我们并不想让使用此接口文件的人使用到此函数。
+### 使用接口
+最后，我们使用 list.h 头文件中的类型和 list.c 文件中的接口来编写程序。
+整个程序由 list.h（定义数据结构和提供用户接口的原型）、list.c（提供函数代码实现接口）和 films.c（把链表接口应用于特定编程问题的源代码文件）组成。要运行该程序，必须把 films.c 和 list.c 一起编译和链接。
+```c
+/* films.c -- 使用抽象数据类型（ADT）风格的链表 */
+/* 与list.c一起编译 */
+#include <stdio.h>
+#include <stdlib.h> /* 提供exit()的原型 */
+#include "list.h"   /* 定义List、Item */
+void showmovies(Item item);
+char *s_gets(char *st, int n);
+int main(void)
+{
+    List movies;
+    Item temp;
+    /* 初始化 */
+    InitializeList(&movies);
+    if (ListIsFull(&movies))
+    {
+        fprintf(stderr, "No memory available! Bye!\n");
+        exit(1);
+    }
+    /* 获取用户输入并存储 */
+    puts("Enter first movie title:");
+    while (s_gets(temp.title, TSIZE) != NULL && temp.title[0] != '\0')
+    {
+        puts("Enter your rating <0-10>:");
+        scanf("%d", &temp.rating);
+        while (getchar() != '\n')
+            continue;
+        if (AddItem(temp, &movies) == false)
+        {
+            fprintf(stderr, "Problem allocating memory\n");
+            break;
+        }
+        if (ListIsFull(&movies))
+        {
+            puts("The list is now full.");
+            break;
+        }
+        puts("Enter next movie title (empty line to stop):");
+    }
+    /* 显示 */
+    if (ListIsEmpty(&movies))
+        printf("No data entered. ");
+    else
+    {
+        printf("Here is the movie list:\n");
+        Traverse(&movies, showmovies);
+    }
+    printf("You entered %d movies.\n", ListItemCount(&movies));
+    /* 清理 */
+    EmptyTheList(&movies);
+    printf("Bye!\n");
+    return 0;
+}
+void showmovies(Item item)
+{
+    printf("Movie: %s Rating: %d\n", item.title,
+           item.rating);
+}
+char *s_gets(char *st, int n)
+{
+    char *ret_val;
+    char *find;
+    ret_val = fgets(st, n, stdin);
+    if (ret_val)
+    {
+        find = strchr(st, '\n'); // 查找换行符
+        if (find)                // 如果地址不是NULL，
+            *find = '\0';        // 在此处放置一个空字符
+        else
+            while (getchar() != '\n')
+                continue; // 处理输入行的剩余内容
+    }
+    return ret_val;
+}
+```
+
+### 链表和数组
+许多编程问题，如创建一个简单链表或队列，都可以用链表或数组来处理。每种形式都有其优缺点，所以要根据具体问题的要求来决定选择哪一种形式。
+![图 7](assets/1693212069103.png)  
+对数组而言，可以使用数组下标直接访问该数组中的任意元素，这叫作随机访问（random access）。对链表而言，必须从链表首节点开始，逐个节点移动到要访问的节点，这叫作顺序访问（sequential access）。
