@@ -3844,7 +3844,9 @@ int main(void)
         strcpy(current->title, input); // 用户输入的标题复制到 title 字符串数组中
         puts("Enter your rating <0-10>:");
         scanf("%d", &current->rating); // 评分保存到 rating 中
-        while (getchar() != '\n') // 不断读取用户的输入，将缓冲区清空
+        // 不断读取用户的输入，将缓冲区清空
+        // 会将换行符 \n 读取出来后，发现相等，才不再读取
+        while (getchar() != '\n')
             continue;
         puts("Enter next movie title (empty line to stop):");
         prev = current; // 将当前结构的地址保存到 prev 中，下个结构添加时使用
@@ -3890,6 +3892,17 @@ char *s_gets(char *st, int n)
 }
 ```
 程序还有些不足。例如，程序没有检查 malloc() 是否成功请求到内存，也无法删除链表中的项。这些不足可以弥补。例如，添加代码检查 malloc() 的返回值是否是 NULL（返回 NULL 说明未获得所需内存）。如果程序要删除链表中的项，还要编写更多的代码。
+
+**为什么要使用：`while (getchar() != '\n')`？因为使用 scanf() 等函数读取缓冲区的内容时，只会读取需要读取的字符，比如上面代码只会读取数值，但是如果我们输入 12x，scanf() 就只会读取12，x 和换行符都还在缓冲区中。**
+```c
+#include <stdio.h>
+int main(void) {
+    int n;
+    scanf("%d", &n); // 如果我们输入 12x
+    printf("%d\n", n); // 输出：12
+    printf("%c\n", getchar()); // 输出：x
+}
+```
 
 ### 抽象数据类型（ADT）
 什么是类型？类型特指两类信息：属性和操作。例如，int 类型的属性是它代表一个整数值，因此它共享整数的属性。允许对 int 类型进行的算术操作有：改变 int 类型值的符号、两个 int 类型值相加、相减、相乘、相除、求模。
