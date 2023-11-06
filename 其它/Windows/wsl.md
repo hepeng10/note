@@ -31,6 +31,7 @@ set_proxy(){
   echo "Proxy has been opened."
 }
 ```
+`curl www.google.com` 验证代理是否成功。
 没发现防火墙会导致不能代理，所以不需要关闭。
 
 # 安装 oh-my-zsh
