@@ -519,8 +519,7 @@ gitHub personal token: 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
 
 Gists token: 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
 
-chatGPT
-API key: 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
+集致腾讯云仓库同步 token: 07bc09ef8f00c8f815c14b045f614ece3058ac1c
 
 阿里云：
 阿里云实例: 

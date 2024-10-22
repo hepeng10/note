@@ -1,13 +1,30 @@
-Windows上最好使用git bash操作，因为ssh等命令cmd没有，安装git bash时注意勾选GIT BASH HERE选项；也可使用SourceTree这个可视化软件进行操作
+
+## 疑难杂症
+### Windows 凭据管理
+当 git 仓库使用 https 协议时，首次 clone 会要求输入仓库的账号密码，正确后会 clone 到本地，并保存账号密码，后续 clone 时不会再要求输入。
+但是当仓库的账号密码变更后，Windows 的 git 不会同步更新，此时如果用 https 协议 clone 会出现 401 或 403 错误，因为 git 还是使用之前的账号密码。
+
+**解决办法：**
+1. 在开始中搜索“凭据管理器”，进入后点击“Windows 凭据”
+2. 找到 git:https://对应的git仓库 这一项，删除
+3. 重新 git clone
+4. 输入新的账号密码
+
+------------------------------------------------
+# 正式开始
+Windows上最好使用git bash操作，因为ssh等命令cmd没有，安装git bash时注意勾选GIT BASH HERE选项；也可使用 SourceTree、fork 等可视化软件进行操作
+
+## 工作区、版本库、暂存区
 工作区：需要进行版本控制的文件目录
 版本库：工作区里的.git目录
 暂存区：使用git add添加，尚未commit的文件所在目录
 
-// 设置帐号：在git安装完成后需要设置帐号，不设置则是用电脑的帐号
+## 设置帐号
+在git安装完成后需要设置帐号，不设置则是用电脑的帐号
 git config --global user.name "Your Name"
 git config --global user.email "email@example.com"
 
-// 基本操作
+## 基本操作
 cd ...  //进入项目目录；直接在需要的目录中 右键-gitbash 更方便
 git init  //将此目录初始化为git目录；目录中会多一个.git目录
 git status  //查看仓库当前状态
@@ -23,21 +40,22 @@ git push  //推送变动的文件到github
 git rm test.txt  //删除文件；当手动删除了多个文件，可使用 git add --all 一次性搞定
 *注：当修改了文件使用add提交后，再修改文件，然后直接commit，那么提交到仓库的并不是第二次修改后的文件，而是第一次修改后的。因为只有第一次修改后的才使用了add添加到暂存区，commit提交的是暂存区的文件而非修改的文件
 
-// 回到过去
+## 回到过去
 git log  //查看变动日志(无法查看已删除的，使用reflog查看包含删除的)；通过日志内容中的commit项后的SHA1字符串回到过去，这个字符串就是对应版本的指针；需要使用q退出查看状态
     git log --pretty=oneline  //更简洁的变动日志，只显示版本指针和版本修改信息
 git reset --hard 3cf7f9070e70ca3864e458ba1710a07d863e24c9  //使用reset命令回到过去，--hard是一个指针，后面跟的就是上面log中查看的commit项后的指针字符串（可以只输入前面几位，git会自动查找对应的，reflog就只显示了前几位）；注：回到那个位置，后面的版本都会丢弃（删除）
     git reset --hard HEAD^  //使用HEAD^返回上一个版本，HEAD^^返回上上个版本，以此类推
     git reset --hard HEAD~10  //使用 ~n 返回上面第n个版本
     *注：命令行中出现了END符号，使用q退出，而不是ctrl+c
-// 返回未来
+## 返回未来
 git reflog  //记录了git版本操作的每一次命令，也就能找到所有commit的内容，每条记录前就是当前版本的指针，通过这个指针就能回到任意版本了
 git reset --hard e9f1354  //同样使用reset回到未来
 
-// 分支操作：分支也就是一个新的指针，和master类似；master就是主分支的指针，一开始HEAD指向master
+## 分支操作
+分支也就是一个新的指针，和master类似；master就是主分支的指针，一开始HEAD指向master
 git checkout -b dev  //checkout命令加上-b表示创建并切换分支dev；创建dev指针指向当前版本，HEAD指向dev；等同下面两句
-    git branch dev  //创建分支dev
-    git checkout dev  //切换分支dev
+    `git branch dev  //创建分支dev`
+    `git checkout dev  //切换分支dev`
 git branch  //查看分支，当前分支前有*号
 git checkout master //在当前dev分支进行各种操作后，使用git checkout master切换到master分支，本地工作区的文件就会立刻变为master分支下的文件；也就是将HEAD指向master
 git merge dev  //merge合并指定分支到当前分支，也就是将dev分支合并到master分支；当合并信息为Fast-forward则为快进模式，直接将master指向dev版本位置；当在master分支上又进行了修改，并且修改内容和dev分支修改的冲突时，在合并时就无法执行快进模式，git会提示我们冲突的文件，然后需要手动打开此文件进行修改，修改后通过add和commit提交
@@ -50,7 +68,7 @@ git stash pop  //恢复之前使用stash存储的状态，并删除stash生成�
     git stash drop  //删除
 git stash apply stash@{0}  //有多个stash时，使用stash@{0}恢复到指定的stash
 
-// 标签管理：通常用于正式发布的版本号
+## 标签管理：通常用于正式发布的版本号
 git tag v1.0  //发布版本后，使用tag为这个版本打个新标签
     git tag v0.9 a2831b0  //为以前的版本打标签，a2831b0是commitId，用git log列出的那个
     git tag -a v0.1 -m "version 0.1 released"  //带说明信息的标签
@@ -62,8 +80,8 @@ git push origin v1.0  //标签不会自动推送到远程，可以这样手动�
 git push origin :refs/tags/v0.9  //删除远程标签，需要先删除本地标签
 
 
-// github使用
-// 使用ssh连接，速度更快更稳定。Windows上只能使用git bash
+## github使用
+### 使用ssh连接，速度更快更稳定。Windows上只能使用git bash
 ssh-keygen -t rsa -C "youremail@example.com"  //在本地创建SSH KEY，然后三个回车即可
 将.ssh目录中(Users/Admin)的id_rsa.pub里的内容完全复制到github设置中的SSH KEYS选项中，Add SSH key复制内容进去，title随意
 测试：ssh git@github.com
@@ -76,17 +94,17 @@ ssh-keygen -t rsa -C "youremail@example.com"  //在本地创建SSH KEY，然后�
     Connection to github.com closed.
 
     输出内容与以上类似即成功
-// 全新仓库
+### 全新仓库
 1、在github上新建一个仓库test
 2、git remote add origin git@github.com:hepeng10/test.git  //使用git remote连接到github的远程仓库hepeng10/test.git
        git remote -v  //查看远程库的信息，如果没有推送权限则只有petch没有push
 3、在本地git仓库中完成操作后，使用git push就可将本地仓库内容推到远程github仓库了；当新仓库是空的时候使用git push -u origin master命令
-// 已有仓库
+### 已有仓库
 1、git clone https://github.com/hepeng10/test.git  //使用 git clone 命令将github上的项目下载到本地。HTTPS协议
        git clone git@github.com:hepeng10/test.git  //SSH协议，速度更快，每次同步不需要输入帐号密码，但需要本地SSH KEY支持
 2、按需修改本地仓库文件，使用add commit等完成本地仓库的提交
 3、使用git push提交到github，期间会要求输入github的帐号密码
-// 冲突合并操作
+### 冲突合并操作
 当同一个文件，另一个人修改上传后，你又进行了修改并上传，在上传过程中就会提示冲突，就要使用git pull将冲突文件拉下来
 git pull  //下载冲突的文件并合并，合并文件中会有冲突文件的两个内容，需要手动对内容进行删除调整
 git add test.txt  //手动调整后再使用add commit push进行提交
@@ -96,5 +114,6 @@ git add test.txt  //手动调整后再使用add commit push进行提交
 3、如果合并有冲突，则解决冲突，并在本地提交；
 4、没有冲突或者解决掉冲突后，再用git push origin branch-name推送就能成功！
 如果git pull提示“no tracking information”，则说明本地分支和远程分支的链接关系没有创建，用命令git branch --set-upstream branch-name origin/branch-name。
-// 建立里程碑（版本号）
+### 建立里程碑（版本号）
 在github网站上，点击release按钮，填入相关信息发布
+
