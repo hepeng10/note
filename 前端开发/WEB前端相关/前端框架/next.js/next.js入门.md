@@ -1,3 +1,4 @@
+nextJS 10 版本
 # 创建项目
 使用 create-next-app 创建项目：
 ```sh
