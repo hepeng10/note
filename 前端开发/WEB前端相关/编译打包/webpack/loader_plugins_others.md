@@ -1,4 +1,14 @@
-# 插件
+# loader
+* json-loader: 处理 JSON 文件
+* url-loader: 处理静态资源，如图片、字体等
+* less-loader: 处理 less 文件
+* post-css-loader: 处理 css 兼容性，优化 css 等。支持插件功能，如：Autoprefixer, cssnano, postcss-preset-env 等
+* css-loader: 解析 @import 和 url() 并处理 CSS 模块化
+* MiniCssExtractPlugin.loader: 将 CSS 代码提取到独立的 CSS 文件中的一个 loader。与 style-loader 不同，后者是将 CSS 直接注入到 HTML 文档中。所以 MiniCssExtractPlugin.loader 更优
+* babel-loader: 用于处理 js, jsx, polyfill 等功能，具有很强的插件功能
+[babel 笔记](../babel/babel%20重点笔记.md)
+
+# plugins
 > 相同类型的插件，使用写在后面的更优。
 * [optimization.splitChunks](https://webpack.docschina.org/plugins/split-chunks-plugin/)：代码分割，类似 CommonsChunkPlugin，但拥有更强大的功能。
 * html-webpack-plugin：将 html 复制并插入一些打包后的依赖路径的插件。

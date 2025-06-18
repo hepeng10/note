@@ -15,7 +15,7 @@ Babel 使用了[微内核](https://juejin.cn/post/6844903943068205064%23heading-
 * 加载插件
 * 调用 Parser 进行语法解析，生成 AST
 * 调用 Traverser 遍历 AST，并使用访问者模式应用’插件’对 AST 进行转换
-* 生成代码，包括 SourceMap 转换和源代码生成
+* 调用 Generator 生成代码，包括 SourceMap 转换和源代码生成
 
 ### 核心周边支撑
 * Parser(@babel/parser)： 将源代码解析为 AST 就靠它了。 它已经内置支持很多语法。 例如 JSX、Typescript、Flow、以及最新的 ECMAScript 规范。目前为了执行效率，parser 是不支持扩展的，由官方进行维护。如果你要支持自定义语法，可以 fork 它，不过这种场景非常少。
@@ -43,3 +43,61 @@ Babel 使用了[微内核](https://juejin.cn/post/6844903943068205064%23heading-
 * @babel/node： Node.js CLI, 通过它直接运行需要 Babel 处理的 JavaScript 文件
 * @babel/register： Patch NodeJs 的 require 方法，支持导入需要 Babel 处理的 JavaScript 模块
 * @babel/cli： CLI 工具
+
+**babel 配置示例：**
+```js
+module.exports = (api) => {
+    api.cache(true);
+
+    const presets = [
+        ['@babel/preset-env', {
+            /**
+             * 可以配置到 .browserslistrc 或
+             * package.json 中 "browserslist": "> 0.25%, not dead"
+             * https://www.babeljs.cn/docs/babel-preset-env
+             */
+            targets: [
+                'last 2 version',
+                'ie >= 9'
+            ],
+            // Allow importing core-js in entrypoint and use browserlist to select polyfills
+            useBuiltIns: 'entry', // https://www.cnblogs.com/amiezhang/p/11384309.html
+            corejs: 3,  // corejs version
+            // Exclude transforms that make all code slower
+            exclude: ['transform-typeof-symbol'],
+        }],
+        '@babel/preset-react'
+    ];
+
+    const plugins = [
+        'react-hot-loader/babel',
+        [  // antd 按需引入
+            'import',
+            { libraryName: 'antd', 'libraryDirectory': 'es', style: 'css' }
+        ],
+
+        '@babel/plugin-transform-runtime',
+        '@babel/plugin-proposal-optional-chaining',
+        '@babel/plugin-proposal-export-default-from',
+        '@babel/plugin-proposal-export-namespace-from',
+        [
+            '@babel/plugin-proposal-decorators',
+            {
+                // decoratorsBeforeExport: true,
+                legacy: true,
+            }
+        ],
+        [
+            '@babel/plugin-proposal-class-properties',
+            {
+                loose: true
+            }
+        ],
+    ];
+
+    return {
+        presets,
+        plugins
+    };
+};
+```

@@ -312,7 +312,7 @@ compiler.run(function (err, stats) {
 * CommonJS require() 语句
 * AMD define 和 require 语句
 * css/sass/less 文件中的 @import 语句。
-* stylesheet url(...) 或者 HTML <img src=...> 文件中的图片链接。
+* stylesheet url(...) 或者 HTML \<img src=...\> 文件中的图片链接。
 
 ### 支持的模块类型
 Webpack 天生支持如下模块类型：

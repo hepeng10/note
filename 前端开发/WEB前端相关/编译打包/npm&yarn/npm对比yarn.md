@@ -12,6 +12,7 @@
 
 ## npx 和 yarn
 npx介绍：http://www.ruanyifeng.com/blog/2019/02/npx.html
+npx 可以执行项目中安装的命令行工具，如项目安装了 jest 如果在终端中直接运行 `jest` 命令是没有的，因为全局 没有安装。但是我们可以通过 `npx jest` 来运行项目中安装的 jest。如果项目中不存在 jest，npx 会尝试使用全局`$PATH`的 jest 命令，全局也没用 jest，则会下载 jest 到临时目录并执行，完成后会删除这个临时目录。
 yarn 拥有项目内的 npx 功能，即可以使用 yarn 来调用项目中安装的模块，如 webpack 命令。但是不具有去全局查找和临时安装功能。
 查看全局模块：npm list -g
 然后使用 npx 可以去执行，但是 yarn 执行不了。
