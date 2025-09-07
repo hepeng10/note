@@ -500,8 +500,8 @@ Log::write('SQL语句：'.$m->getLastSql().'--IP地址：'.$ip);  //将内容写
 
 sunshine
 必须使用 https 访问：https://localhost:47990
+hepeng
 hepeng10
-hepengsoul
 
 
 集致科技：
@@ -525,11 +525,6 @@ SSH: HePeng0822
 匡伟阿里云：
 SSH: Root@123      新密码：ShangQi@13579
 MYSQL: mysql@123
-
-WSL：
-WSL 中的 ubuntu 账号密码
-hepeng
-hepeng10
 
 
 
