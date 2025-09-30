@@ -158,7 +158,10 @@ math 库
     [c15_recursion_factorial —— 函数的递归调用](./modern-cpp-main/c15_recursion_factorial/main.cpp)
 
 ## lambda 表达式
-
+lambda 表达式是在声明的时候就会对外部变量进行捕获，捕获的方式有值捕获和引用捕获。
+-   值捕获：在 lambda 表达式中捕获外部变量的副本，对副本进行操作不会影响外部变量，外部变量的操作也不会影响副本。
+-   引用捕获：在 lambda 表达式中捕获外部变量的引用，对引用进行操作会影响外部变量，外部变量的操作也会影响引用。
+详解：[C++中的lambda表达式](./C++中的lambda表达式.md)
 [c16_lambda](./modern-cpp-main/c16_lambda/main.cpp)
 
 ## 指针，堆，栈
