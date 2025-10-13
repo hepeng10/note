@@ -101,3 +101,8 @@ Keil Assistant ÊÇÖ±½ÓÊ¹ÓÃ Keil µÄÅäÖÃ½øÐÐ±àÒë´ò°üµÄ£¬ËùÒÔ²»ÐèÒªÔÙÔÚÕâ±ß×ö¹ý¶àµÄÅ
 
 #### ºÍ Keil µÄÍ¬²½
 VSCode ÖÐÐÞ¸ÄÁËÎÄ¼þ£¬ÇÐ»»µ½ Keil »á×Ô¶¯ÌáÊ¾ÊÇ·ñÓ¦ÓÃ¸ü¸Ä£¬µã»÷ÔÊÐíÈ«²¿¾ÍÐÐ¡£ÔÚ Keil ÖÐÐÞ¸ÄÁËÒ»Ð©ÅäÖÃ£¬Èçµã»÷Èý¸öÐ¡·½¿éÍ¼±êÌí¼ÓÁËÎÄ¼þµÈ£¬VSCode ÊÇÎÞ·¨¸ÐÖªµ½½øÐÐ¸üÐÂµÄ£¬ÐèÒª¹Ø±Õ VSCode ÔÙ´ò¿ª²Å»áÉúÐ§¡£
+
+## VSCode ÖÐ¸ñÊ½»¯´úÂë
+ÔÚ VSCode ÖÐ¸ñÊ½»¯´úÂë¿ÉÒÔÊ¹ÓÃ C/C++ ²å¼þ½øÐÐ¸ñÊ½»¯¡£°²×°²å¼þºóÔÚ²å¼þµÄÉèÖÃÖÐ×Ô¶¨Òå¸ñÊ½»¯¹æÔò¡£
+![Í¼ 0](assets/1760075148290.png)  
+ÔÚ .clang-format ÎÄ¼þÖÐ¿ÉÒÔ×Ô¶¨Òå¸ñÊ½»¯¹æÔò£¬È»ºó·ÅÔÚ×Ô¶¨ÒåµÄÄ¿Â¼ÖÐ£¬ÅäÖÃ file Îª´ËÂ·¾¶¾ÍÄÜÊ¹ÓÃ´Ë¹æÔò½øÐÐ¸ñÊ½»¯ÁË¡£²»¹ýÕâÑùÅäÖÃºó£¬¾Í²»»áÊ¹ÓÃµ±Ç°ÏîÄ¿ÖÐµÄ .clang-format ÎÄ¼þÁË¡£ÒòÎª VSCode ÖÐ´ò¿ª Keil ÏîÄ¿£¬ÎÄ¼þÂ·¾¶ºÍÊµ¼ÊµÄÄ¿Â¼½á¹¹²»Í¬£¬ËùÒÔ²»ÄÜÖ±½ÓÊ¹ÓÃµ±Ç°ÏîÄ¿ÖÐµÄ .clang-format ÎÄ¼þ£¬Ö»ÄÜÊ¹ÓÃ¹Ì¶¨Â·¾¶µÄ¸ñÊ½»¯ÎÄ¼þ¡£
