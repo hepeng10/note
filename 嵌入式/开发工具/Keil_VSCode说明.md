@@ -85,6 +85,9 @@ vscode 烧录依赖 python 命令，并且依赖一个 python 包 serial。需要使用 `pip instal
 可以将项目结构和配置搞好后，导出为 EIDE 模板，后面的新项目通过此模板快速创建。
 ![alt text](assets/image-13.png)
 
+#### .eide 目录
+当导入项目后会生成一个 .eide 目录，里面包含了项目的配置信息，包括一些路径。如果直接将此项目目录拷贝到其它电脑上，如果连同 .eide 一起拷贝，则可能出现别的电脑项目存放路径不同，而找不到头文件等问题。如果遇到此问题，可以删除 .eide 目录，重新导入项目。
+
 ## ARM 项目的配置
 ARM 项目可以使用 EIDE，也可以使用 Keil Assistant 插件。
 在 EIDE 中需要使用导入功能导入 .uvprojx 项目；Keil Assistant 中点击 + 号导入项目。
@@ -106,3 +109,45 @@ VSCode 中修改了文件，切换到 Keil 会自动提示是否应用更改，点击允许全部就行。在 Ke
 在 VSCode 中格式化代码可以使用 C/C++ 插件进行格式化。安装插件后在插件的设置中自定义格式化规则。
 ![图 0](assets/1760075148290.png)  
 在 .clang-format 文件中可以自定义格式化规则，然后放在自定义的目录中，配置 file 为此路径就能使用此规则进行格式化了。不过这样配置后，就不会使用当前项目中的 .clang-format 文件了。因为 VSCode 中打开 Keil 项目，文件路径和实际的目录结构不同，所以不能直接使用当前项目中的 .clang-format 文件，只能使用固定路径的格式化文件。
+
+## 自定义代码片段
+通过首选项中的配置代码片段功能可以自定义代码片段。点击配置用户代码片段后，选择 c.json 打开配置文件，添加如下内容后，即可通过输入 `header` 后按 Tab 键插入代码片段。
+```json
+{
+	"C C++ Header": {
+		"scope": "c, cpp",
+		"prefix": "header",
+		"description": "Add #ifndef, #define and #endif",
+		"body": [
+			"#ifndef __${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_H__",
+			"#define __${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_H__",
+			"",
+			"$0",
+			"",
+			"#endif /* __${TM_FILENAME_BASE/(.*)/${1:/upcase}/}_H__ */"
+		]
+	}
+}
+```
+
+# 注意事项
+## 导入 Keil 项目
+使用 EIDE 导入 Keil 项目时，Keil 项目文件可能未在项目跟目录下，如下所示：
+![图 4](assets/1760410705853.png)  
+![图 5](assets/1760410771798.png)  
+导入后 EIDE 提示是否以当前目录打开，此时要选择 No，然后会弹出选择项目目录的对话框，再选择实际的项目目录。
+![图 6](assets/1760410852343.png)  
+
+
+## 解决“未定义标识符”
+开发 Keil 项目时，如果出现提示“未定义标识符”，但是却能正常点击跳转，可能时因为 C/C++ 的 intelliSense 引擎没有正确识别到头文件中的标识符。
+![图 1](assets/1760408507746.png)  
+方法一：删除项目目录中的 .vscode 和 .eide 目录，重新导入项目。如果此方法不行再尝试下面的方法。
+方法二：可以通过修改项目的配置文件来修改 intelliSense 模式来解决：
+![图 2](assets/1760408689646.png)  
+```json
+"C_Cpp.intelliSenseEngineFallback": "Disabled", //需要添加的
+"C_Cpp.intelliSenseEngine": "Tag Parser",  //  需要添加的
+```
+方法三：在设置中将 C/C++ 配置中的 intelliSense 引擎模式修改为 Tag Parser。不过这里的修改就会对所有项目生效。
+![图 3](assets/1760410303752.png)  
