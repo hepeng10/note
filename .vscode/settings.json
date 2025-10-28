@@ -120,5 +120,7 @@
     "variant": "cpp",
     "*.rh": "cpp",
     "*.tcc": "cpp"
-  }
+  },
+  "trae.tab.enableRename": false,
+  "trae.tab.enableAutoImport": false
 }
