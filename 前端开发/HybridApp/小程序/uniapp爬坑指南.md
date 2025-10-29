@@ -70,6 +70,67 @@ rules: {
 ```
 另外此插件和 prettier 配置有冲突，所以项目中不使用 prettier。unibest 也集成了样式检查， stylelint 插件也需要禁用。
 
+# APP
+## 自定义头部
+小程序头部有胶囊，自定义头部需要计算状态栏+胶囊的高度，并将标题显示和胶囊一行。而APP没有胶囊，只需要获取状态栏高度+自己觉得合适的高度就行。所以uniapp中需要写兼容性代码：
+```ts
+// useCustomHeader 自定义头部高度计算
+import { systemInfo } from '@/utils/systemInfo';
+
+let statusBarHeight = 0; // 状态栏高度
+let menuButtonHeight = 0; // 右上角胶囊高度
+let menuButtonLeft = 0; // 胶囊距左边距离
+let menuButtonRight = 0; // 胶囊距右边距离
+let menuButtonWidth = 0; // 胶囊宽度
+let headerHeight = 0; // 标题栏高度
+let contentHeight = 0; // 内容高度（页面除去 header 的高度）
+
+const gap = 10; // 标题栏相对于胶囊的内边距
+
+function useCustomHeader() {
+  const getHeight = () => {
+    if (!statusBarHeight || !menuButtonHeight) {
+      let scale = 0;
+      // #ifndef APP-PLUS
+      const { top, left, right, width, height } = uni.getMenuButtonBoundingClientRect() || {};
+      scale = Number.parseFloat((750 / systemInfo.screenWidth).toFixed(4));
+      statusBarHeight = top * scale + 2; // +2后高度才够
+      menuButtonHeight = height * scale;
+      menuButtonLeft = left * scale;
+      menuButtonRight = right * scale;
+      menuButtonWidth = width * scale;
+      headerHeight = statusBarHeight + menuButtonHeight + gap;
+      contentHeight = systemInfo.screenHeight * scale - headerHeight + 2; // 加2后高度才够
+      // #endif
+      // #ifdef APP-PLUS
+      scale = Number.parseFloat((750 / systemInfo.screenWidth).toFixed(4));
+      statusBarHeight = systemInfo.statusBarHeight * scale;
+      menuButtonHeight = 30 * scale; // 这里30是大概写的个值，看起来顺眼就行
+      headerHeight = statusBarHeight + menuButtonHeight + gap;
+      contentHeight = systemInfo.screenHeight * scale - headerHeight + 2; // 加2后高度才够
+      // #endif
+    }
+  };
+
+  getHeight();
+
+  // 单位 rpx
+  return {
+    statusBarHeight,
+    menuButtonHeight,
+    menuButtonLeft,
+    menuButtonRight,
+    menuButtonWidth,
+    gap,
+    headerHeight,
+    contentHeight,
+  };
+};
+
+export default useCustomHeader;
+```
+
+
 # 组件
 ## 组件导入
 普通的vue项目，要使用组件需要在页面中导入组件，如：
