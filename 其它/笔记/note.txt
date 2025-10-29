@@ -523,7 +523,8 @@ Gists token: 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
 SSH: HePeng0822
 
 匡伟阿里云：
-SSH: Root@123      新密码：ShangQi@13579
+user: root
+SSH: Root@123      新密码：QiXin@13579
 MYSQL: mysql@123
 
 
