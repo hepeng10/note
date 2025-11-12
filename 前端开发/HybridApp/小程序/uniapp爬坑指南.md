@@ -28,7 +28,6 @@ uniapp 开发时可能出现小程序依赖分析错误，导致报“Error: xxx
       ignoreUploadUnusedFiles: false, // 上传时忽略未使用的文件
     },
 ```
-
 ```ts
 // 限制输入为两位小数的数字
 function handleDecimalInput(event: any) {
@@ -159,6 +158,58 @@ import CustomHeaderPage from '@/components/customHeaderPage.vue';
 ```
 疑问：这里按理说组件应该在`@/components/customHeaderPage/customHeaderPage.vue`，但是我没创建`customHeaderPage`目录，直接在`@/components`目录下创建了`customHeaderPage.vue`文件，也能正常使用。感觉应该是uniapp自带的导入就包括这个规则。
 
+## 修改UI库样式
+修改UI库样式需要配置 `styleIsolation: 'shared'` 来关闭样式隔离。然后可以使用 `:deep` 选择器来选择子组件的 class。
+```html
+<script lang="ts" setup>
+import { useDeviceStore } from '@/store';
+
+// 组件中通过配置选项来关闭样式隔离
+defineOptions({
+  options: {
+    addGlobalClass: true,
+    virtualHost: true,
+    styleIsolation: 'shared', // 主要是这个，关闭样式隔离
+  },
+});
+
+defineProps<Props>();
+interface Props {
+  noPadding?: boolean // 不添加内边距
+}
+
+const deviceStore = useDeviceStore();
+</script>
+
+<template>
+  <view>
+    <!-- custom-class 传给子组件，支持 scoped 样式 -->
+    <wd-notice-bar v-if="deviceStore.pwd === deviceStore.defaultPwd && !deviceStore.pwdNoticeClosed" type="danger" text="请及时前往“我的”页面修改密码，避免被他人连接使用。" prefix="warn-bold" :scrollable="true" closable custom-class="customPwdNotice" @close="deviceStore.setPwdNoticeClosed(true)" />
+    <view class="box-border" :style="{ padding: noPadding ? '0rpx' : '20rpx' }">
+      <slot />
+    </view>
+  </view>
+</template>
+
+<style lang="scss" scoped>
+/* 方式一：使用 custom-class 传给子组件最外层 */
+.customPwdNotice {
+  border-radius: 0;
+  /* 使用 :deep 选择器来选择子组件的 class */
+  :deep(.wd-notice-bar__suffix) {
+    border-radius: 0;
+  }
+}
+/* 方式二：使用 ::v-deep 选择器来选择子组件的 class。也会加上一个 scoped 的 class，而不会影响全局 */
+::v-deep .wd-notice-bar {
+  border-radius: 0;
+  .wd-notice-bar__suffix {
+    border-radius: 0;
+  }
+}
+</style>
+```
+
 ## wot-ui
 使用组件时必须用`<wd-button>`，不能用`<WdButton>`。
 ### 主题定制
@@ -193,6 +244,21 @@ import CustomHeaderPage from '@/components/customHeaderPage.vue';
       >
         重新扫描
       </wd-button>
+```
+封装的组件添加的是自定义事件，而自定义事件无法添加修饰符，因此像 wd-button 组件的 click 事件无法添加 .stop 修饰符。
+解决方法：在外层再添加一层 view 包裹 wd-button 组件，然后在 view 上添加 .stop 修饰符。
+```html
+  <view class="text-0" :class="className" @click.stop="">
+    <wd-button
+      :round="false"
+      :class="[bgColor, styles, btnClass]"
+      :disabled="disabled"
+      :loading="isLoading"
+      @click="handleBtnClick"
+    >
+      {{ btnText || '按钮' }}
+    </wd-button>
+  </view>
 ```
 
 ## unocss
