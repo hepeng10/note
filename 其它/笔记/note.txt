@@ -588,3 +588,49 @@ foreach ($list as $k=>$v){
 }
 
 insert into tb_question (question_name, question_price,question_startTime,question_category,question_endTime,question_userId,question_content,question_title,status,result,pay) select question_name, question_price,question_startTime,question_category,question_endTime,question_userId,question_content,question_title,status,result,pay from tb_question
+
+《卧龙吟·古今照》
+——以《诸葛抚琴》意境为弦，咏武侯生平
+
+[Intro: Chinese ancient, Chinese folk, Chinese tradition music, koto, flute, yearning]
+[verse 1]
+茅庐三顾 踏碎春草霜露
+纵马新野 云压城时袖展江雾
+借东风 烧透赤壁天幕
+烟火中 八阵图暗藏星宿
+
+[verse 2]
+锦官城雨 润透陌上桑枯
+蜀道凿开 羌笛吹绿戍边枯骨
+朱笔点 墨痕渗入耕戍
+诫子书 字字是霜雪筋骨
+
+[hook]
+琴弦颤 指尖山河奔涌
+空城上 三尺瑶琴退万重
+七弦松 五丈原秋意浓
+灯轻颤 照透青史朦胧
+
+[verse 3]
+祁山风鸣 羽扇轻摇夜幕
+北斗星沉 寒光浸透军符
+残局开 苍天为子下注
+秋风扫 卷起未竟征途
+
+[verse 4]
+灯火彻夜 照透万卷政务
+丹心一片 融作黎民雨露
+忠魂系 山河万里如诉
+清风扶 飘过千年竹坞
+
+[hook]
+琴弦裂 飞出北伐征鸿
+出师表 溅湿洛阳钟鼓
+七弦断 化作祁山长虹
+将星落 震碎世间英雄
+
+[outro]
+木牛流过栈道 流年流过指缝
+琴箱里还沉睡着 梁父吟的梦
+千年后我仰望 您点亮的星空
+听见 羽扇拨动 时间的长河
