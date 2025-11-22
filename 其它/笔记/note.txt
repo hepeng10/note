@@ -500,8 +500,7 @@ Log::write('SQL语句：'.$m->getLastSql().'--IP地址：'.$ip);  //将内容写
 
 sunshine
 必须使用 https 访问：https://localhost:47990
-hepeng10
-hepengsoul
+hepeng  hepeng10
 
 
 小程序审核术语：
