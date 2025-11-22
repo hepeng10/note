@@ -589,48 +589,117 @@ foreach ($list as $k=>$v){
 
 insert into tb_question (question_name, question_price,question_startTime,question_category,question_endTime,question_userId,question_content,question_title,status,result,pay) select question_name, question_price,question_startTime,question_category,question_endTime,question_userId,question_content,question_title,status,result,pay from tb_question
 
-《卧龙吟·古今照》
-——以《诸葛抚琴》意境为弦，咏武侯生平
+《阿里布达年代记》《十景缎》《妖刀记》《妻子的欲望》《陈皮皮的斗争》《妻心如刀》《玲珑孽缘》《沧澜曲》《浪子江湖》《六朝清羽记》《逍遥小散仙》，《江山如此多娇》，《平妖传魅惑的谎言》《 骑士的血脉 》《红楼遗秘》 《海盗的悠闲生活》《夜幕下的上海滩  》《伊甸园之奴宠战记》《 武林启示录》
 
-[Intro: Chinese ancient, Chinese folk, Chinese tradition music, koto, flute, yearning]
-[verse 1]
+作者：生而为人
+链接：https://www.zhihu.com/question/35584877/answer/1898311199323558544
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+（引子）
+羽扇轻摇 拂过隆中晨雾
+指尖悬着 三分天下的棋谱
+
+【第一段：出山】
 茅庐三顾 踏碎春草霜露
 纵马新野 云压城时袖展江雾
-借东风 烧透赤壁天幕
+借东风一簇 烧透赤壁天幕
 烟火中 八阵图暗藏星宿
 
-[verse 2]
-锦官城雨 润透陌上桑枯
-蜀道凿开 羌笛吹绿戍边枯骨
-朱笔点 墨痕渗入耕戍
-诫子书 字字是霜雪筋骨
-
-[hook]
+（副歌）
 琴弦颤 指尖山河奔涌
 空城上 三尺瑶琴退万重
 七弦松 五丈原秋意浓
-灯轻颤 照透青史朦胧
+落灯如豆 照透青史朦胧
 
-[verse 3]
-祁山风鸣 羽扇轻摇夜幕
-北斗星沉 寒光浸透军符
-残局开 苍天为子下注
-秋风扫 卷起未竟征途
+【第二段：治蜀】
+锦官城雨 润透陌上桑枯
+蜀道凿开 羌笛吹绿戍边枯骨
+朱笔点盐铁 墨痕渗入耕戍
+诫子书 字字是霜雪筋骨
 
-[verse 4]
-灯火彻夜 照透万卷政务
-丹心一片 融作黎民雨露
-忠魂系 山河万里如诉
-清风扶 飘过千年竹坞
-
-[hook]
+（副歌变奏）
 琴弦裂 飞出北伐征鸿
 出师表 溅湿洛阳钟鼓
 七弦断 化作祁山长虹
-将星落 震碎世间英雄
+坠地时 敲响天外晨钟
 
-[outro]
+（桥段）
 木牛流过栈道 流年流过指缝
+最后一次推演 将星碎在秋风
+原来最险的计 是向天借一纪
+终究 还了半局
+
+（尾声）
+定军山月 依然照你抚琴
+琴箱里睡着 未醒的《梁父吟》
+千年后我路过 你计算的星空
+听见 羽扇拨动 云海的回声
+
+《卧龙吟·古今照》
+——以《诸葛抚琴》意境为弦，咏武侯生平
+
+
+[duet]
+[Intro:Chinese tradition music, koto, guzheng, yearning]
+
+[female vocal:female, downtempo]
+毛卢三顾 踏碎春草霜露!!
+纵马新野 云压城时袖展江雾!!~~~
+借东风 烧透赤壁天幕!!
+烟火中 八阵图暗藏星绣!!~~~
+
+[female vocal:female, downtempo]
+锦官城雨 润透陌上桑枯!!
+蜀道凿开 枪笛吹绿树边枯骨!!~~~
+朱笔点 墨痕渗入更树!!
+诫子书 字字是霜雪筋骨!!~~~
+
+[koto solo]
+
+[male rap:male, emo rap, chicago rap, uptempo, Rhythm]
+望城楼 独奏琴声淡泊~~~
+空城开 谈笑退敌万虫(重)~~~
+智与谋 运筹天下帷幄~~~
+定三分 平生志在辽(寥)扩(廓)~~~
+
+[Instrumental solo][Chinese folk, koto and flute]
+
+[female vocal:female, downtempo]
+其山风鸣 羽扇轻摇夜幕!!
+北斗星沉 寒光散落浸透军符!!~~~
+残局开 苍天为子下注!!
+秋风扫 抹去了未竟征途!!~~~
+
+[female vocal:female, downtempo]
+灯火彻夜 照透万卷庆竹!!
+丹心一片 融作黎民雨露!!~~~
+忠魂系 山河万里如诉!!
+叶纷飞 飘过千年竹屋!!~~~
+
+[koto solo]
+
+[male rap:male, emo rap, chicago rap, uptempo, Rhythm]
+出师表 溅湿洛阳钟鼓~~~
+千军动 飞出北伐征红~~~
+雨萧瑟 五丈原秋意浓~~~
+将星落 震碎世间英雄~~~
+
+[Instrumental solo][Chinese folk, koto and flute]
+
+[female vocal:downtempo, quiet rap]
+木牛流过站道 流年流过指缝
 琴箱里还沉睡着 梁父吟的梦
 千年后我仰望 您点亮的星空
-听见 羽扇拨动 时间的长河
+听见 羽扇拨动 历史的中~~~
+历史的中~~~
+
+[end]
+
+
+# Style of Music
+* [wyy陈易狄 style], [CYAN 青幻 studio style] 使用其他用户的风格
+* [duet] 对唱
+
+# Lyrics
+* [duet] 在最前面加上 duet 表示对唱
