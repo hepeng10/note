@@ -96,7 +96,7 @@ return (
 组件可以是一个能接收类型参数的泛型组件。
 
 #### 定义泛型组件：
-```ts
+```tsx
 // <DayData> 是组件接收的泛型参数
 function MainCalendar<DayData>(props: MainCalendarProps<DayData>, ref: React.Ref<CalendarRefFn>) {
   const calendarRef = useRef<CalendarRefFn>();
@@ -122,7 +122,7 @@ export default MainCalendar;
 ```
 
 #### 使用泛型组件
-```ts
+```tsx
 return (
     // 在组件后使用 <Type> 来传递类型
     <MainCalendar<{ isWork: boolean; }>
@@ -133,7 +133,7 @@ return (
 
 #### React.forwardRef 与泛型组件
 React.forwardRef 会导致泛型组件的泛型丢失，我们的组件使用 React.forwardRef 包裹后就没法再接收泛型了。解决方法是手动修改组件类型。
-```ts
+```tsx
 // forwardRef 会丢失组件的泛型参数，需要使用 as 手动修改类型
 export default forwardRef(MainCalendar) as <T>(
     // 使用组件的 Props 接收这个泛型

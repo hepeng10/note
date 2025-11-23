@@ -107,6 +107,7 @@ function commitRoot() {
     currentRoot = wipRoot
     wipRoot = null
 }
+
 function commitWork(fiber) {
     if (!fiber) {
         return
@@ -167,10 +168,10 @@ function render(element, container) {
 // 每当完成其中一块任务后，就把控制权交给浏览器，让浏览器判断是否有更高优先级的任务需要完成。
 let nextUnitOfWork = null  // 下一次构建的 fiber
 let currentRoot = null  // 保存上次提交到 DOM 节点的 fiber 树的引用，用于对虚拟 DOM 进行比较
-let wipRoot = null  // wipRoot（work in progress root）。一棵树用来记录对 DOM 节点的修改，用于一次性提交进行 DOM 的修改。
+let wipRoot = null  // wipRoot（work in progress root，根 fiber）。一棵树用来记录对 DOM 节点的修改，用于一次性提交进行 DOM 的修改。
 let deletions = []  // 需要移除的 fiber 数组
 function workLoop(deadline) {
-    let shouldYield = false;
+    let shouldYield = false; // 是否要终止
     // 每次 while 循环构建一个 fiber，被中断后可以回来继续构建
     while (nextUnitOfWork && !shouldYield) {
         // 构建 fiber，返回下一个待构建的 fiber
@@ -179,8 +180,12 @@ function workLoop(deadline) {
         shouldYield = deadline.timeRemaining() < 1
     }
 
-    // 当下一个 fiber 节点为 undefined 即所有 fiber 都构建完成，并且 DOM 修改记录树有的，则进行提交修改 DOM
-    // fiber 没完全构建则等浏览器执行完其它任务后再回来，继续上面的 while 循环，从 nextUnitOfWork 继续构建
+    /**
+     * 当下一个要构建 fiber 的节点为 undefined 即所有 fiber 都构建完成，
+     * 并且 DOM 修改记录树有的，则进行提交修改 DOM
+     * fiber 没完全构建则等浏览器执行完其它任务后再回来，
+     * 继续上面的 while 循环，从 nextUnitOfWork 继续构建
+     */
     if (!nextUnitOfWork && wipRoot) {
         commitRoot()
     }
@@ -198,7 +203,7 @@ function workLoop(deadline) {
 // requestIdleCallback 会给我们一个 deadline 参数。我们可以通过它来判断离浏览器再次拿回控制权还有多少时间。
 requestIdleCallback(workLoop)
 
-// 构建 fiber，并返回下一个 fiber。
+// 构建 fiber，并返回下一个待构建 fiber。
 // 在构建 fiber 的时候至少会完成当前 fiber 的构建，所以我们返回下一个待构建的 fiber 存储下来，当中断的时候就可以继续从下一个 fiber 开始。
 function performUnitOfWork(fiber) {
     const isFunctionComponent = fiber.type instanceof Function;
@@ -209,8 +214,12 @@ function performUnitOfWork(fiber) {
         updateHostComponent(fiber)
     }
 
-    // 返回下一个待构建的 fiber 节点
-    // 首先获取 child，没有 child 获取 sibling，没有 sibling 则获取 parent 然后获取 parent 的 sibling。直到所有元素都被遍历，返回 undefined。
+    /**
+     * 返回下一个待构建的 fiber 节点
+     * 首先获取 child，没有 child 获取 sibling，
+     * 没有 sibling 则获取 parent 然后获取 parent 的 sibling。
+     * 直到所有元素都被遍历，返回 undefined。
+     */
     if (fiber.child) {
         return fiber.child
     }
@@ -231,8 +240,15 @@ function updateFunctionComponent(fiber) {
     hookIndex = 0
     wipFiber.hooks = []  // useState 可以多次调用，需要使用一个数组来维护
 
-    // fiber.type 获取到函数并执行，返回 return 的基础组件虚拟 dom（类组件则应该实例化后调用 render 方法）。fiber.props 是函数组件接收的属性。
-    const element = fiber.type(fiber.props);
+    /**
+    fiber.type 获取到函数并执行，返回 return 的基础组件虚拟 dom（类组件则应该实例化后调用 render 方法）。fiber.props 是函数组件接收的属性。
+    这里 createElement 第一个参数传的一个函数组件，而不是 div 这样的字符串，
+    所以需要通过 .type() 调用后返回一个虚拟 dom 节点。
+    const element = mReact.createElement(App, {
+        name: "foo",
+    })
+    */
+    const element = fiber.type(fiber.props)
     const children = [element]
     reconcileChildren(fiber, children)
 }
@@ -396,6 +412,15 @@ function App(props) {
         props.name
     )
 }
+/**
+element = {
+    type: App,
+    props: {
+        name: "foo",
+        children: []
+    }
+}
+ */
 const element = mReact.createElement(App, {
     name: "foo",
 })

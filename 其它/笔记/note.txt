@@ -503,9 +503,6 @@ sunshine
 hepeng  hepeng10
 
 
-小程序审核术语：
-我司小程序平台为用户提供招工找活场景，场景中招工用户发布招聘信息，需明确用工地址，需要定位进行地址选择；找活用户在寻找工作时，也需要通过当前定位判断招工职位用工地址与自己的距离来做出选择，我方平台保证仅会在用户使用过程中去获取权限
-
 集致科技：
 建筑招工找活、吉工家：jlg_20151027
 记工记账：jigongjia2022
@@ -518,21 +515,16 @@ gitHub personal token: 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
 
 Gists token: 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
 
-chatGPT
-API key: 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
+集致腾讯云仓库同步 token: 07bc09ef8f00c8f815c14b045f614ece3058ac1c
 
 阿里云：
 阿里云实例: 
 SSH: HePeng0822
 
 匡伟阿里云：
-SSH: Root@123      新密码：ShangQi@13579
+user: root
+SSH: Root@123      新密码：QiXin@13579
 MYSQL: mysql@123
-
-WSL：
-WSL 中的 ubuntu 账号密码
-hepeng
-hepeng10
 
 
 
@@ -595,3 +587,117 @@ foreach ($list as $k=>$v){
 }
 
 insert into tb_question (question_name, question_price,question_startTime,question_category,question_endTime,question_userId,question_content,question_title,status,result,pay) select question_name, question_price,question_startTime,question_category,question_endTime,question_userId,question_content,question_title,status,result,pay from tb_question
+
+《阿里布达年代记》《十景缎》《妖刀记》《妻子的欲望》《陈皮皮的斗争》《妻心如刀》《玲珑孽缘》《沧澜曲》《浪子江湖》《六朝清羽记》《逍遥小散仙》，《江山如此多娇》，《平妖传魅惑的谎言》《 骑士的血脉 》《红楼遗秘》 《海盗的悠闲生活》《夜幕下的上海滩  》《伊甸园之奴宠战记》《 武林启示录》
+
+作者：生而为人
+链接：https://www.zhihu.com/question/35584877/answer/1898311199323558544
+来源：知乎
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+（引子）
+羽扇轻摇 拂过隆中晨雾
+指尖悬着 三分天下的棋谱
+
+【第一段：出山】
+茅庐三顾 踏碎春草霜露
+纵马新野 云压城时袖展江雾
+借东风一簇 烧透赤壁天幕
+烟火中 八阵图暗藏星宿
+
+（副歌）
+琴弦颤 指尖山河奔涌
+空城上 三尺瑶琴退万重
+七弦松 五丈原秋意浓
+落灯如豆 照透青史朦胧
+
+【第二段：治蜀】
+锦官城雨 润透陌上桑枯
+蜀道凿开 羌笛吹绿戍边枯骨
+朱笔点盐铁 墨痕渗入耕戍
+诫子书 字字是霜雪筋骨
+
+（副歌变奏）
+琴弦裂 飞出北伐征鸿
+出师表 溅湿洛阳钟鼓
+七弦断 化作祁山长虹
+坠地时 敲响天外晨钟
+
+（桥段）
+木牛流过栈道 流年流过指缝
+最后一次推演 将星碎在秋风
+原来最险的计 是向天借一纪
+终究 还了半局
+
+（尾声）
+定军山月 依然照你抚琴
+琴箱里睡着 未醒的《梁父吟》
+千年后我路过 你计算的星空
+听见 羽扇拨动 云海的回声
+
+《卧龙吟·古今照》
+——以《诸葛抚琴》意境为弦，咏武侯生平
+
+
+[duet]
+[Intro:Chinese tradition music, koto, guzheng, yearning]
+
+[female vocal:female, downtempo]
+茅庐三顾 踏碎春草霜露!!
+纵马新野 云压城时袖展江雾!!~~~
+借东风 烧透赤壁天幕!!
+烟火中 八阵图暗藏星宿!!~~~
+
+[female vocal:female, downtempo]
+锦官城雨 润透陌上桑枯!!
+蜀道凿开 羌笛吹绿戍边枯骨!!~~~
+朱笔点 墨痕渗入耕戍!!
+诫子书 字字是霜雪筋骨!!~~~
+
+[koto solo]
+
+[male rap:male, emo rap, chicago rap, uptempo, Rhythm]
+望城楼 独奏琴声淡泊~~~
+空城开 谈笑退敌万重~~~
+智与谋 运筹天下帷幄~~~
+定三分 平生志在寥廓~~~
+
+[Instrumental solo][Chinese folk, koto and flute]
+
+[female vocal:female, downtempo]
+祁山风鸣 羽扇轻摇夜幕!!
+北斗星沉 寒光散落浸透军符!!~~~
+残局开 苍天为子下注!!
+秋风扫 抹去了未竟征途!!~~~
+
+[female vocal:female, downtempo]
+灯火彻夜 照透万卷罄竹!!
+丹心一片 融作黎民雨露!!~~~
+忠魂系 山河万里如诉!!
+叶纷飞 飘过千年竹屋!!~~~
+
+[koto solo]
+
+[male rap:male, emo rap, chicago rap, uptempo, Rhythm]
+出师表 溅湿洛阳钟鼓~~~
+千军动 飞出北伐征鸿~~~
+雨萧瑟 五丈原秋意浓~~~
+将星落 震碎世间英雄~~~
+
+[Instrumental solo][Chinese folk, koto and flute]
+
+[female vocal:downtempo, quiet rap]
+木牛流过栈道 流年流过指缝
+琴箱里还沉睡着 梁父吟的梦
+千年后我仰望 您点亮的星空
+听见 羽扇拨动 历史的钟~~~
+
+[end]
+
+
+# Style of Music
+* [wyy陈易狄 style], [CYAN 青幻 studio style] 使用其他用户的风格
+* [duet] 对唱
+
+# Lyrics
+* [duet] 在最前面加上 duet 表示对唱
