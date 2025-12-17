@@ -2801,7 +2801,7 @@ union hold {
     char letter;
 };
 ```
-以上代码如果将 union 改为 struct 那么是声明一个包含3个成员的结构。然而这里使用的是 union，表示这是一个只能存储一个 int 类型的值或一个 double 类型的值或 char 类型的值的联合（不是3个字段存储3个值，而是同一时刻只能选择存储某种类型的值）。
+以上代码如果将 union 改为 struct 那么是声明一个包含3个成员的结构。然而这里使用的是 union，表示这是一个只能存储一个 int 类型的值或一个 double 类型的值或 char 类型的值的联合（不是3个字段存储3个值，而是同一时刻只能选择存储某种类型的值，**内存占用为其中最大的那个成员所需内存**）。
 使用联合声明变量：
 ```c
 union hold fit; // hold 类型的联合变量
@@ -2867,6 +2867,17 @@ struct car_data
 ```
 现在，如果 flits 是 car_data 类型的结构变量，可以用 flits.owncar.socsecurity 代替 flits.ownerinfo.owncar.socsecurity。
 
+##### union和struct的区别
+| 特性        | struct        | union       |
+| --------- | ------------- | ----------- |
+| 内存布局      | 各成员独立存放       | 所有成员共用同一块内存 |
+| 总大小       | 所有成员大小之和（+对齐） | 最大成员大小      |
+| 修改成员      | 互不影响          | 会覆盖其他成员     |
+| 多成员能否同时使用 | ✔ 能           | ❌ 不能        |
+| 适合场景      | 组合数据结构        | 节省内存、数据类型转换 |
+| 访问安全性     | 安全            | 需要开发者小心管理   |
+
+
 ### 枚举类型
 可以用枚举类型（enumerated type）声明符号名称来表示整型常量。使用 enum 关键字，可以创建一个新“类型”并指定它可具有的值。**枚举主要用来提高程序的可读性和可维护性。**
 ```c
@@ -2887,6 +2898,17 @@ enum levels {low = 100, medium = 500, high = 2000};
 // cat 是0，puma 是11，tiger 是12
 enum feline {cat, lynx = 10, puma, tiger};
 ```
+
+##### typedef 和枚举结合使用
+使用 typedef 可以使声明枚举类型的变量时代码更简洁。
+```c
+// 使用 typedef 为枚举类型创建一个新名称 spectrum
+typedef enum {red, orange, yellow, green, blue, violet} Spectrum;
+Spectrum color; // color 是 Spectrum 类型的变量
+color = green; // 将枚举类型中的 green 赋值给 color
+// color = 1; // 不能这样赋值，必须使用枚举成员
+```
+`Spectrum` 实际上是 `enum {red, orange, yellow, green, blue, violet}` 的别名，也比上面使用 `enum spectrum` 更简洁。
 
 ### typedef
 typedef 工具是一个高级数据特性，利用 typedef 可以为某一类型自定义名称。这方面与 #define 类似，但是两者有3处不同：
