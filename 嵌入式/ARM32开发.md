@@ -131,10 +131,164 @@ MCU复位后做的第一件事：
 1. 从地址 0x0000 0000 处取出堆栈指针 MSP 的初始值，该值就是栈顶地址。
 2. 从地址 0x0000 0004 处取出程序计数器指针 PC 的初始值，该值是复位向量。
 
-芯片厂商可以会把0x0000 0000和0x0000 0004地址映射到其它的地址！！！
+芯片厂商可以会把0x0000 0000和0x0000 0004地址映射到其它的地址。如0x0800 0000处，这样MCU复位后就会从0x0800 0000处取出堆栈指针和在0x0800 0004处取出程序计数器指针的初始值。这样做的好处是可以把程序存储在外部存储器中，从而节省内部存储器空间。
 
 F1芯片为例：
 ![图 45](assets/1765876210014.png)  
+
+**大部分情况下都会配置为从内部flash启动，即0x0800 0000处。**
+
+# 启动过程
+以内部flash启动为例：
+![图 46](assets/1766131914780.png)  
+1. 初始化MSP：从0x0800 0000处取出MSP的初始值，该值就是栈顶地址。
+2. 初始化PC：从0x0800 0004处取出PC的初始值，该值是复位向量。
+3. 设置堆栈大小：Heap_Size(堆)、Stack_Size(栈)
+4. 初始化中断向量表：__Vectors定义
+6. 调用__main函数：__main函数是C语言标准库中的一个函数，它会初始化C语言运行时环境，包括栈、堆、全局变量等。__main函数会调用main函数，main函数是我们编写的程序入口函数。
+7. 调用main函数：main函数执行时，会初始化外设、配置时钟、设置引脚模式等。执行结束后，会进入一个死循环，等待中断发生。
+## Reset_Handler函数介绍
+```armasm
+Reset_Handler   PROC
+                EXPORT  Reset_Handler   [WEAK]
+                IMPORT  __main
+                IMPORT  SystemInit
+                LDR   R0, =SystemInit
+                BLX   R0               
+                LDR   R0, =__main
+                BX      R0
+                ENDP
+```
+* EXPORT：标明全局属性，可被外部调用
+* IMPORT：申明来自外部文件，类extern
+* PROC：定义子程序
+* ENDP：表示子程序结束
+* WEAK：弱定义，意思是如果用户自己定义了Reset_Handler函数，就会使用用户定义的函数，否则就会使用默认的函数。
+
+如果外部没有SystemInit函数则会报错，不过可以通过屏蔽掉SystemInit函数的调用，来避免报错。
+
+### 堆栈简介
+* 栈(Stack)：编译器自动分配和释放，存放函数参数、局部变量等。
+* 堆(Heap)：程序员分配和释放，由malloc、calloc、realloc等函数分配，由free、exit等函数释放。
+
+函数局部变量较多，嵌套关系复杂时，需加大栈大小（Stack_Size）！
+![图 47](assets/1766133360959.png)  
+
+### STM32启动过程图解
+![图 48](assets/1766134218106.png)  
+
+
+# 时钟
+简单来说，时钟是具有周期性的脉冲信号，最常用的是占空比50%的方波。
+时钟的使用简单来说就是“选择”、“乘法”、“除法”这三个步骤。
+
+外部晶振实物图：
+![图 49](assets/1766135105847.png)  
+
+## 时钟树
+时钟频率是否配置为最大值，取决于具体的应用场景。如果应用场景对时钟频率要求较高，那么就需要配置为最大值。如果应用场景对时钟频率要求不高，那么就可以配置为较小值，以**节省功耗。**
+#### 简图：
+![图 50](assets/1766197999578.png)  
+**LSE时钟得到1Hz的计算是：$32768 \div 2^{15} = 1Hz$**
+#### 完整图：
+![图 51](assets/1766198004344.png)  
+**以上是F1系列的时钟，如果是其它系列，那么时钟架构会有差异，频率也会不同，不过时钟树的原理是相同的。**
+
+## 系统时钟配置步骤
+1. 配置HSE_VALUE：配置外部晶振频率，单位为赫兹（Hz）。stm32xxxx_hal_conf.h
+  ![图 52](assets/1766212475401.png)  
+2. 调用SystemInit()函数（可选）：在启动文件中调用， 在system_stm32xxxx.c定义
+3. 选择时钟源，配置PLL：通过HAL_RCC_OscConfig()函数设置
+4. 选择系统时钟源，配置总线分频器：通过HAL_RCC_ClockConfig()函数设置
+5. 配置扩展外设时钟（可选）：通过HAL_RCCEx_PeriphCLKConfig()函数设置
+
+### 外设时钟使能和失能
+**我们要使用某个外设，必需先使能该外设时钟！！！**
+HAL库使能某个外设时钟的方法，如： 
+ __HAL_RCC_GPIOA_CLK_ENABLE();      		/* 使能 GPIOA 时钟 */
+HAL库失能某个外设时钟的方法，如：
+ __HAL_RCC_GPIOA_CLK_DISABLE();     		/* 失能 GPIOA 时钟 */
+
+### 振荡器配置
+**这里是使用HAL库配置，每个配置实际上就是配置寄存器中某一位的值，如果使用标准库，原理相同的，只是配置时调用的方法不同。**
+使用 `HAL_StatusTypeDef HAL_RCC_OscConfig(RCC_OscInitTypeDef  *RCC_OscInitStruct)` 函数配置振荡器。
+
+RCC_OscInitTypeDef结构体定义：
+```c
+typedef struct 
+{ 
+	uint32_t  OscillatorType; 		/* 选择需要配置的振荡器，可以配置多个，HSE/LSE/HSI/LSI */ 
+	uint32_t  HSEState; 			/* HSE 状态 */ 
+	uint32_t  HSEPredivValue; 		/* HSE 预分频值 */ 
+	uint32_t  LSEState; 			/* LSE 状态 */ 
+	uint32_t  HSIState; 			/* HSI状态 */ 
+	uint32_t  HSICalibrationValue; 	/* HSI 校准值。因为HSI是一个内部振荡器，会因为温度等变化而导致频率变化，所以需要校准。 */ 
+	uint32_t  LSIState; 			/* LSI 状态 */ 
+	RCC_PLLInitTypeDef  PLL; 		/* PLL 结构体 */ 
+} RCC_OscInitTypeDef;
+
+typedef struct 
+{ 
+	uint32_t  PLLState; 		/* PLL 状态 */ 
+	uint32_t  PLLSource; 	/* PLL 时钟源 */ 
+	uint32_t  PLLMUL; 		/* PLL 倍频系数 */ 
+} RCC_PLLInitTypeDef;
+```
+调用：
+```c
+  RCC_OscInitTypeDef RCC_OscInitStruct = {0};
+  /** Initializes the RCC Oscillators according to the specified parameters
+  * in the RCC_OscInitTypeDef structure.
+  */
+  RCC_OscInitStruct.OscillatorType = RCC_OSCILLATORTYPE_HSE;
+  RCC_OscInitStruct.HSEState = RCC_HSE_ON;
+  RCC_OscInitStruct.HSEPredivValue = RCC_HSE_PREDIV_DIV1;
+  RCC_OscInitStruct.HSIState = RCC_HSI_ON;
+  RCC_OscInitStruct.PLL.PLLState = RCC_PLL_ON;
+  RCC_OscInitStruct.PLL.PLLSource = RCC_PLLSOURCE_HSE;
+  RCC_OscInitStruct.PLL.PLLMUL = RCC_PLL_MUL9;
+  if (HAL_RCC_OscConfig(&RCC_OscInitStruct) != HAL_OK)
+  {
+    Error_Handler();
+  }
+```
+
+### 时钟配置
+使用 `HAL_StatusTypeDef HAL_RCC_ClockConfig(RCC_ClkInitTypeDef  *RCC_ClkInitStruct, uint32_t FLatency)` 函数配置时钟。
+RCC_ClkInitTypeDef结构体定义：
+```c
+typedef struct 
+{ 
+	uint32_t  ClockType; 		/* 选择需要配置的时钟，可配置多个，SYSCLK/HCLK/PCLK1/PCLK2 */ 
+	uint32_t  SYSCLKSource; 	/* SYSCLK 时钟源 */ 
+	uint32_t  AHBPrescaler; 	/* AHB 预分频系数 */ 
+	uint32_t  APB1Prescaler; 	/* APB1 预分频系数 */ 
+	uint32_t  APB2Prescaler; 	/* APB2 预分频系数 */ 
+} RCC_ClkInitTypeDef;
+
+uint32_t FLatency 
+#define  FLASH_LATENCY_0   0x00000000U 				/* FLASH 0个等待周期 */ 
+#define  FLASH_LATENCY_1   FLASH_ACR_LATENCY_0 		/* FLASH 1个等待周期 */ 
+#define  FLASH_LATENCY_2   FLASH_ACR_LATENCY_1 		/* FLASH 2个等待周期 */
+```
+Flatency需要根据SYSCLK的频率来配置。
+调用：
+```c
+  RCC_ClkInitTypeDef RCC_ClkInitStruct = {0};
+  /** Initializes the CPU, AHB and APB buses clocks
+  */
+  RCC_ClkInitStruct.ClockType = RCC_CLOCKTYPE_HCLK|RCC_CLOCKTYPE_SYSCLK
+                              |RCC_CLOCKTYPE_PCLK1|RCC_CLOCKTYPE_PCLK2;
+  RCC_ClkInitStruct.SYSCLKSource = RCC_SYSCLKSOURCE_PLLCLK;
+  RCC_ClkInitStruct.AHBCLKDivider = RCC_SYSCLK_DIV1;
+  RCC_ClkInitStruct.APB1CLKDivider = RCC_HCLK_DIV2;
+  RCC_ClkInitStruct.APB2CLKDivider = RCC_HCLK_DIV1;
+
+  if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_2) != HAL_OK)
+  {
+    Error_Handler();
+  }
+```
 
 
 # GPIO
@@ -572,7 +726,9 @@ int fputc(int ch, FILE* file) {
     return ch;
 }
 ```
-然后再 Keil 中配置使用 MicroLIB，将微型的 C 语言标准库引入：
+然后不能使用“半主机模式”。要关闭半主机模式有两种方法：微库法和代码法。
+#### 微库法
+在 Keil 中配置使用 MicroLIB，将微型的 C 语言标准库引入：
 ![图 17](assets/1750320051425.png)  
 这样我们就可以使用 printf 函数通过串口进行打印了：
 ```c
@@ -590,6 +746,65 @@ int fputc(int ch, FILE* file) {
     HAL_UART_Transmit(&huart1, (uint8_t)&ch, 1, 1000);
     return ch;
 }
+```
+#### 代码法
+将以下代码加到程序中：
+```c
+/******************************************************************************************/
+/* 加入以下代码, 支持printf函数, 而不需要选择use MicroLIB */
+
+#if 1
+
+#if (__ARMCC_VERSION >= 6010050)            /* 使用AC6编译器时 */
+__asm(".global __use_no_semihosting\n\t");  /* 声明不使用半主机模式 */
+__asm(".global __ARM_use_no_argv \n\t");    /* AC6下需要声明main函数为无参数格式，否则部分例程可能出现半主机模式 */
+
+#else
+/* 使用AC5编译器时, 要在这里定义__FILE 和 不使用半主机模式 */
+#pragma import(__use_no_semihosting)
+
+struct __FILE
+{
+    int handle;
+    /* Whatever you require here. If the only file you are using is */
+    /* standard output using printf() for debugging, no file handling */
+    /* is required. */
+};
+
+#endif
+
+/* 不使用半主机模式，至少需要重定义_ttywrch\_sys_exit\_sys_command_string函数,以同时兼容AC6和AC5模式 */
+int _ttywrch(int ch)
+{
+    ch = ch;
+    return ch;
+}
+
+/* 定义_sys_exit()以避免使用半主机模式 */
+void _sys_exit(int x)
+{
+    x = x;
+}
+
+char *_sys_command_string(char *cmd, int len)
+{
+    return NULL;
+}
+
+
+/* FILE 在 stdio.h里面定义. */
+FILE __stdout;
+
+/* MDK下需要重定义fputc函数, printf函数最终会通过调用fputc输出字符串到串口 */
+int fputc(int ch, FILE *f)
+{
+    while ((USART_UX->SR & 0X40) == 0);     /* 等待上一个字符发送完成 */
+
+    USART_UX->DR = (uint8_t)ch;             /* 将要发送的字符 ch 写入到DR寄存器 */
+    return ch;
+}
+#endif
+/******************************************************************************************/
 ```
 
 # IIC/I2C

@@ -51,6 +51,10 @@ function handleDecimalInput(event: any) {
 }
 ```
 
+## v-if显示异常
+使用`v-if`,`v-else`控制组件显示时，发现组件打包成安卓APP显示有异常，是因为它们会导致组件元素的删除。主要表现在tabbar中的组件由于是始终保持渲染状态的，在其它页面的操作导致tabbar组件的显示状态变化，就容易出现切换回tabbar后页面显示异常的问题。
+解决方法是使用`v-show`来控制显示隐藏，`v-show`只是通过CSS的`display`属性来控制显示隐藏，不会删除元素。所以在 uniapp 中应该尽量使用`v-show`来控制组件的显示隐藏。
+
 # unibest
 ## 配置
 ### eslint stylistic
@@ -385,3 +389,7 @@ const deviceStore = useDeviceStore();
 获取服务后，再通过小程序的API获取特征，特征分为发送和接收两个UUID，蓝牙方的发送对应的是小程序的接收，蓝牙方的接收对应的是小程序的发送。通过嵌入式开发人员提供的特征UUID进行匹配，将匹配上的保存，后续发送、接收数据时使用此特征UUID。
 ## 数据接收
 蓝牙在发送数据时会对长数据进行拆分，比如发送100个字节的数据，蓝牙会每次只发送20个字节，分5次发完。接收端也会接收到5次，所以需要接收端判断数据尾来确定数据是否接收完毕。接受完毕后还需要将多次接收到的数据拼接，从而形成完整的数据。
+## APP兼容问题
+### 重复订阅事件
+断开蓝牙连接后再次连接蓝牙，如果把整个蓝牙连接流程走一遍，那么就可能重复订阅`onBLEConnectionStateChange`和`onBLECharacteristicValueChange`事件，导致事件回调被调用多次。从而导致数据异常的BUG，尤其是打包成安卓APP的时候。
+API提供了``offBLEConnectionStateChange``和``offBLECharacteristicValueChange``方法，不过调用的时候发现APP直接中断运行了，估计是内部报错了，控制台没发现错误信息。所以使用了另一种方法解决，定义一个`isFirstConnect`变量值为`true`，第一次连接时订阅事件，然后将`isFirstConnect`设为`false`，后续再连接时就不再订阅事件了。
