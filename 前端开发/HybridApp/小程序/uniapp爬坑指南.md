@@ -54,6 +54,63 @@ function handleDecimalInput(event: any) {
 ## v-if显示异常
 使用`v-if`,`v-else`控制组件显示时，发现组件打包成安卓APP显示有异常，是因为它们会导致组件元素的删除。主要表现在tabbar中的组件由于是始终保持渲染状态的，在其它页面的操作导致tabbar组件的显示状态变化，就容易出现切换回tabbar后页面显示异常的问题。
 解决方法是使用`v-show`来控制显示隐藏，`v-show`只是通过CSS的`display`属性来控制显示隐藏，不会删除元素。所以在 uniapp 中应该尽量使用`v-show`来控制组件的显示隐藏。
+**后面开发中也发现了`v-show`显示异常，`v-if`显示正常的情况，所以遇到显示异常还是需要自己尝试。**
+
+## 下拉刷新
+### scroll-view 下拉刷新
+在开发 scroll-view 下拉刷新时，发下往下滚动页面后，往回滚会触发下拉刷新，从而无法回滚。解决方法是要将给page设置样式：
+```css
+page {
+  height: 100vh;
+  overflow: hidden;
+}
+```
+scroll-view也要设置高度，才能滚动：
+```html
+<!-- 50px 是 tabbar 的高度 -->
+<scroll-view
+  v-show="bluetooth.connectedDevice.value"
+  class="pb-20rpx"
+  :style="`height: calc(100vh - 50px - ${headerHeight}rpx)`"
+  scroll-y
+  refresher-enabled
+  :refresher-triggered="refresherTag"
+  :refresher-threshold="100"
+  enhanced
+  @refresherrefresh="onRefresh"
+>
+```
+页面的下拉刷新会导致fixed定位的头部也会跟着一起下拉，所以选用scroll-view的下拉刷新。不过需要计算scroll-view的高度。
+
+## 定时器
+### 前后台切换
+当小程序切到后台后，小程序里的代码会停止运行，如果切到后台的时间较长，在切回前台时，定时器就可能停止运行。
+解决方法是在切回前台时，重新启动定时器。而切到后台时停止定时器。
+```ts
+// 定时器
+let timer = null;
+// 启动定时器
+function startTimer() {
+  timer = setInterval(() => {
+    // 定时器任务
+  }, 1000);
+}
+// 停止定时器
+function stopTimer() {
+  if (timer) {
+    clearInterval(timer);
+    timer = null;
+  }
+}
+// 切回前台时重新启动定时器
+onShow() {
+  startTimer();
+}
+// 切到后台时停止定时器
+onHide() {
+  stopTimer();
+}
+```
 
 # unibest
 ## 配置
@@ -265,6 +322,33 @@ const deviceStore = useDeviceStore();
   </view>
 ```
 
+## GlobalToast组件
+使用`GlobalToast`组件可以全局使用自定义的wot-ui的toast提示。不过需要封装组件和hooks，直接从wot-ui抄即可。
+1. 封装`GlobalToast.vue`组件，用于全局调用toast提示。
+2. 在`App.ku.vue`中引入`GlobalToast`组件。`App.ku.vue`是全局挂载组件，每个页面都会添加到根节点。
+3. 封装`useGlobalToast`hooks，此hooks可以用在任何地方调用，而不是必须在vue3的setup中。
+4. 可以再封装一个`showToast`函数，方便显示toast：
+  ```ts
+  export function showToast(title: string, { cb, duration = 2000, cover = true }: ToastOptions = {}) {
+    if (title) {
+      // 在函数中调用useGlobalToast
+      const toast = useGlobalToast();
+      toast.show({
+        msg: title,
+        duration,
+        cover,
+      });
+    }
+    if (cb) {
+      setTimeout(() => {
+        console.log('setTimeout');
+        cb();
+      }, duration);
+    }
+  }
+  ```
+**GlobalLoading和GlobalMessage同理。**
+
 ## unocss
 ### 配置
 在 unocss.config.ts 中配置 unocss。主要有 safelist 配置动态图标用于自定义 tabbar 的展示；rules 配置自定义 class 样式； theme 配置中的 colors，配置主题色；shortcuts 配置自定义快捷 class。
@@ -389,6 +473,35 @@ const deviceStore = useDeviceStore();
 获取服务后，再通过小程序的API获取特征，特征分为发送和接收两个UUID，蓝牙方的发送对应的是小程序的接收，蓝牙方的接收对应的是小程序的发送。通过嵌入式开发人员提供的特征UUID进行匹配，将匹配上的保存，后续发送、接收数据时使用此特征UUID。
 ## 数据接收
 蓝牙在发送数据时会对长数据进行拆分，比如发送100个字节的数据，蓝牙会每次只发送20个字节，分5次发完。接收端也会接收到5次，所以需要接收端判断数据尾来确定数据是否接收完毕。接受完毕后还需要将多次接收到的数据拼接，从而形成完整的数据。
+
+还有就是这个长数据的大小也是有限制的，如果太长了还需要在发送时程序中进行拆分。那么小程序在接收时如何判断数据是否接收完毕呢？
+**以下是三种最常用的工程解决方案，按推荐程度排序：**
+### 方案一：在协议头中加入“总包数”和“当前索引”（最严谨）
+* **协议帧格式设计：**
+  `[帧头] [总包数] [当前包序号] [数据长度] [100字节数据...] [CRC校验] [帧尾]`
+* **具体发送逻辑：**
+  * 第一包：`... [总数: 10] [序号: 1] ...`
+  * ...
+  * 第十包：`... [总数: 10] [序号: 10] ...`
+* **接收方逻辑：**
+  1. 接收方解析每一帧时，看到“总数 10”，就知道后面要攒够 10 帧。
+  2. 利用“当前包序号”，你可以把数据准确地填入缓冲区（如：`Buffer[(序号-1)*100]`）。
+  3. **判断完成标准：** 当你收到了序号为 10 的包，且已经成功收齐了 1 到 10 的所有包（防止中间丢帧）时，组合数据并处理。
+
+### 方案二：修改最后一帧的“命令类型”或“标志位”（最省字节）
+* **协议帧格式：** `[帧头] [标志位] [数据...] [帧尾]`
+* **发送逻辑：**
+  * 前 9 帧：标志位设为 `0x01`（表示：数据传输中）。
+  * 第 10 帧：标志位设为 `0x02`（表示：这是最后一帧，请处理）。
+* **接收方逻辑：**
+接收方只要收到 `0x02` 的帧，就立刻触发“解析完成”函数。
+
+### 方案三：使用“长数据”起始帧 + 连续数据帧
+这种方法模仿了 CAN 总线或某些工业协议。
+1. **第一步（握手）：** 单片机先发一个极短的“预告帧”，告诉接收方：“我要发 1000 字节了，请准备好空间”。
+2. **第二步（传输）：** 连续发送 10 帧每帧 100 字节的纯数据帧（或带简单校验的帧）。
+3. **第三步（结束）：** 接收方根据第一步收到的“1000 字节”目标值，通过已接收字节计数器来判断是否结束。
+
 ## APP兼容问题
 ### 重复订阅事件
 断开蓝牙连接后再次连接蓝牙，如果把整个蓝牙连接流程走一遍，那么就可能重复订阅`onBLEConnectionStateChange`和`onBLECharacteristicValueChange`事件，导致事件回调被调用多次。从而导致数据异常的BUG，尤其是打包成安卓APP的时候。
