@@ -526,6 +526,8 @@ user: root
 SSH: Root@123      新密码：QiXin@13579
 MYSQL: mysql@123
 
+测试Apple Store
+2082565236@qq.com  Hepeng0822
 
 
 //配置文件，在创建的thinkphp框架目录中的Conf/config.php中添加；改了配置文件需要删除Runtime下的内容清空缓存才能生效

@@ -190,6 +190,72 @@ function useCustomHeader() {
 export default useCustomHeader;
 ```
 
+## 打包
+### 安卓打包
+[官方打包文档](https://uniapp.dcloud.net.cn/tutorial/app-base.html)
+#### 生成证书：
+1. 下载JDK安装，下载地址：https://www.oracle.com/java/technologies/downloads/
+2. 将bin目录添加到环境变量Path中，如：`C:\Program Files\Java\jdk-25\bin`，或者命令行跳转到bin目录下。
+    使用命令添加到环境变量Path中：
+    ```
+    set PATH=%PATH%;C:\Program Files\Java\jdk-25\bin
+    ```
+3. 生成证书：运行命令`keytool -genkey -alias testalias -keyalg RSA -keysize 2048 -validity 36500 -keystore test.keystore`
+    * testalias是证书别名，可修改为自己想设置的字符，建议使用英文字母和数字
+    * test.keystore是证书文件名称，可修改为自己想设置的文件名称，也可以指定完整文件路径
+    * 36500是证书的有效期，表示100年有效期，单位天，建议时间设置长一点，避免证书过期
+    **回车后会提示：**
+    ```
+    Enter keystore password:  //输入证书文件密码，输入完成回车  
+    Re-enter new password:   //再次输入证书文件密码，输入完成回车  
+    What is your first and last name?  
+      [Unknown]:  //输入名字和姓氏，输入完成回车  
+    What is the name of your organizational unit?  
+      [Unknown]:  //输入组织单位名称，输入完成回车  
+    What is the name of your organization?  
+      [Unknown]:  //输入组织名称，输入完成回车  
+    What is the name of your City or Locality?  
+      [Unknown]:  //输入城市或区域名称，输入完成回车  
+    What is the name of your State or Province?  
+      [Unknown]:  //输入省/市/自治区名称，输入完成回车  
+    What is the two-letter country code for this unit?  
+      [Unknown]:  //输入国家/地区代号（两个字母），中国为CN，输入完成回车  
+    Is CN=XX, OU=XX, O=XX, L=XX, ST=XX, C=XX correct?  
+      [no]:  //确认上面输入的内容是否正确，输入y，回车  
+
+    Enter key password for <testalias>  
+            (RETURN if same as keystore password):  //确认证书密码与证书文件密码一样（HBuilder|HBuilderX要求这两个密码一致），直接回车就可以
+    ```
+    完成后会生成证书到当前命令行所在目录。
+#### 打包配置
+* 两个密码都是输入上面设置的证书文件密码。
+  ![图 2](assets/1768453988264.png)  
+* 配置模块：查看一下这里的模块，如果用到需要勾选，勾选后可以切换源码视图找到添加的内容，然后回到自己项目中的`manifest.config.ts`中，添加到`modules`下，后续就不用再勾选了。
+  ![图 3](assets/1768456153885.png)  
+  ```ts
+  /* 模块配置 */
+  modules: {
+    Bluetooth: {},
+  },
+  ```
+* 配置权限：使用到的权限需要添加到`manifest.config.ts`中的`permissions`下。
+  ```ts
+        // 权限配置
+        permissions: [
+          '<uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>',
+          '<uses-permission android:name="android.permission.ACCESS_NETWORK_STATE"/>',
+          '<uses-permission android:name="android.permission.READ_PHONE_STATE"/>',
+          '<uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />',
+          '<uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />',
+          '<uses-permission android:name="android.permission.BLUETOOTH_ADMIN" />',
+          '<uses-permission android:name="android.permission.BLUETOOTH" />',
+          '<uses-permission android:name="android.permission.BLUETOOTH_SCAN" />',
+        ],
+  ```
+  具体的权限配置可查看：[uniapp-Android权限配置](https://uniapp.dcloud.net.cn/tutorial/app-permission-android.html)
+
+
+
 
 # 组件
 ## 组件导入
@@ -322,7 +388,7 @@ const deviceStore = useDeviceStore();
   </view>
 ```
 
-## GlobalToast组件
+### GlobalToast组件
 使用`GlobalToast`组件可以全局使用自定义的wot-ui的toast提示。不过需要封装组件和hooks，直接从wot-ui抄即可。
 1. 封装`GlobalToast.vue`组件，用于全局调用toast提示。
 2. 在`App.ku.vue`中引入`GlobalToast`组件。`App.ku.vue`是全局挂载组件，每个页面都会添加到根节点。
@@ -348,6 +414,25 @@ const deviceStore = useDeviceStore();
   }
   ```
 **GlobalLoading和GlobalMessage同理。**
+
+### tooltip问题
+在使用`wd-tooltip`组件时，在 scroll-view 中会导致页面底部多出来很多空白内容，导致滚动异常的问题：
+![图 1](assets/1768295351747.png)  
+经排查发现是样式使用了 `bottom:-100vh`，导致滚动异常。将其改为 `bottom:0 !important` 即可解决问题。
+```css
+/* 原样式 */
+.wd-tooltip__hidden.data-v-62c6ff3e {
+    left: -100vw;
+    bottom: -100vh;
+    visibility: hidden;
+}
+/* 覆盖样式 */
+.wd-tooltip__hidden {
+  bottom: 0 !important;
+}
+```
+***这里的样式是`visibility: hidden;`，然后定位到页面之外。所以覆盖的时候也要定位到页面之外，否则可能导致影响页面点击事件。比如可以设置为`left-500vw`。***
+
 
 ## unocss
 ### 配置
@@ -457,6 +542,8 @@ const deviceStore = useDeviceStore();
 这个也会增加 css 的体积。
 
 # 蓝牙
+## ArrayBuffer操作
+详细操作看这篇文章不错：[最详细的前端二进制数据流](https://juejin.cn/post/7100759219397197831)
 ## 重新扫描扫不到设备
 首次扫描扫出设备后，重新进行扫描，但是就扫不到之前的设备了。解决方法有二：
 * 关闭蓝牙 closeBluetoothAdapter 重新初始化。
@@ -471,6 +558,10 @@ const deviceStore = useDeviceStore();
 要和蓝牙设备通信，必须先获取设备的服务和特征，然后通过特征进行读写操作。此时就需要和嵌入式蓝牙开发人员确认服务和特征的 UUID。
 蓝牙连接成功后，通过小程序的API获取服务，与嵌式开发人员提供的服务UUID进行匹配，将匹配上的保存，后续发送、接收数据时使用此服务UUID。
 获取服务后，再通过小程序的API获取特征，特征分为发送和接收两个UUID，蓝牙方的发送对应的是小程序的接收，蓝牙方的接收对应的是小程序的发送。通过嵌入式开发人员提供的特征UUID进行匹配，将匹配上的保存，后续发送、接收数据时使用此特征UUID。
+## MAC地址
+iOS、鸿蒙上会屏蔽MAC地址，所以需要将MAC地址添加到advertisData或advertisServiceUUIDs中。
+### 遇到的问题
+安卓上在advertisServiceUUIDs中添加了MAC地址后，能正常获取。但是出现iOS没返回advertisServiceUUIDs这个字段的情况，另外鸿蒙甚至扫不到此蓝牙设备。
 ## 数据接收
 蓝牙在发送数据时会对长数据进行拆分，比如发送100个字节的数据，蓝牙会每次只发送20个字节，分5次发完。接收端也会接收到5次，所以需要接收端判断数据尾来确定数据是否接收完毕。接受完毕后还需要将多次接收到的数据拼接，从而形成完整的数据。
 
@@ -502,7 +593,10 @@ const deviceStore = useDeviceStore();
 2. **第二步（传输）：** 连续发送 10 帧每帧 100 字节的纯数据帧（或带简单校验的帧）。
 3. **第三步（结束）：** 接收方根据第一步收到的“1000 字节”目标值，通过已接收字节计数器来判断是否结束。
 
-## APP兼容问题
-### 重复订阅事件
+## 注意事项
+### 小程序
+* **蓝牙功能在小程序正式版中需要在“用户隐私保护”中勾选蓝牙权限（位置权限可以不用勾选）。**
+### APP兼容问题
+#### 重复订阅事件
 断开蓝牙连接后再次连接蓝牙，如果把整个蓝牙连接流程走一遍，那么就可能重复订阅`onBLEConnectionStateChange`和`onBLECharacteristicValueChange`事件，导致事件回调被调用多次。从而导致数据异常的BUG，尤其是打包成安卓APP的时候。
 API提供了``offBLEConnectionStateChange``和``offBLECharacteristicValueChange``方法，不过调用的时候发现APP直接中断运行了，估计是内部报错了，控制台没发现错误信息。所以使用了另一种方法解决，定义一个`isFirstConnect`变量值为`true`，第一次连接时订阅事件，然后将`isFirstConnect`设为`false`，后续再连接时就不再订阅事件了。
