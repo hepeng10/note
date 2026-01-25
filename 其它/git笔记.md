@@ -1,6 +1,59 @@
 
-## 疑难杂症
-### Windows 凭据管理
+# 必要操作
+## 设置用户名和邮箱
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your.email@example.com"
+```
+## 设置换行符规则
+git安装好后执行命令`git config --global core.autocrlf false`，关闭全局的自动换行符转换功能，防止自动修改文件。
+如果没修改某个文件，但是它却出现在了“更改”中，可以执行`git diff --binary -- <file>`来分析是不是此原因导致。
+
+## 查看git配置
+要确认进行了哪些git配置，可以执行以下命令查看当前的git配置信息：
+```bash
+git config --list
+```
+
+## 项目中的操作
+* 使用`.gitattributes`文件来指定特定文件的换行符处理规则，确保二进制文件不会被错误地转换。
+* 使用`.gitignore`文件来忽略不需要版本控制的文件和目录，保持仓库的整洁。
+
+## Keil相关
+Keil的工程文件`.uvprojx`里面包含了Keil的配置信息，应该将其加入版本控制。但是每个开发者可能又会进行单独的配置，比如使用的编译器版本等。所以拉取代码后，修改为了自己的配置，再次拉取时不希望别人的配置覆盖自己的，就需要配置为合并时始终使用自己的版本。
+在项目根目录下创建或修改 `.gitattributes` 文件，添加如下内容：
+```
+*.uvprojx merge=ours
+```
+这样配置后，当发生合并冲突时，Git 会自动选择本地版本的 `.uvprojx` 文件，避免覆盖开发者的个人配置。
+然后执行git命令：
+```
+git config --global merge.ours.driver true
+```
+此命令配置了一个名为 `ours` 的合并驱动程序，告诉 Git 在合并时始终使用本地版本的文件。
+这样配置后，`.uvprojx` 文件在合并时将始终保留本地版本，避免了冲突和覆盖问题。
+
+# 疑难杂症
+## 二进制文件自动修改
+二进制文件如`.zip,.pdf,.doc`等在 git 中管理时，可能出现拉取、切换分支等操作后就出现在“更改”中。是因为 LF 和 CRLF 的问题，解决办法是将这些二进制文件明确指定为二进制格式，不进行换行符转换。
+* 在项目根目录下创建或修改 `.gitattributes` 文件，添加如下内容：
+    ```
+    * text eol=lf
+    *.pdf binary
+    *.PDF binary
+    *.zip binary
+    *.doc binary
+    *.docx binary
+    *.ppt binary
+    *.xlsx binary
+    *.xls binary
+    ```
+* 执行命令`git config --global core.autocrlf false`，关闭全局的自动换行符转换功能。
+    然后执行命令`git rm --cached -r .`，将所有文件从暂存区移除（不会删除工作区文件）。
+    接着执行命令`git add .`，重新添加所有文件到暂存区，这次会根据 `.gitattributes` 文件的配置正确处理换行符。
+    最后执行命令`git commit -m "Fix line endings and binary files"`，提交更改。
+
+## Windows 凭据管理
 当 git 仓库使用 https 协议时，首次 clone 会要求输入仓库的账号密码，正确后会 clone 到本地，并保存账号密码，后续 clone 时不会再要求输入。
 但是当仓库的账号密码变更后，Windows 的 git 不会同步更新，此时如果用 https 协议 clone 会出现 401 或 403 错误，因为 git 还是使用之前的账号密码。
 
