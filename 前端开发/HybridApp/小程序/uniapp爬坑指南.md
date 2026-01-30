@@ -559,9 +559,41 @@ const deviceStore = useDeviceStore();
 蓝牙连接成功后，通过小程序的API获取服务，与嵌式开发人员提供的服务UUID进行匹配，将匹配上的保存，后续发送、接收数据时使用此服务UUID。
 获取服务后，再通过小程序的API获取特征，特征分为发送和接收两个UUID，蓝牙方的发送对应的是小程序的接收，蓝牙方的接收对应的是小程序的发送。通过嵌入式开发人员提供的特征UUID进行匹配，将匹配上的保存，后续发送、接收数据时使用此特征UUID。
 ## MAC地址
-iOS、鸿蒙上会屏蔽MAC地址，所以需要将MAC地址添加到advertisData或advertisServiceUUIDs中。
 ### 遇到的问题
-安卓上在advertisServiceUUIDs中添加了MAC地址后，能正常获取。但是出现iOS没返回advertisServiceUUIDs这个字段的情况，另外鸿蒙甚至扫不到此蓝牙设备。
+都是iOS的问题，各种坑。
+1. 安卓上在`advertisServiceUUIDs`中添加了MAC地址后，能正常获取。但是出现iOS没返回`advertisServiceUUIDs`这个字段的情况，另外鸿蒙甚至扫不到此蓝牙设备。排查下来应该是格式问题，后面改为了在`advertisData`中添加MAC地址。
+2. 小程序获取设备数据后，使用 `device.name` 拿到的名称可能会串台，比如A设备的赋值给了B设备，B设备的赋值给了A设备。所以需要使用 `device.localName` 获取的名称才是准确的。
+3. 嵌入式端发送的数据包其中有个字节表示 AD TYPE，不同的值表示修改蓝牙数据中的不同字段，
+    蓝牙规范定义了上百种AD TYPE，但嵌入式开发中常用的只有这几个，优先掌握这些即可：
+
+    | AD TYPE值（16进制） | 名称                          | 核心含义                                                                 | 适用场景                          | 关键注意事项（避坑）|
+    |---------------------|-------------------------------|--------------------------------------------------------------------------|-----------------------------------|---------------------------------|
+    | 0x01                | Flags（标志位）| 标识设备的可发现性、蓝牙类型（BLE/经典蓝牙）| 必须放在主广播包，小程序/iOS必检 | 必须包含`0x02`（通用可发现）+`0x04`（不支持经典蓝牙），值为`0x06` |
+    | 0x02                | 16-bit Service UUID（不完整） | 广播设备支持的部分16-bit Service UUID（节省字节）| 主广播包放核心UUID               | 数据长度必须是2的倍数（1个UUID=2字节）|
+    | 0x03                | 16-bit Service UUID（完整）| 广播设备支持的所有16-bit Service UUID                                   | 扫描响应包放全部UUID             | 数据长度必须是2的倍数           |
+    | 0x06                | 128-bit Service UUID（不完整）| 广播部分128-bit Service UUID                                             | 主广播包放核心UUID               | 数据长度必须是16的倍数（1个UUID=16字节）|
+    | 0x07                | 128-bit Service UUID（完整）| 广播全部128-bit Service UUID                                             | 扫描响应包放全部UUID             | 数据长度必须是16的倍数           |
+    | 0x09                | Complete Local Name（完整设备名） | 设备的完整名称                                                           | 扫描响应包（主包放短名）| 长度≤30字节                     |
+    | 0xFF                | Manufacturer Specific Data（厂商数据） | 自定义的厂商私有数据（比如设备ID、状态）| 主广播包/扫描响应包均可           | 前2字节是厂商ID（比如乐鑫=0x7C04），后续是自定义数据 |
+
+    > 关键提醒：**不要用自定义AD TYPE**（比如0x88、0x99）——iOS系统会直接不给小程序返回这类字段，导致核心数据丢失，小程序搜不到设备。
+
+    比如我们使用的蓝牙芯片中使用宏定义来配置：
+    ```c
+    #define CUSTOM_USER_ADVERTISE_DATA \
+                "\x07"\ // 表示后面有7个字节（AD TYPE 1个字节 + 6个字节数据）
+                "\xff"\ // 这个字节就是 AD TYPE，值为 0xFF 表示厂商数据即advertisData
+                // 后面还有6个字节是MAC地址，通过下面的memcpy来添加
+    #define CUSTOM_USER_ADVERTISE_DATA_LEN (sizeof(CUSTOM_USER_ADVERTISE_DATA)-1) // 上面宏定义的长度
+    
+    
+    memcpy(p,CUSTOM_USER_ADVERTISE_DATA,CUSTOM_USER_ADVERTISE_DATA_LEN); // 先将上面的宏数据复制到p中
+    user_adv.adv_data_len = CUSTOM_USER_ADVERTISE_DATA_LEN + 6; // 修改数据长度为宏定义长度+6字节（AD TYPE+MAC地址）
+    memcpy(p+CUSTOM_USER_ADVERTISE_DATA_LEN,p_mac,6); // 再将MAC地址添加到p中
+    memcpy(user_adv.adv_data,p,CUSTOM_USER_ADVERTISE_DATA_LEN+6); // 最后将p中的数据复制到user_adv.adv_data中
+    ```
+
+
 ## 数据接收
 蓝牙在发送数据时会对长数据进行拆分，比如发送100个字节的数据，蓝牙会每次只发送20个字节，分5次发完。接收端也会接收到5次，所以需要接收端判断数据尾来确定数据是否接收完毕。接受完毕后还需要将多次接收到的数据拼接，从而形成完整的数据。
 

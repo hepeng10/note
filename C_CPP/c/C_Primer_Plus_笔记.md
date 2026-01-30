@@ -1988,7 +1988,7 @@ volatile 的语法和 const 一样：
 volatile int loc1; /* loc1 是一个易变的位置 */
 volatile int * ploc; /* ploc 是一个指向易变的位置的指针 */
 ```
-volatile 不是必须的，但是在合适的地方使用 volatile 变量编译器会对其进行优化。
+volatile 不是必须的，但是在合适的地方使用 volatile 变量**编译器会对其进行优化**。
 
 ##### restrict 类型限定符
 restrict 关键字允许编译器优化某部分代码以更好地支持计算。它只能用于指针，表明该指针是访问数据对象的**唯一且初始**的方式。
