@@ -632,3 +632,5 @@ const deviceStore = useDeviceStore();
 #### 重复订阅事件
 断开蓝牙连接后再次连接蓝牙，如果把整个蓝牙连接流程走一遍，那么就可能重复订阅`onBLEConnectionStateChange`和`onBLECharacteristicValueChange`事件，导致事件回调被调用多次。从而导致数据异常的BUG，尤其是打包成安卓APP的时候。
 API提供了``offBLEConnectionStateChange``和``offBLECharacteristicValueChange``方法，不过调用的时候发现APP直接中断运行了，估计是内部报错了，控制台没发现错误信息。所以使用了另一种方法解决，定义一个`isFirstConnect`变量值为`true`，第一次连接时订阅事件，然后将`isFirstConnect`设为`false`，后续再连接时就不再订阅事件了。
+### 蓝牙
+1. 蓝牙模块的广播数据长度有大小限制，比如蓝牙名称和advertisData共享长度（貌似是32字节），因此如果advertisData内容较多，那么蓝牙名称就不能设置太长。其它字段也会有长度限制，还没仔细研究。
