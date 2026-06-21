@@ -1,0 +1,184 @@
+用途：1、用于创建配置文件；2、用于程序间的通讯(如QQ等好友之间发送的消息)；3、编写小型数据库(如QQ等聊天记录的保存)
+<?xml version="1.0" encoding="utf-8"?> <!--文档声明；注意保存文件的类型也必须是utf-8-->
+<?xml-stylesheet type="text/css" href="style.css"?> <!--xml也能用css来添加样式，但很少用，主要用于数据处理-->
+<班级> <!--必须有且只有一个根元素；根元素是指包含其它所有内容的元素-->
+<stu> <!--标签使用中文、英文都可以-->
+<name>张三</name> <!--有内容的标签应该写在一行，换行符可能会解析-->
+<头像><![CDATA[$^&$#(&]]></头像> <!--使用<![CDATA[内容]]>来传递一些二进制内容等-->
+<sex>男</sex>
+<age>25</age>
+</stu>
+<stu stuNo="a0001" cup="c"> <!--自定义属性；属性值必须用单引号或双引号；里面可以使用&apos;表示单引号，&quot;表示双引号，&lt;小于，$gt;大于，&amp;表示&-->
+<name>小丽</name>
+<sex>女</sex>
+<age>22</age>
+</stu>
+</班级>
+
+
+约束技术
+DTD：约束xml(html,xhtml...)文件的书写规范；还有一种是Schema
+
+demo.xml文件内容：
+<?xml version="1.0" encoding="utf-8"?>
+<!DOCTYPE 班级 SYSTEM "demo.dtd"> <!--引用本地DTD文件：格式<!DOCTYPE 根元素名 SYSTEM "DTD的路径"/>-->
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd"><!--引用公开的dtd文件：<!DOCTYPE 根元素名 PUBLIC "DTD名称" "DTD文件的URL"/>-->
+<班级>
+	<学生>
+		<name>张三</name>
+		<sex>男</sex>
+		<age>25</age>
+	</学生>
+	<学生>
+		<name>小丽</name>
+		<sex>女</sex>
+		<age>22</age>
+	</学生>
+</班级>
+
+demo.dtd文件内容，外部dtd文件，最常使用：
+<!ELEMENT 班级(学生+)> <!--!ELEMENT是用来定义元素的关键字；班级是自定义元素名；学生+表示该元素至少出现1次-->
+<!ELEMENT 学生(name,age,sex)> <!--name,age,sex表示学生的子元素-->
+<!ELEMENT name(#PCDATA)> <!--#PCDATA表示这个元素不能再有子元素-->
+<!ELEMENT age(#PCDATA)> <!--xml文件的元素顺序需要按照dtd定义时的顺序-->
+<!ELEMENT sex(#PCDATA)>
+dtd也可以写在xml文件中，即把引入dtd文件的代码改为[]，dtd就写在里面：
+<!DOCTYPE 班级 [
+<!ELEMENT 班级(学生+)>
+<!ELEMENT 学生(name,age,sex)>
+<!ELEMENT name(#PCDATA)>
+<!ELEMENT age(EMPTY)> <!--EMPTY表示不能包含子元素和文本内容，但可以包含属性-->
+<!ELEMENT sex(ANY)> <!--ANY表示该元素可以包含任何在DTD中定义的元素内容-->
+]/>
+
+校验xml，使用javascript；浏览器运行的是这个文件，这个文件引入了xml文件，xml文件引入了dtd文件
+<html>
+<head>
+<title>测试dtd</title>
+<meta http-equiv="content-type" content="text/html;charset=utf-8"/>
+<script>
+var xmldoc=new ActiveXobject("Microsoft.XMLDOM"); //创建一个xml解析器
+xmldoc.validateOnParse=true; //开启校验功能
+xmldoc.load("demo.xml"); //指定要校验的xml文件
+document.write("错误信息="+xmldoc.parseError.reason+"<br/>"); //输出错误信息；如果xml中有dtd文件中没声明的标签等就会报错
+document.write("错误行号="+xmldoc.parseError.line+"<br/>"); //输出错误行号
+</script>
+</head>
+</html>
+
+dtd语法：
+元素定义：
+<!ELEMENT 家庭(人+,家电*,玩具?,宠物),(男|女)>
+()用来给元素分组
++表示至少该元素至少出现一次
+*表示出现任意次数
+?表示0或1次
+什么都没有表示只有一次
+|必须从中选出至少一个
+,元素必须按指定的顺序出现
+
+元素的属性定义：
+<!ATTLIST 元素名
+	属性名 类型 属性特点
+	属性名 类型 属性特点
+	...
+>
+属性类型有：
+CDATA //表示属性值可以是字符或数字
+ID //属性值是唯一的，以字母开头
+IDREF/IDREFS //ID引用；表示这个属性的值是已定义的一个ID属性的值
+Enumerated //枚举
+ENTITY/ENTITIES //实体
+属性特点有：
+#REQUIRED //表示该属性必须有
+#IMPLIED //该属性可有可无
+#FIXED value //该属性的值是固定值
+DEFAULT value //默认值
+<!ATTLIST 学生
+	住址 CDATA #REQUIRED //必须存在这个属性，值为任意字符或数字；如：住址="成都"
+	学号 ID #REQUIRED //必须存在，值唯一，并且以字母开头；如：学号="a001"
+	大佬 IDREFS #IMPLIED //可有可无，值就是任意一个或多个(有S)学号的值，中间用空格隔开；如：大佬="a001 a003"
+	国籍 CDATA #FIXED "中国" //可有可无，如果有必须是中国
+	婚姻 (未婚|已婚|离异) "未婚" //没有这个属性则默认未婚
+>
+<学生 住址="成都" 学号="a001" 大佬="a003" 婚姻="已婚">
+
+实体定义：为一段内容创建一个别名，引用这段内容使用别名即可
+1、引用实体：在DTD文件中定义，XML文件引入并使用
+<!ENTITY 实体名 "实体内容">
+<!ENTITY intro "这是一个介绍">
+<介绍>&intro;</介绍> //在XML中使用 &实体名; 引用实体内容
+2、参数实体：DTD中定义并在DTD中使用
+<!ENTITY % 实体名 "实体内容">
+<!ENTITY % sName "名字">
+<!ELEMENT %sName; (#PCDATA)> //在DTD中使用 %实体名 引用；%sName会替换为“名字”
+
+
+
+使用PHP技术对XML进行操作：
+常用的3种技术：1、PHP DOM 2、PHP结合XPATH操作XML 3、SimpleXml
+
+php文件内容
+PHP DOM技术：
+$xmldoc=new DOMDocument(); //DOMDocument是PHP内置的操作DOM的类
+$xmldoc->load("demo.xml"); //使用内置的load方法加载XML文件，就可以通过DOM技术操作XML了
+·查：
+$stus=$xmldoc->getElementsByTagName("学生"); //获取所有学生元素，返回一个DOMNodeList对象；类似JS
+echo $stus->length; //获取$stu的长度
+$stu1=$stus->item(0); //使用item方法获取第一个学生
+$names=$stu1->getElementsByTagName("名字"); //取出学生的名字元素，返回一个DOMNodeList对象
+$names->item(0)->nodeValue; //通过连贯操作取出第一个名字元素的值
+封装函数：
+function getNodeVal(&$MyNode,$tagName){
+	return $MyNode->getElementsByName($tagName)->item(0)->nodeValue;
+}
+调用函数：
+echo getNodeVal($stu1,"名字");
+·增：
+$root=$xmldoc->getElementsByTagName("班级")->item(0); //获取根节点
+$stu_node=$xmldoc->createElement("学生"); //创建学生节点
+$stu_node->setAttribute("性别","男"); //使用setAttribute方法给学生节点添加性别属性
+$stu_node_name=$xmldoc->createElement("姓名"); //创建姓名节点，是学生节点的子节点
+$stu_node_name->nodeValue="张三"; //使用nodeValue给节点赋值
+$stu_node->appendChild($stu_node_name); //将姓名节点挂载到学生节点下
+$stu_node_age=$xmldoc->createElement("年龄");
+$stu_node_age->nodeValue="20";
+$stu_node->appendChild($stu_node_age);
+$root->appendChild($stu_node); //将学生节点挂载到根节点下
+$xmldoc->save("demo.xml"); //将内容保存到demo.xml，也可以保存到别的文件中
+·删：
+$root=$xmldoc->getElementsByTagName("班级")->item(0);
+$stus=$xmldoc->getElementsByTagName("学生"); //获取所有学生元素
+$stu3=$stus->item(2); //获取第三个学生
+①$root->removeChild($stu3); //通过父节点使用removeChild方法删除指定的元素
+②$stu3->parentNode->removeChild($stu3); //也可以使用parentNode获取父节点然后删除，这样就不用先去找出父节点了
+$xmldoc->save("demo.xml");
+·改：
+$stus=$xmldoc->getElementsByTagName("学生");
+$stu1=$stus->item(0);
+$stu1_age=$stu1->getElementsByTagName("年龄")->item(0); //获取要修改的元素
+$stu1_age->nodeValue+=10; //将年龄加10
+$xmldoc->save("demo.xml");
+
+XPath技术：用于节点的选择
+$xmldoc=new DOMDocument(); //DOMDocument是PHP内置的操作DOM的类
+$xmldoc->load("demo.xml"); //使用内置的load方法加载XML文件，就可以通过DOM技术操作XML了
+$xpath=new DOMXPath($xmldoc); //通过xmldom对象来创建xpath对象
+$stus=$xpath->query("/学生"); //使用query方法来查找节点，返回一个DOMNodeList对象
+$stus->length; //通过这个对象就能对节点进行DOM操作
+·query方法详解：
+$xpath->query("/学生/学号"); //通过/取得学生下面的学号，学生和学号之间可以有别的节点
+$xpath->query("//学生/学号"); //通过//取得父节点是学生的学号
+$xpath->query("//学生/学号/*"); //*表示所有节点
+$xpath->query("//*"); //取得DOM文档的所有节点
+
+SimpleXml技术：是以面向对象的方式来操作xml文件
+$lib=simplexml_load_file("demo.xml"); //使用PHP的simplexml_load_file函数加载xml文件，返回一个对象数组
+$books=$lib->book; //取出所有的book元素，返回一个数组
+$book=$books[0]; //取出第一本书
+echo $book->title; //取出这本书的书名；title为book节点的子节点
+echo $book['author']; //取出这本书的作者属性
+·simplexml也可以结合xpath使用
+$titles=$lib->xpath("//title"); //取出所有的title元素返回一个数组；直接使用xpath查询不需要使用query
+echo $title[1]; //输出第二个书名
+

@@ -10,6 +10,28 @@
         @input="handleDecimalInput($event)"
     >
 ```
+```ts
+// 限制输入为两位小数的数字
+function handleDecimalInput(event: any) {
+  let value = event.detail.value;
+  // 限制输入为两位小数的数字
+  value = decimalLimit(value, 2);
+  text = value;
+}
+```
+这里更新text数据，我输入1符合条件，更新text为1，然后渲染正常；然后我输入s就是1s，校验后得到的结果还是1，赋值给text，此时数据没变，而vue的机制是model没变化就不会重新渲染template，所以页面就不会更新。输入框中就会显示1s。
+在html中，可以使用`event.target.value = value`来操作DOM强制更新input输入框中显示的内容（后面测试web里双向绑定能生效，不用手动更新DOM），而小程序无法这样操作DOM更新。尝试了使用key的修改，但是也没有效果。
+解决方法是：
+```ts
+function handleDecimalInput(event: any) {
+  let value = event.detail.value;
+  text = value; // 先用原始值更新text，然后再校验
+  value = decimalLimit(value, 2);
+  nextTick(() => { // 等下一个事件循环，确保text更新后再执行。否则会触发批处理机制，原始值无法赋值成功，也没法正常渲染
+    text = value; // 再用校验后的值更新text
+  });
+}
+```
 
 ## 依赖分析忽略
 uniapp 开发时可能出现小程序依赖分析错误，导致报“Error: xxx.js 已被代码依赖分析忽略，无法被其他模块引用”：
@@ -27,28 +49,6 @@ uniapp 开发时可能出现小程序依赖分析错误，导致报“Error: xxx
       ignoreDevUnusedFiles: false, // 开发时忽略未使用的文件
       ignoreUploadUnusedFiles: false, // 上传时忽略未使用的文件
     },
-```
-```ts
-// 限制输入为两位小数的数字
-function handleDecimalInput(event: any) {
-  let value = event.detail.value;
-  // 限制输入为两位小数的数字
-  value = decimalLimit(value, 2);
-  text = value;
-}
-```
-这里更新text数据，我输入1符合条件，更新text为1，然后渲染正常；然后我输入s就是1s，校验后得到的结果还是1，赋值给text，此时数据没变，而vue的机制是model没变化就不会重新渲染template，所以页面就不会更新。输入框中就会显示1s。
-在html中，可以使用`event.target.value = value`来操作DOM强制更新input输入框中显示的内容，而小程序无法这样操作DOM更新。尝试了使用key的修改，但是也没有效果。
-解决方法是：
-```ts
-function handleDecimalInput(event: any) {
-  let value = event.detail.value;
-  text = value; // 先用原始值更新text，然后再校验
-  value = decimalLimit(value, 2);
-  nextTick(() => { // 等下一个事件循环，确保text更新后再执行。否则会触发批处理机制，原始值无法赋值成功，也没法正常渲染
-    text = value; // 再用校验后的值更新text
-  });
-}
 ```
 
 ## v-if显示异常

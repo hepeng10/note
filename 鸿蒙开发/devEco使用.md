@@ -1,0 +1,2 @@
+# 预览
+使用预览器预览，预览的是当前devEco打开的那个文件，也就是说我们要预览某个页面，就打开对于的`.ets`文件进行预览即可。如果当前打开的不是页面文件而是json配置等，则会报错：`Cannot preview this file. Previews are available for .json (for service widgets), .ets, .js, .css, and .hml files.`
