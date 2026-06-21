@@ -27,11 +27,3 @@ type IUserV2 interface {
 	GetOne(ctx context.Context, req *v2.GetOneReq) (res *v2.GetOneRes, err error)
 	GetList(ctx context.Context, req *v2.GetListReq) (res *v2.GetListRes, err error)
 }
-
-type IUserV3 interface {
-	Create(ctx context.Context, req *v3.CreateReq) (res *v3.CreateRes, err error)
-	Delete(ctx context.Context, req *v3.DeleteReq) (res *v3.DeleteRes, err error)
-	Update(ctx context.Context, req *v3.UpdateReq) (res *v3.UpdateRes, err error)
-	GetOne(ctx context.Context, req *v3.GetOneReq) (res *v3.GetOneRes, err error)
-	GetList(ctx context.Context, req *v3.GetListReq) (res *v3.GetListRes, err error)
-}

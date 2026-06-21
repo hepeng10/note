@@ -20,7 +20,8 @@
 
 # 安装插件
 安装后修改了配置文件需要执行`. $PROFILE`使配置生效。
-## Zlocation
+
+## Zlocation（使用下面更先进的zoxide替代）
 Zlocation类似autojump或是zsh-z的插件，可以用关键字直接跳转到想去资料夹，比cd更高效。
 使用以下命令安装：
 ```bash
@@ -38,6 +39,27 @@ ZLocation的常用命令
 - 查看已知文件夹的位置：z
 - 进入包含对应字符串的文件夹，可用用Tab键来选择具体的文件夹：z xxx
 - 回到之前的文件夹：z -
+
+## zoxide
+zoxide是一个更先进的zlocation插件，功能更强大。
+一、先安装 scoop 包管理器，相较 winget，scoop资源更丰富。
+1. 必须使用非管理员打开PowerShell，如果默认是管理员，可以使用 win+r 打开运行窗口，输入`pwsh`命令打开非管理员的PowerShell。
+2. 运行`Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser`解锁脚本执行权限。
+3. 运行`irm get.scoop.sh | iex`安装scoop。
+4. 运行`scoop -v`确认安装成功。
+
+二、安装zoxide插件。
+1. 运行`scoop install zoxide`安装zoxide。
+2. 运行`Invoke-Expression (& { (zoxide init powershell | Out-String) })`配置zoxide。
+3. 运行`. $PROFILE`使配置生效。
+4. 运行`zoxide --version`确认安装成功。
+5. 可以使用`z`命令来跳转到想去的文件夹。
+    基本命令：https://zoxide.org/zh/tutorials/basic-commands/
+
+注意：如果之前安装过ZLocation插件，需要删除：运行`code $PROFILE`打开配置文件，删除`Import-Module ZLocation`。
+    在`$PROFILE`文件里添加了`Invoke-Expression (& { (zoxide init powershell | Out-String) })`，发现在Windows的Powershell中没问题，但是在vscode的终端里会报错。并且没添加这行配置也能正常使用zoxide，所以目前看来不需要添加这行配置。
+
+
 
 ## posh-git
 posh-git可以让Git指令用Tab键自动补全。

@@ -10,7 +10,7 @@ wsl2 不是就一定比 wsl1 好，wsl2 的优点是拥有完整的 linux 环境
 需要注意的是，在 clone 项目的时候就应该用 wsl1 跳转到 windows 的项目目录进行 clone，如果在 windows 上使用 gitbash 等 clone，那么用 wsl1 进入到此项目就会出很多问题，如 git 提交识别，husky 报错等。
 
 # 代理
-==代理软件使用TUN模式即可直接代理。==
+==更新：代理软件使用TUN模式即可直接代理。==
 需要先开启代理才能从 github 上拉取安装 oh-my-zsh，安装后可以通过环境变量里配置或通过脚本来快速启动或关闭代理，我使用的是新建个脚本来快速开启和关闭代理。
 https://solidspoon.xyz/2021/02/17/%E9%85%8D%E7%BD%AEWSL2%E4%BD%BF%E7%94%A8Windows%E4%BB%A3%E7%90%86%E4%B8%8A%E7%BD%91/
 https://www.cnblogs.com/tuilk/p/16287472.html
@@ -62,3 +62,8 @@ https://www.cnblogs.com/facetwitter/p/14646597.html
 使用vscode可以打开wsl中的项目进行开发。
 1. 在vscode中安装WSL插件。（trae没这个插件，需要用其他方式：https://docs.trae.ai/ide/wsl）
 2. 在wsl中进入到项目目录，运行 `code .` 就可以在vscode中打开此项目了。（首次运行会自动下载安装 VS Code Server for Linux）
+
+# docker desktop
+安装 docker desktop 后，在 wsl 中还无法直接使用 docker，要在 wsl 中安装容器还需要勾选：
+![图 0](assets/1778828180932.png)  
+记得点右下角`apply` 使配置生效。
