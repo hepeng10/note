@@ -11,6 +11,7 @@ wsl2 不是就一定比 wsl1 好，wsl2 的优点是拥有完整的 linux 环境
 （最后还是使用 git bash 安装 zsh 再安装 oh-my-zsh 后直接在 Windows 中使用方便点。）
 
 # 代理
+==代理软件使用TUN模式即可。下面是老笔记，供参考。==
 需要先开启代理才能从 github 上拉取安装 oh-my-zsh，安装后可以通过环境变量里配置或通过脚本来快速启动或关闭代理，我使用的是新建个脚本来快速开启和关闭代理。
 https://solidspoon.xyz/2021/02/17/%E9%85%8D%E7%BD%AEWSL2%E4%BD%BF%E7%94%A8Windows%E4%BB%A3%E7%90%86%E4%B8%8A%E7%BD%91/
 https://www.cnblogs.com/tuilk/p/16287472.html
