@@ -506,7 +506,7 @@ hepeng  hepeng10
 集致科技：
 建筑招工找活、吉工家：jlg_20151027
 记工记账：jigongjia2022
-git clone: hepeng10    HePeng0822
+git clone: hepeng10    姓名+生日
 工地随手记  secret: cd32ca5addb193f482b46de10a572d72
 2020开工测一测  secret: 3e8ea2f28eee38610cdd13981dc780de
 
@@ -519,15 +519,16 @@ Gists token: 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
 
 阿里云：
 阿里云实例: 
-SSH: HePeng0822
+SSH: 姓名+生日
 
 匡伟阿里云：
 user: root
 SSH: Root@123      新密码：QiXin@13579
 MYSQL: mysql@123
 
-测试Apple Store
-2082565236@qq.com  Hepeng0822
+iPhone测试机：
+Apple Store：2082565236@qq.com  姓名+生日
+锁屏密码：666666
 
 
 //配置文件，在创建的thinkphp框架目录中的Conf/config.php中添加；改了配置文件需要删除Runtime下的内容清空缓存才能生效
